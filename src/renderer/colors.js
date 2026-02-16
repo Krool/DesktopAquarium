@@ -1,0 +1,36 @@
+// Rarity colors applied to creature glyphs
+export const RARITY_COLORS = {
+  common: "#E0E0E0",
+  uncommon: "#7FE0FF",
+  rare: "#4FA3FF",
+  epic: "#C36BFF",
+  legendary: "#FFD84F",
+};
+
+// Environment colors
+export const ENV_COLORS = {
+  kelp: "#4CAF50",
+  rock: "#616161",
+  coral: "#E0A0A0",
+  water: "rgba(33, 150, 243, 0.30)",
+  bubble: "#90CAF9",
+  ui: "#9E9E9E",
+};
+
+// Score values per rarity
+export const SCORE_VALUES = {
+  common: 10,
+  uncommon: 25,
+  rare: 75,
+  epic: 250,
+  legendary: 1500,
+};
+
+// Display weights for tank spawn selection
+export const DISPLAY_WEIGHTS = {
+  common: 6,
+  uncommon: 3,
+  rare: 1.5,
+  epic: 0.5,
+  legendary: 0.1,
+};

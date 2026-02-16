@@ -1,0 +1,151 @@
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/src/fonts/JetBrainsMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background: transparent;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  font-family: "JetBrains Mono", monospace;
+}
+
+#tank {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#drag-region {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  z-index: 10;
+  display: none;
+}
+
+#close-btn {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  z-index: 20;
+  color: #9e9e9e;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  cursor: pointer;
+  display: none;
+  user-select: none;
+}
+
+#close-btn:hover {
+  color: #ffffff;
+}
+
+body.drag-mode {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+body.drag-mode #drag-region {
+  display: block;
+}
+
+body.drag-mode #close-btn {
+  display: block;
+}
+
+/* Collection window styles */
+body.collection-window {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  overflow-y: auto;
+}
+
+#collection-root {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.collection-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.collection-header h1 {
+  font-size: 20px;
+  color: #e0e0e0;
+  margin-bottom: 8px;
+}
+
+.collection-header .score {
+  font-size: 16px;
+  color: #9e9e9e;
+}
+
+.collection-header .progress {
+  font-size: 14px;
+  color: #9e9e9e;
+}
+
+.pool-section {
+  margin-bottom: 24px;
+}
+
+.pool-title {
+  font-size: 16px;
+  color: #7fe0ff;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 4px;
+}
+
+.creature-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.creature-card {
+  border: 1px solid #333;
+  padding: 8px;
+  text-align: center;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.creature-card .sprite {
+  font-size: 12px;
+  white-space: pre;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.creature-card .name {
+  font-size: 10px;
+  margin-bottom: 2px;
+}
+
+.creature-card .count {
+  font-size: 9px;
+  color: #9e9e9e;
+}
+
+.creature-card.unknown {
+  color: #555;
+}

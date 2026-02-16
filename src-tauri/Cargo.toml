@@ -1,0 +1,30 @@
+[package]
+name = "ascii-reef"
+version = "0.1.0"
+description = "ASCII Reef - Ambient Desktop Aquarium"
+authors = ["KroolWorld"]
+edition = "2021"
+
+[lib]
+name = "ascii_reef_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rdev = "0.5"
+rand = "0.8"
+dirs = "5"
+chrono = "0.4"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = [
+    "Win32_Media_Audio",
+    "Win32_System_Com",
+    "Win32_Foundation",
+] }
