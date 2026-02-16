@@ -4,7 +4,7 @@ import { drawChar, COLS, ROWS } from "../renderer/canvas.js";
 import { RARITY_COLORS } from "../renderer/colors.js";
 
 const FRAME_DURATION = 500; // 0.5s per animation frame
-const ROCK_ROW = 28;
+const ROCK_ROW = ROWS - 2;
 
 export class CreatureInstance {
   constructor(spriteDef, opts = {}) {
@@ -47,13 +47,13 @@ export class CreatureInstance {
   getRowConstraints() {
     switch (this.sprite.category) {
       case "bottom":
-        return { min: 25, max: ROCK_ROW - this.sprite.height };
+        return { min: ROCK_ROW - 4, max: ROCK_ROW - this.sprite.height };
       case "floater":
-        return { min: 0, max: 25 - this.sprite.height };
+        return { min: 1, max: ROCK_ROW - 5 - this.sprite.height };
       case "heavy":
       case "swimmer":
       default:
-        return { min: 0, max: ROCK_ROW - this.sprite.height };
+        return { min: 1, max: ROCK_ROW - this.sprite.height };
     }
   }
 

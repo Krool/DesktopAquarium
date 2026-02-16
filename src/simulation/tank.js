@@ -2,7 +2,8 @@
 
 import { CreatureInstance } from "./creature.js";
 import { drawString, COLS, ROWS } from "../renderer/canvas.js";
-import { ENV_COLORS, DISPLAY_WEIGHTS, SCORE_VALUES } from "../renderer/colors.js";
+import { ENV_COLORS, DISPLAY_WEIGHTS, SCORE_VALUES, RARITY_COLORS } from "../renderer/colors.js";
+import { getMyRank } from "./leaderboard.js";
 
 const SOFT_TARGET = 9;
 const HARD_CAP = 12;
@@ -137,16 +138,19 @@ export function renderTank(timestamp) {
     creature.render(timestamp);
   }
 
-  // Score display bottom-left
+  // Score display on the rock line row (bottom area)
   const score = calculateScore();
-  const scoreText = `Score: ${score.toLocaleString()}`;
-  drawString(1, ROWS - 1, scoreText, ENV_COLORS.ui);
+  const rank = getMyRank();
+  const scoreText = rank !== null
+    ? `Score: ${score.toLocaleString()} #${rank}`
+    : `Score: ${score.toLocaleString()}`;
+  drawString(1, ROWS - 2, scoreText, ENV_COLORS.ui);
 
-  // Collection progress bottom-right
+  // Collection progress bottom-right on rock line
   const total = 75;
   const owned = getUniqueCount();
   const progressText = `${owned}/${total}`;
-  drawString(COLS - progressText.length - 1, ROWS - 1, progressText, ENV_COLORS.ui);
+  drawString(COLS - progressText.length - 1, ROWS - 2, progressText, ENV_COLORS.ui);
 }
 
 export function getCreatures() {

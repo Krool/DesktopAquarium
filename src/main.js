@@ -12,10 +12,17 @@ import {
   updateCollection,
   spawnDiscoveryCreature,
   setCapBoost,
+  calculateScore,
+  getUniqueCount,
 } from "./simulation/tank.js";
+import {
+  initLeaderboard,
+  submitScore,
+  renderLeaderboardRank,
+} from "./simulation/leaderboard.js";
 import creaturesData from "./data/creatures.json";
 
-const { listen, emit } = window.__TAURI__.event;
+const { listen } = window.__TAURI__.event;
 const { invoke } = window.__TAURI__.core;
 
 let allSprites = {};
@@ -30,7 +37,10 @@ async function init() {
 
   // Initialize canvas
   const canvas = document.getElementById("tank");
-  const dims = initCanvas(canvas);
+  initCanvas(canvas);
+
+  // Initialize leaderboard
+  initLeaderboard();
 
   // Request initial state from Rust backend
   try {
@@ -39,17 +49,17 @@ async function init() {
     isFirstRun = Object.keys(collection).length === 0;
     initTank(allSprites, collection);
     energyDisplay.current = state.energy || 0;
+
+    // Submit initial score to leaderboard
+    if (Object.keys(collection).length > 0) {
+      const score = calculateScore();
+      const unique = getUniqueCount();
+      submitScore(score, unique);
+    }
   } catch {
-    // Backend not ready yet or command not available
     isFirstRun = true;
     initTank(allSprites, {});
   }
-
-  // Listen for drag mode toggle
-  listen("drag-mode", (event) => {
-    const enabled = event.payload;
-    document.body.classList.toggle("drag-mode", enabled);
-  });
 
   // Listen for energy updates
   listen("energy-update", (event) => {
@@ -70,21 +80,27 @@ async function init() {
       const state = await invoke("get_state");
       updateCollection(state.collection || {});
     } catch {
-      // Fallback: local update
+      // Fallback
     }
 
     // Trigger visual effects
     triggerDiscoveryBurst(sprite.name, sprite.rarity, isNew);
     spawnDiscoveryCreature(sprite, performance.now());
     setCapBoost(performance.now());
+
+    // Submit updated score to leaderboard
+    const score = calculateScore();
+    const unique = getUniqueCount();
+    submitScore(score, unique);
   });
 
-  // Close button handler
-  document.getElementById("close-btn").addEventListener("click", async () => {
+  // Close button hides window to tray
+  document.getElementById("close-btn").addEventListener("click", async (e) => {
+    e.stopPropagation();
     try {
-      await invoke("toggle_drag_mode");
+      await invoke("hide_window");
     } catch {
-      document.body.classList.remove("drag-mode");
+      // Fallback
     }
   });
 
@@ -103,7 +119,10 @@ async function init() {
     // 3. Discovery effects (on top)
     renderDiscovery(timestamp);
 
-    // 4. First-run welcome text
+    // 4. Leaderboard rank display
+    renderLeaderboardRank(timestamp);
+
+    // 5. First-run welcome text
     if (isFirstRun && firstRunTextVisible) {
       const text = "~ waiting for signs of life ~";
       const col = Math.floor((COLS - text.length) / 2);
@@ -111,7 +130,7 @@ async function init() {
       drawString(col, row, text, ENV_COLORS.ui);
     }
 
-    // 5. Energy meter (small, top-left)
+    // 6. Energy meter (small, top-left)
     const meterWidth = 10;
     const filled = Math.floor((energyDisplay.current / energyDisplay.threshold) * meterWidth);
     let meter = "[";

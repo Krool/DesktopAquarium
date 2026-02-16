@@ -1,7 +1,7 @@
 // 60x30 character grid rendered on HTML5 Canvas at 24 FPS
 
 const COLS = 60;
-const ROWS = 30;
+const ROWS = 24;
 const FONT_SIZE = 14;
 const FPS = 24;
 const FRAME_INTERVAL = 1000 / FPS;
@@ -58,6 +58,11 @@ export function drawString(col, row, str, color) {
 
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Semi-transparent dark blue background
+  ctx.fillStyle = "rgba(10, 15, 40, 0.75)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
   ctx.font = `${FONT_SIZE}px "JetBrains Mono", monospace`;
   ctx.textBaseline = "top";
 

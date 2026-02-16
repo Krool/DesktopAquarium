@@ -14,6 +14,7 @@
     "vite": "^6"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2"
+    "@tauri-apps/api": "^2",
+    "firebase": "^12.9.0"
   }
 }

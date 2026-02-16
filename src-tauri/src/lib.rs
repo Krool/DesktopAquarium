@@ -47,13 +47,25 @@ pub fn run() {
             commands::toggle_drag_mode,
             commands::export_save,
             commands::import_save,
+            commands::hide_window,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();
 
-            // Set main window to click-through by default
+            // Remove WS_MAXIMIZEBOX to prevent Windows 11 snap layout button
+            #[cfg(target_os = "windows")]
             if let Some(window) = app.get_webview_window("main") {
-                let _ = window.set_ignore_cursor_events(true);
+                use raw_window_handle::HasWindowHandle;
+                if let Ok(handle) = window.window_handle() {
+                    if let raw_window_handle::RawWindowHandle::Win32(win32) = handle.as_ref() {
+                        use windows::Win32::UI::WindowsAndMessaging::*;
+                        let hwnd = windows::Win32::Foundation::HWND(win32.hwnd.get() as *mut _);
+                        unsafe {
+                            let style = GetWindowLongW(hwnd, GWL_STYLE);
+                            SetWindowLongW(hwnd, GWL_STYLE, style & !(WS_MAXIMIZEBOX.0 as i32));
+                        }
+                    }
+                }
             }
 
             // Setup system tray

@@ -3,16 +3,16 @@
 import { drawChar, drawString, COLS, ROWS } from "../renderer/canvas.js";
 import { ENV_COLORS } from "../renderer/colors.js";
 
-// Constants
-const ROCK_ROW = 28; // 0-indexed row 28 = spec "row 29"
-const SAND_ROW = 29; // 0-indexed row 29 = spec "row 30"
+// Constants - derived from ROWS
+const ROCK_ROW = ROWS - 2; // second-to-last row
+const SAND_ROW = ROWS - 1; // last row
 const WATER_DENSITY = 0.06; // ~6% of cells
 const KELP_SWAY_PERIOD = 4000; // 4 seconds full cycle
 
 // Water particle glyphs
 const WATER_GLYPHS = ["~", ".", "\u00B0", "o"];
 
-// Pre-generate water particle positions (regenerated periodically)
+// Pre-generate water particle positions
 let waterParticles = [];
 let waterDriftOffset = 0;
 
@@ -42,7 +42,6 @@ const kelpPositions = [];
 
 // Kelp frames
 const KELP_FRAME_1 = ["   |", "  /|", " / |", "/  |"];
-
 const KELP_FRAME_2 = ["   |", "   |\\", "   | \\", "   |  \\"];
 
 // Coral configuration: 1-3 pieces, non-overlapping with kelp
@@ -72,7 +71,7 @@ const bubbleColumns = [];
   for (let i = 0; i < count; i++) {
     bubbleColumns.push({
       col: 5 + Math.floor(Math.random() * (COLS - 10)),
-      offset: Math.random() * ROWS,
+      offset: Math.random() * ROCK_ROW,
     });
   }
 }
@@ -131,3 +130,5 @@ export function renderEnvironment(timestamp) {
     }
   }
 }
+
+export { ROCK_ROW };

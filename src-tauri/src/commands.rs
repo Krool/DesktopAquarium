@@ -1,6 +1,6 @@
 use crate::state::SharedState;
 use std::sync::Arc;
-use tauri::State;
+use tauri::{Manager, State};
 
 #[tauri::command]
 pub fn get_state(state: State<'_, Arc<SharedState>>) -> Result<serde_json::Value, String> {
@@ -53,5 +53,13 @@ pub fn import_save(
     guard.position = save.display.position;
 
     crate::save::atomic_save(&guard)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn hide_window(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        window.hide().map_err(|e| e.to_string())?;
+    }
     Ok(())
 }

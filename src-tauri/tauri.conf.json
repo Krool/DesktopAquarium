@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "identifier": "com.kroolworld.ascii-reef",
   "build": {
+    "beforeDevCommand": "npx vite dev",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../dist"
   },
@@ -14,7 +15,7 @@
         "label": "main",
         "title": "ASCII Reef",
         "width": 504,
-        "height": 448,
+        "height": 390,
         "transparent": true,
         "decorations": false,
         "alwaysOnTop": true,
@@ -43,7 +44,5 @@
       }
     }
   },
-  "plugins": {
-    "dialog": {}
-  }
+  "plugins": {}
 }
