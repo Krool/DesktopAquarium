@@ -2,9 +2,9 @@
 
 import { drawChar, COLS, ROWS } from "../renderer/canvas.js";
 import { RARITY_COLORS } from "../renderer/colors.js";
+import { spawnBubble } from "./environment.js";
 
 const FRAME_DURATION = 500; // 0.5s per animation frame
-const ROCK_ROW = ROWS - 2;
 
 export class CreatureInstance {
   constructor(spriteDef, opts = {}) {
@@ -47,27 +47,27 @@ export class CreatureInstance {
   getRowConstraints() {
     switch (this.sprite.category) {
       case "bottom":
-        return { min: ROCK_ROW - 4, max: ROCK_ROW - this.sprite.height };
+        return { min: (ROWS - 2) - 4, max: (ROWS - 2) - this.sprite.height };
       case "floater":
-        return { min: 1, max: ROCK_ROW - 5 - this.sprite.height };
+        return { min: 1, max: (ROWS - 2) - 5 - this.sprite.height };
       case "heavy":
       case "swimmer":
       default:
-        return { min: 1, max: ROCK_ROW - this.sprite.height };
+        return { min: 1, max: (ROWS - 2) - this.sprite.height };
     }
   }
 
   getDefaultSpeed() {
     switch (this.sprite.category) {
       case "bottom":
-        return 0.5 + Math.random() * 0.5; // 0.5-1
+        return 0.2 + Math.random() * 0.2; // 0.2-0.4
       case "floater":
-        return 0.5 + Math.random() * 0.5; // 0.5-1
+        return 0.15 + Math.random() * 0.2; // 0.15-0.35
       case "heavy":
-        return 0.3 + Math.random() * 0.2; // 0.3-0.5
+        return 0.15 + Math.random() * 0.15; // 0.15-0.3
       case "swimmer":
       default:
-        return 1 + Math.random() * 2; // 1-3
+        return 0.3 + Math.random() * 0.5; // 0.3-0.8
     }
   }
 
@@ -114,6 +114,14 @@ export class CreatureInstance {
     if (timestamp - this.lastFrameSwap >= FRAME_DURATION) {
       this.frameIndex = (this.frameIndex + 1) % this.sprite.frameCount;
       this.lastFrameSwap = timestamp;
+    }
+
+    // Occasionally spawn bubbles from mouth
+    if (this.sprite.category !== "bottom" && Math.random() < 0.004) {
+      const mouthCol = this.direction === 1
+        ? this.col + this.sprite.width
+        : this.col - 1;
+      spawnBubble(mouthCol, this.row);
     }
 
     // Check if offscreen (remove)

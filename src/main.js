@@ -1,9 +1,9 @@
 // ASCII Reef - Overlay bootstrap + Tauri event listeners
 
-import { initCanvas, startRenderLoop, drawString, COLS, ROWS } from "./renderer/canvas.js";
+import { initCanvas, startRenderLoop, drawString, resizeCanvas, COLS, ROWS } from "./renderer/canvas.js";
 import { parseAllCreatures } from "./renderer/sprites.js";
 import { ENV_COLORS } from "./renderer/colors.js";
-import { renderEnvironment } from "./simulation/environment.js";
+import { renderEnvironment, reinitEnvironment } from "./simulation/environment.js";
 import { renderDiscovery, triggerDiscoveryBurst } from "./simulation/discovery.js";
 import {
   initTank,
@@ -14,6 +14,7 @@ import {
   setCapBoost,
   calculateScore,
   getUniqueCount,
+  clearCreatures,
 } from "./simulation/tank.js";
 import {
   initLeaderboard,
@@ -92,6 +93,27 @@ async function init() {
     const score = calculateScore();
     const unique = getUniqueCount();
     submitScore(score, unique);
+  });
+
+  // Listen for tank resize events from tray menu
+  listen("resize-tank", (event) => {
+    const { cols, rows } = event.payload;
+    resizeCanvas(cols, rows);
+    reinitEnvironment();
+    clearCreatures();
+  });
+
+  // Listen for reset-aquarium event from tray menu
+  listen("reset-aquarium", async () => {
+    try {
+      const state = await invoke("get_state");
+      updateCollection(state.collection || {});
+    } catch {
+      // Fallback
+    }
+    clearCreatures();
+    isFirstRun = true;
+    firstRunTextVisible = true;
   });
 
   // Close button hides window to tray

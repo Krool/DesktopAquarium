@@ -42,6 +42,13 @@ pub struct GameState {
     pub source_energy: HashMap<String, u32>,
     /// Last time idle fallback was checked
     pub last_input_time: f64,
+    /// Selected size preset index
+    #[serde(default = "default_size_index")]
+    pub size_index: usize,
+}
+
+fn default_size_index() -> usize {
+    2 // "Medium Tall" (60x24) = current default
 }
 
 impl Default for GameState {
@@ -61,6 +68,7 @@ impl Default for GameState {
             dominant_source: "typing".to_string(),
             source_energy,
             last_input_time: 0.0,
+            size_index: default_size_index(),
         }
     }
 }

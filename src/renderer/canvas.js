@@ -1,7 +1,8 @@
-// 60x30 character grid rendered on HTML5 Canvas at 24 FPS
+// Character grid rendered on HTML5 Canvas at 24 FPS
+// COLS and ROWS are mutable — updated via resizeTank()
 
-const COLS = 60;
-const ROWS = 24;
+let COLS = 60;
+let ROWS = 24;
 const FONT_SIZE = 14;
 const FPS = 24;
 const FRAME_INTERVAL = 1000 / FPS;
@@ -12,10 +13,14 @@ let lastFrameTime = 0;
 let renderCallback = null;
 
 // Buffer: each cell holds { char, color }
-const buffer = [];
-for (let i = 0; i < ROWS * COLS; i++) {
-  buffer.push({ char: " ", color: null });
+let buffer = [];
+function allocBuffer() {
+  buffer = [];
+  for (let i = 0; i < ROWS * COLS; i++) {
+    buffer.push({ char: " ", color: null });
+  }
 }
+allocBuffer();
 
 export function initCanvas(canvasEl) {
   canvas = canvasEl;
@@ -24,7 +29,7 @@ export function initCanvas(canvasEl) {
   ctx.font = `${FONT_SIZE}px "JetBrains Mono", monospace`;
   const metrics = ctx.measureText("M");
   charWidth = Math.ceil(metrics.width);
-  charHeight = FONT_SIZE + 2; // line height with small gap
+  charHeight = FONT_SIZE + 2;
 
   canvas.width = COLS * charWidth;
   canvas.height = ROWS * charHeight;
@@ -32,6 +37,31 @@ export function initCanvas(canvasEl) {
   canvas.style.height = canvas.height + "px";
 
   return { width: canvas.width, height: canvas.height, charWidth, charHeight };
+}
+
+// Resize the grid and canvas to new dimensions
+export function resizeCanvas(cols, rows) {
+  COLS = cols;
+  ROWS = rows;
+  allocBuffer();
+
+  if (canvas && ctx) {
+    ctx.font = `${FONT_SIZE}px "JetBrains Mono", monospace`;
+    const metrics = ctx.measureText("M");
+    charWidth = Math.ceil(metrics.width);
+    charHeight = FONT_SIZE + 2;
+
+    canvas.width = COLS * charWidth;
+    canvas.height = ROWS * charHeight;
+    canvas.style.width = canvas.width + "px";
+    canvas.style.height = canvas.height + "px";
+  }
+
+  return { width: canvas?.width || 0, height: canvas?.height || 0 };
+}
+
+export function getCharDimensions() {
+  return { charWidth, charHeight };
 }
 
 export function clearBuffer() {

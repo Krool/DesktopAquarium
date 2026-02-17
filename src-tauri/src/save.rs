@@ -32,6 +32,12 @@ pub struct SaveProgression {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SaveDisplay {
     pub position: (f64, f64),
+    #[serde(default = "default_size_index")]
+    pub size_index: usize,
+}
+
+fn default_size_index() -> usize {
+    2
 }
 
 pub fn save_dir() -> PathBuf {
@@ -72,6 +78,7 @@ pub fn atomic_save(state: &GameState) -> Result<(), String> {
         },
         display: SaveDisplay {
             position: state.position,
+            size_index: state.size_index,
         },
     };
 
@@ -123,6 +130,7 @@ pub fn load() -> Result<GameState, String> {
         total_discoveries: save.progression.total_discoveries,
         pity: save.progression.pity,
         position: save.display.position,
+        size_index: save.display.size_index,
         drag_mode: false,
         dominant_source: "typing".to_string(),
         source_energy,

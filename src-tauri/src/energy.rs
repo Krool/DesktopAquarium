@@ -151,6 +151,9 @@ pub fn start_energy_loop(
                         "rarity": rarity_str,
                         "isNew": is_new,
                     }));
+
+                    // Save immediately after discovery
+                    let _ = save::atomic_save(&state_guard);
                 }
             }
 

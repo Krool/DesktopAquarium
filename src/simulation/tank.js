@@ -153,6 +153,11 @@ export function renderTank(timestamp) {
   drawString(COLS - progressText.length - 1, ROWS - 2, progressText, ENV_COLORS.ui);
 }
 
+export function clearCreatures() {
+  creatures = [];
+  nextSpawnTime = 0;
+}
+
 export function getCreatures() {
   return creatures;
 }

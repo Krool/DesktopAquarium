@@ -41,6 +41,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, None))
         .manage(shared_state.clone())
         .invoke_handler(tauri::generate_handler![
             commands::get_state,
@@ -65,6 +66,36 @@ pub fn run() {
                             SetWindowLongW(hwnd, GWL_STYLE, style & !(WS_MAXIMIZEBOX.0 as i32));
                         }
                     }
+                }
+            }
+
+            // Enable autostart by default on first run
+            {
+                use tauri_plugin_autostart::ManagerExt;
+                let autolaunch = app.autolaunch();
+                if !autolaunch.is_enabled().unwrap_or(false) {
+                    let _ = autolaunch.enable();
+                }
+            }
+
+            // Apply saved size
+            {
+                let guard = state_for_builder.lock().unwrap();
+                let idx = guard.size_index;
+                if idx < tray::SIZE_PRESETS.len() {
+                    let (_, cols, rows, w, h) = tray::SIZE_PRESETS[idx];
+                    if let Some(window) = app.get_webview_window("main") {
+                        let _ = window.set_size(tauri::LogicalSize::new(w, h));
+                    }
+                    // Emit resize event after a short delay so frontend is ready
+                    let handle_for_resize = handle.clone();
+                    let cols = cols;
+                    let rows = rows;
+                    std::thread::spawn(move || {
+                        std::thread::sleep(std::time::Duration::from_millis(500));
+                        use tauri::Emitter;
+                        let _ = handle_for_resize.emit("resize-tank", serde_json::json!({ "cols": cols, "rows": rows }));
+                    });
                 }
             }
 

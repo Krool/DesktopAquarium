@@ -9,11 +9,14 @@ export const RARITY_COLORS = {
 
 // Environment colors
 export const ENV_COLORS = {
-  kelp: "#4CAF50",
+  kelp: "#22c55e",
   rock: "#616161",
   coral: "#E0A0A0",
   water: "rgba(33, 150, 243, 0.30)",
-  bubble: "#90CAF9",
+  bubble: "#7dd3fc",
+  sand: "#a8896c",
+  star: "#facc15",
+  chest: "#d97706",
   ui: "#9E9E9E",
 };
 

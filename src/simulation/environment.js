@@ -1,22 +1,43 @@
-// Environment rendering: kelp, coral, bubbles, water particles, rock line
+// Environment rendering: kelp, coral, bubbles, water particles, rock line, decorations
 
 import { drawChar, drawString, COLS, ROWS } from "../renderer/canvas.js";
 import { ENV_COLORS } from "../renderer/colors.js";
 
-// Constants - derived from ROWS
-const ROCK_ROW = ROWS - 2; // second-to-last row
-const SAND_ROW = ROWS - 1; // last row
-const WATER_DENSITY = 0.06; // ~6% of cells
-const KELP_SWAY_PERIOD = 4000; // 4 seconds full cycle
-
-// Water particle glyphs
+// Dynamic constants
+let ROCK_ROW, SAND_ROW;
+const WATER_DENSITY = 0.06;
 const WATER_GLYPHS = ["~", ".", "\u00B0", "o"];
+const SAND_GLYPHS = [".", ",", " ", ".", ",", "_", "."];
+const CORAL = ["  _-_ ", " /   \\", " \\_-_/"];
 
-// Pre-generate water particle positions
+// State that gets regenerated on resize
 let waterParticles = [];
 let waterDriftOffset = 0;
+let kelpStalks = [];
+let coralPositions = [];
+let starfish = [];
+let chestCol = null;
 
-function generateWaterParticles() {
+// Bubbles: organic, spawned from creatures and decorations
+const bubbles = [];
+const MAX_BUBBLES = 30;
+
+export function spawnBubble(col, row) {
+  if (bubbles.length >= MAX_BUBBLES) return;
+  bubbles.push({
+    x: col + (Math.random() - 0.5) * 0.5,
+    y: row,
+    speed: 0.02 + Math.random() * 0.03,
+    drift: (Math.random() - 0.5) * 0.15,
+    big: Math.random() > 0.6,
+  });
+}
+
+function generateAll() {
+  ROCK_ROW = ROWS - 2;
+  SAND_ROW = ROWS - 1;
+
+  // Water particles
   waterParticles = [];
   const count = Math.floor(COLS * (ROWS - 2) * WATER_DENSITY);
   for (let i = 0; i < count; i++) {
@@ -26,29 +47,24 @@ function generateWaterParticles() {
       glyph: WATER_GLYPHS[Math.floor(Math.random() * WATER_GLYPHS.length)],
     });
   }
-}
-generateWaterParticles();
 
-// Kelp configuration: 2-4 stalks, spaced 8+ columns apart
-const kelpPositions = [];
-{
-  const count = 2 + Math.floor(Math.random() * 3); // 2-4
-  const spacing = Math.floor(COLS / (count + 1));
-  for (let i = 0; i < count; i++) {
-    const col = spacing * (i + 1) + Math.floor(Math.random() * 4) - 2;
-    kelpPositions.push(Math.max(2, Math.min(COLS - 5, col)));
+  // Kelp stalks - scale count with width
+  kelpStalks = [];
+  const kelpCount = Math.max(2, Math.floor(COLS / 15));
+  const kelpSpacing = Math.floor(COLS / (kelpCount + 1));
+  for (let i = 0; i < kelpCount; i++) {
+    const col = kelpSpacing * (i + 1) + Math.floor(Math.random() * 4) - 2;
+    kelpStalks.push({
+      col: Math.max(2, Math.min(COLS - 3, col)),
+      height: 3 + Math.floor(Math.random() * 4),
+      phase: Math.random() * Math.PI * 2,
+    });
   }
-}
 
-// Kelp frames
-const KELP_FRAME_1 = ["   |", "  /|", " / |", "/  |"];
-const KELP_FRAME_2 = ["   |", "   |\\", "   | \\", "   |  \\"];
-
-// Coral configuration: 1-3 pieces, non-overlapping with kelp
-const coralPositions = [];
-{
-  const count = 1 + Math.floor(Math.random() * 3); // 1-3
-  for (let i = 0; i < count; i++) {
+  // Coral - scale with width
+  coralPositions = [];
+  const coralCount = Math.max(1, Math.floor(COLS / 30));
+  for (let i = 0; i < coralCount; i++) {
     let col;
     let attempts = 0;
     do {
@@ -56,29 +72,47 @@ const coralPositions = [];
       attempts++;
     } while (
       attempts < 20 &&
-      kelpPositions.some((k) => Math.abs(k - col) < 8)
+      kelpStalks.some((k) => Math.abs(k.col - col) < 8)
     );
     if (attempts < 20) coralPositions.push(col);
   }
-}
 
-const CORAL = ["  _-_ ", " /   \\", " \\_-_/"];
-
-// Bubble columns: 1-2, rising 1 row/sec
-const bubbleColumns = [];
-{
-  const count = 1 + Math.floor(Math.random() * 2);
-  for (let i = 0; i < count; i++) {
-    bubbleColumns.push({
-      col: 5 + Math.floor(Math.random() * (COLS - 10)),
-      offset: Math.random() * ROCK_ROW,
-    });
+  // Starfish - scale with width
+  starfish = [];
+  const starCount = Math.max(1, Math.floor(COLS / 25));
+  for (let i = 0; i < starCount; i++) {
+    starfish.push({ col: 5 + Math.floor(Math.random() * (COLS - 10)) });
   }
+
+  // Treasure chest
+  chestCol = null;
+  const chestTry = Math.floor(COLS * 0.6) + Math.floor(Math.random() * 10) - 5;
+  const overlaps = kelpStalks.some((k) => Math.abs(k.col - chestTry) < 6);
+  if (!overlaps && chestTry + 4 < COLS - 1 && chestTry >= 1) {
+    chestCol = chestTry;
+  }
+
+  // Clear bubbles on resize
+  bubbles.length = 0;
 }
 
-const BUBBLE_GLYPHS = ["o", "O", "\u00B0"];
+// Initial generation
+generateAll();
+
+// Re-initialize for new dimensions
+export function reinitEnvironment() {
+  generateAll();
+}
+
+export function getRockRow() {
+  return ROWS - 2;
+}
 
 export function renderEnvironment(timestamp) {
+  ROCK_ROW = ROWS - 2;
+  SAND_ROW = ROWS - 1;
+  const t = timestamp / 1000;
+
   // Water particles - slow drift
   waterDriftOffset = (timestamp / 3000) % COLS;
   for (const p of waterParticles) {
@@ -93,20 +127,22 @@ export function renderEnvironment(timestamp) {
     drawChar(col, ROCK_ROW, "_", ENV_COLORS.rock);
   }
 
-  // Sand/ground row
-  const sandGlyphs = [" ", "^", " ", " ", "^", " "];
+  // Sand row with texture
   for (let col = 0; col < COLS; col++) {
-    const g = sandGlyphs[col % sandGlyphs.length];
-    if (g !== " ") drawChar(col, SAND_ROW, g, ENV_COLORS.rock);
+    const g = SAND_GLYPHS[col % SAND_GLYPHS.length];
+    if (g !== " ") drawChar(col, SAND_ROW, g, ENV_COLORS.sand);
   }
 
-  // Kelp
-  const kelpPhase = (timestamp % KELP_SWAY_PERIOD) / KELP_SWAY_PERIOD;
-  const kelpFrame = kelpPhase < 0.5 ? KELP_FRAME_1 : KELP_FRAME_2;
-  for (const kCol of kelpPositions) {
-    const startRow = ROCK_ROW - kelpFrame.length;
-    for (let r = 0; r < kelpFrame.length; r++) {
-      drawString(kCol, startRow + r, kelpFrame[r], ENV_COLORS.kelp);
+  // Kelp - per-segment sway
+  for (const stalk of kelpStalks) {
+    const sway = Math.sin(t * 0.5 + stalk.phase);
+    for (let i = 0; i < stalk.height; i++) {
+      const row = ROCK_ROW - 1 - i;
+      if (row < 1) break;
+      const offset = i > 0 ? Math.round(sway * (i * 0.4)) : 0;
+      const col = stalk.col + offset;
+      const ch = i % 2 === 0 ? ")" : "(";
+      drawChar(col, row, ch, ENV_COLORS.kelp);
     }
   }
 
@@ -118,17 +154,32 @@ export function renderEnvironment(timestamp) {
     }
   }
 
-  // Bubble columns
-  for (const bc of bubbleColumns) {
-    const risingOffset = (timestamp / 1000 + bc.offset) % ROCK_ROW;
-    for (let i = 0; i < 3; i++) {
-      const row = Math.floor(ROCK_ROW - risingOffset + i * 3) % ROCK_ROW;
-      if (row >= 0 && row < ROCK_ROW) {
-        const glyph = BUBBLE_GLYPHS[i % BUBBLE_GLYPHS.length];
-        drawChar(bc.col + i, row, glyph, ENV_COLORS.bubble);
-      }
+  // Starfish on sand
+  for (const s of starfish) {
+    drawChar(s.col, ROCK_ROW - 1, "*", ENV_COLORS.star);
+  }
+
+  // Treasure chest on sand
+  if (chestCol !== null) {
+    drawString(chestCol, ROCK_ROW - 2, "____", ENV_COLORS.chest);
+    drawString(chestCol, ROCK_ROW - 1, "|$$|", ENV_COLORS.chest);
+  }
+
+  // Occasional bubbles from chest
+  if (chestCol !== null && Math.random() < 0.008) {
+    spawnBubble(chestCol + 2, ROCK_ROW - 3);
+  }
+
+  // Update and render bubbles
+  for (let i = bubbles.length - 1; i >= 0; i--) {
+    const b = bubbles[i];
+    b.y -= b.speed;
+    b.x += b.drift * 0.05;
+    if (b.y < 1) {
+      bubbles.splice(i, 1);
+      continue;
     }
+    const ch = b.big ? "O" : "o";
+    drawChar(Math.round(b.x), Math.round(b.y), ch, ENV_COLORS.bubble);
   }
 }
-
-export { ROCK_ROW };
