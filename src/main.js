@@ -1,6 +1,6 @@
 // ASCII Reef - Overlay bootstrap + Tauri event listeners
 
-import { initCanvas, startRenderLoop, drawString, drawStringBg, drawBg, resizeCanvas, getCharDimensions, COLS, ROWS } from "./renderer/canvas.js";
+import { initCanvas, startRenderLoop, drawStringBg, resizeCanvas, COLS, ROWS } from "./renderer/canvas.js";
 import { parseAllCreatures } from "./renderer/sprites.js";
 import { ENV_COLORS, RARITY_COLORS } from "./renderer/colors.js";
 import { renderEnvironment, reinitEnvironment, setUnlockedAchievements } from "./simulation/environment.js";
@@ -168,17 +168,21 @@ async function init() {
     }
   });
 
-  // Click on progress count (bottom-right) opens collection window
-  document.getElementById("drag-overlay").addEventListener("mousedown", (e) => {
-    const { charWidth, charHeight } = getCharDimensions();
-    const gridCol = Math.floor(e.offsetX / charWidth);
-    const gridRow = Math.floor(e.offsetY / charHeight);
-    const rockRow = ROWS - 2;
-    // Progress text is at the right side of the rock row
-    if (gridRow === rockRow && gridCol >= COLS - 8) {
-      e.stopPropagation();
-      e.preventDefault();
-      invoke("open_collection");
+  // Explicit collection button avoids drag-region click conflicts.
+  const collectionBtn = document.getElementById("collection-btn");
+  let collectionOpening = false;
+  collectionBtn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (collectionOpening) return;
+
+    collectionOpening = true;
+    try {
+      await invoke("open_collection");
+    } catch {
+      // Fallback
+    } finally {
+      collectionOpening = false;
     }
   });
 
