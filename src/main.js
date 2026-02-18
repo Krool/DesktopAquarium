@@ -210,13 +210,16 @@ async function init() {
       drawStringBg(col, row, text, ENV_COLORS.ui, uiBg);
     }
 
-    // 6. Three energy bars (top-left, stacked horizontally)
-    const barWidth = 8;
+    // 6. Three energy bars (top-left, scaled down on smaller aquariums)
+    const barWidth = COLS <= 45 ? 4 : COLS <= 65 ? 6 : 8;
+    const barGap = COLS <= 45 ? 1 : 2;
     const bars = [
-      { label: "T", value: energyDisplay.typing, col: 1 },
-      { label: "C", value: energyDisplay.click, col: 15 },
-      { label: "A", value: energyDisplay.audio, col: 29 },
+      { label: "T", value: energyDisplay.typing },
+      { label: "C", value: energyDisplay.click },
+      { label: "A", value: energyDisplay.audio },
     ];
+
+    let barCol = 1;
     for (const bar of bars) {
       const filled = Math.floor((bar.value / energyDisplay.threshold) * barWidth);
       let meter = bar.label + "[";
@@ -224,7 +227,8 @@ async function init() {
         meter += i < filled ? "|" : ".";
       }
       meter += "]";
-      drawStringBg(bar.col, 0, meter, ENV_COLORS.ui, uiBg);
+      drawStringBg(barCol, 0, meter, ENV_COLORS.ui, uiBg);
+      barCol += meter.length + barGap;
     }
 
     // 7. Last discovery: sprite preview + name
