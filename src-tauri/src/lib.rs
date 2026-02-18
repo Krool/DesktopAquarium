@@ -49,6 +49,7 @@ pub fn run() {
             commands::export_save,
             commands::import_save,
             commands::hide_window,
+            commands::open_collection,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();

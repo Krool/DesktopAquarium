@@ -1,10 +1,11 @@
 // ASCII Reef - Overlay bootstrap + Tauri event listeners
 
-import { initCanvas, startRenderLoop, drawString, resizeCanvas, COLS, ROWS } from "./renderer/canvas.js";
+import { initCanvas, startRenderLoop, drawString, drawStringBg, drawBg, resizeCanvas, getCharDimensions, COLS, ROWS } from "./renderer/canvas.js";
 import { parseAllCreatures } from "./renderer/sprites.js";
-import { ENV_COLORS } from "./renderer/colors.js";
-import { renderEnvironment, reinitEnvironment } from "./simulation/environment.js";
-import { renderDiscovery, triggerDiscoveryBurst } from "./simulation/discovery.js";
+import { ENV_COLORS, RARITY_COLORS } from "./renderer/colors.js";
+import { renderEnvironment, reinitEnvironment, setUnlockedAchievements } from "./simulation/environment.js";
+import { renderDiscovery, triggerDiscoveryBurst, triggerAchievementToast } from "./simulation/discovery.js";
+import { computeUnlocked, diffAchievements, getAchievements } from "./simulation/achievements.js";
 import {
   initTank,
   updateTank,
@@ -20,6 +21,7 @@ import {
   initLeaderboard,
   submitScore,
   renderLeaderboardRank,
+  getMyRank,
 } from "./simulation/leaderboard.js";
 import creaturesData from "./data/creatures.json";
 
@@ -30,7 +32,24 @@ let allSprites = {};
 let lastTimestamp = 0;
 let isFirstRun = false;
 let firstRunTextVisible = true;
-let energyDisplay = { current: 0, threshold: 40 };
+let energyDisplay = { typing: 0, click: 0, audio: 0, threshold: 40 };
+let lastDiscovery = null;
+let currentAchievements = new Set();
+
+function updateAchievements(collection, showToasts) {
+  const rank = getMyRank();
+  const newSet = computeUnlocked(collection, creaturesData, rank);
+  if (showToasts) {
+    const newlyEarned = diffAchievements(currentAchievements, newSet);
+    const allAchievements = getAchievements();
+    for (const id of newlyEarned) {
+      const ach = allAchievements.find((a) => a.id === id);
+      if (ach) triggerAchievementToast(ach.name, ach.unlock);
+    }
+  }
+  currentAchievements = newSet;
+  setUnlockedAchievements(newSet);
+}
 
 async function init() {
   // Parse creature sprites
@@ -49,7 +68,14 @@ async function init() {
     const collection = state.collection || {};
     isFirstRun = Object.keys(collection).length === 0;
     initTank(allSprites, collection);
-    energyDisplay.current = state.energy || 0;
+    if (state.poolEnergy) {
+      energyDisplay.typing = state.poolEnergy.typing || 0;
+      energyDisplay.click = state.poolEnergy.click || 0;
+      energyDisplay.audio = state.poolEnergy.audio || 0;
+    }
+
+    // Compute initial achievements (no toasts on load)
+    updateAchievements(collection, false);
 
     // Submit initial score to leaderboard
     if (Object.keys(collection).length > 0) {
@@ -60,11 +86,14 @@ async function init() {
   } catch {
     isFirstRun = true;
     initTank(allSprites, {});
+    updateAchievements({}, false);
   }
 
   // Listen for energy updates
   listen("energy-update", (event) => {
-    energyDisplay.current = event.payload.current;
+    energyDisplay.typing = event.payload.typing;
+    energyDisplay.click = event.payload.click;
+    energyDisplay.audio = event.payload.audio;
     energyDisplay.threshold = event.payload.threshold;
   });
 
@@ -75,14 +104,24 @@ async function init() {
     if (!sprite) return;
 
     firstRunTextVisible = false;
+    lastDiscovery = {
+      name: sprite.name,
+      rarity: sprite.rarity,
+      sprite: sprite.height === 1 ? sprite.frames[0][0] : "",
+    };
 
     // Update collection from backend
+    let col = {};
     try {
       const state = await invoke("get_state");
-      updateCollection(state.collection || {});
+      col = state.collection || {};
+      updateCollection(col);
     } catch {
       // Fallback
     }
+
+    // Check for new achievements (show toasts)
+    updateAchievements(col, true);
 
     // Trigger visual effects
     triggerDiscoveryBurst(sprite.name, sprite.rarity, isNew);
@@ -105,12 +144,15 @@ async function init() {
 
   // Listen for reset-aquarium event from tray menu
   listen("reset-aquarium", async () => {
+    let col = {};
     try {
       const state = await invoke("get_state");
-      updateCollection(state.collection || {});
+      col = state.collection || {};
+      updateCollection(col);
     } catch {
       // Fallback
     }
+    updateAchievements(col, false);
     clearCreatures();
     isFirstRun = true;
     firstRunTextVisible = true;
@@ -123,6 +165,20 @@ async function init() {
       await invoke("hide_window");
     } catch {
       // Fallback
+    }
+  });
+
+  // Click on progress count (bottom-right) opens collection window
+  document.getElementById("drag-overlay").addEventListener("mousedown", (e) => {
+    const { charWidth, charHeight } = getCharDimensions();
+    const gridCol = Math.floor(e.offsetX / charWidth);
+    const gridRow = Math.floor(e.offsetY / charHeight);
+    const rockRow = ROWS - 2;
+    // Progress text is at the right side of the rock row
+    if (gridRow === rockRow && gridCol >= COLS - 8) {
+      e.stopPropagation();
+      e.preventDefault();
+      invoke("open_collection");
     }
   });
 
@@ -144,23 +200,43 @@ async function init() {
     // 4. Leaderboard rank display
     renderLeaderboardRank(timestamp);
 
+    const uiBg = "rgba(0, 0, 0, 0.5)";
+
     // 5. First-run welcome text
     if (isFirstRun && firstRunTextVisible) {
       const text = "~ waiting for signs of life ~";
       const col = Math.floor((COLS - text.length) / 2);
       const row = Math.floor(ROWS / 2);
-      drawString(col, row, text, ENV_COLORS.ui);
+      drawStringBg(col, row, text, ENV_COLORS.ui, uiBg);
     }
 
-    // 6. Energy meter (small, top-left)
-    const meterWidth = 10;
-    const filled = Math.floor((energyDisplay.current / energyDisplay.threshold) * meterWidth);
-    let meter = "[";
-    for (let i = 0; i < meterWidth; i++) {
-      meter += i < filled ? "|" : ".";
+    // 6. Three energy bars (top-left, stacked horizontally)
+    const barWidth = 8;
+    const bars = [
+      { label: "T", value: energyDisplay.typing, col: 1 },
+      { label: "C", value: energyDisplay.click, col: 15 },
+      { label: "A", value: energyDisplay.audio, col: 29 },
+    ];
+    for (const bar of bars) {
+      const filled = Math.floor((bar.value / energyDisplay.threshold) * barWidth);
+      let meter = bar.label + "[";
+      for (let i = 0; i < barWidth; i++) {
+        meter += i < filled ? "|" : ".";
+      }
+      meter += "]";
+      drawStringBg(bar.col, 0, meter, ENV_COLORS.ui, uiBg);
     }
-    meter += "]";
-    drawString(1, 0, meter, ENV_COLORS.ui);
+
+    // 7. Last discovery: sprite preview + name
+    if (lastDiscovery) {
+      const color = RARITY_COLORS[lastDiscovery.rarity] || ENV_COLORS.ui;
+      let col = 42;
+      if (lastDiscovery.sprite) {
+        drawStringBg(col, 0, lastDiscovery.sprite, color, uiBg);
+        col += lastDiscovery.sprite.length + 1;
+      }
+      drawStringBg(col, 0, lastDiscovery.name, color, uiBg);
+    }
   });
 }
 

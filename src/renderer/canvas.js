@@ -14,10 +14,14 @@ let renderCallback = null;
 
 // Buffer: each cell holds { char, color }
 let buffer = [];
+// Background buffer: each cell holds a bg color or null
+let bgBuffer = [];
 function allocBuffer() {
   buffer = [];
+  bgBuffer = [];
   for (let i = 0; i < ROWS * COLS; i++) {
     buffer.push({ char: " ", color: null });
+    bgBuffer.push(null);
   }
 }
 allocBuffer();
@@ -68,6 +72,7 @@ export function clearBuffer() {
   for (let i = 0; i < buffer.length; i++) {
     buffer[i].char = " ";
     buffer[i].color = null;
+    bgBuffer[i] = null;
   }
 }
 
@@ -86,6 +91,24 @@ export function drawString(col, row, str, color) {
   }
 }
 
+// Draw a background rectangle (cell-aligned)
+export function drawBg(col, row, width, height, bgColor) {
+  for (let r = 0; r < height; r++) {
+    for (let c = 0; c < width; c++) {
+      const cc = col + c;
+      const rr = row + r;
+      if (cc < 0 || cc >= COLS || rr < 0 || rr >= ROWS) continue;
+      bgBuffer[rr * COLS + cc] = bgColor;
+    }
+  }
+}
+
+// Draw a string with a background behind it
+export function drawStringBg(col, row, str, color, bgColor) {
+  drawBg(col, row, str.length, 1, bgColor);
+  drawString(col, row, str, color);
+}
+
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -93,6 +116,18 @@ function render() {
   ctx.fillStyle = "rgba(10, 15, 40, 0.75)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  // Draw cell backgrounds
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const bg = bgBuffer[row * COLS + col];
+      if (bg) {
+        ctx.fillStyle = bg;
+        ctx.fillRect(col * charWidth, row * charHeight, charWidth, charHeight);
+      }
+    }
+  }
+
+  // Draw text
   ctx.font = `${FONT_SIZE}px "JetBrains Mono", monospace`;
   ctx.textBaseline = "top";
 

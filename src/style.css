@@ -92,18 +92,6 @@ body.collection-window {
   color: #9e9e9e;
 }
 
-.pool-section {
-  margin-bottom: 24px;
-}
-
-.pool-title {
-  font-size: 16px;
-  color: #7fe0ff;
-  margin-bottom: 12px;
-  border-bottom: 1px solid #333;
-  padding-bottom: 4px;
-}
-
 .creature-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -140,4 +128,64 @@ body.collection-window {
 
 .creature-card.unknown {
   color: #555;
+}
+
+/* Achievements section */
+.achievements-section {
+  margin-bottom: 24px;
+}
+
+.achievements-section h2 {
+  font-size: 16px;
+  color: #facc15;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.achievement-card {
+  border: 1px solid #333;
+  padding: 8px;
+  text-align: center;
+  min-height: 60px;
+}
+
+.achievement-card.unlocked {
+  border-color: #facc15;
+}
+
+.achievement-card.locked {
+  color: #555;
+}
+
+.achievement-card .ach-icon {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.achievement-card.unlocked .ach-icon {
+  color: #facc15;
+}
+
+.achievement-card .ach-name {
+  font-size: 11px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.achievement-card .ach-desc {
+  font-size: 9px;
+  color: #9e9e9e;
+}
+
+.achievement-card .ach-unlock {
+  font-size: 9px;
+  color: #22c55e;
+  margin-top: 2px;
 }

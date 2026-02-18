@@ -99,6 +99,7 @@ async function fetchLeaderboard() {
 
       if (docSnap.id === playerId) {
         myRank = rank;
+        localStorage.setItem("ascii-reef-rank", String(rank));
       }
       rank++;
     });

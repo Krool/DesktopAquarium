@@ -15,7 +15,9 @@ pub fn start_audio_detection(active: Arc<AtomicBool>) {
 
 #[cfg(windows)]
 fn detect_audio_playback() -> bool {
+    use windows::core::Interface;
     use windows::Win32::Media::Audio::*;
+    use windows::Win32::Media::Audio::Endpoints::IAudioMeterInformation;
     use windows::Win32::System::Com::*;
 
     unsafe {
@@ -40,7 +42,14 @@ fn detect_audio_playback() -> bool {
                 if let Ok(session) = session_enum.GetSession(i) {
                     if let Ok(state) = session.GetState() {
                         if state == AudioSessionStateActive {
-                            return Ok(true);
+                            // Check peak meter to verify actual audio output
+                            if let Ok(meter) = session.cast::<IAudioMeterInformation>() {
+                                if let Ok(peak) = meter.GetPeakValue() {
+                                    if peak > 0.01 {
+                                        return Ok(true);
+                                    }
+                                }
+                            }
                         }
                     }
                 }

@@ -31,15 +31,11 @@ impl Default for PityCounters {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameState {
     pub collection: HashMap<String, OwnedCreature>,
-    pub energy: u32,
+    pub pool_energy: HashMap<String, u32>,
     pub total_discoveries: u32,
     pub pity: PityCounters,
     pub position: (f64, f64),
     pub drag_mode: bool,
-    /// Which input source has contributed the most energy since last discovery
-    pub dominant_source: String,
-    /// Per-source energy since last discovery
-    pub source_energy: HashMap<String, u32>,
     /// Last time idle fallback was checked
     pub last_input_time: f64,
     /// Selected size preset index
@@ -51,22 +47,23 @@ fn default_size_index() -> usize {
     2 // "Medium Tall" (60x24) = current default
 }
 
+fn default_pool_energy() -> HashMap<String, u32> {
+    let mut m = HashMap::new();
+    m.insert("typing".to_string(), 0);
+    m.insert("click".to_string(), 0);
+    m.insert("audio".to_string(), 0);
+    m
+}
+
 impl Default for GameState {
     fn default() -> Self {
-        let mut source_energy = HashMap::new();
-        source_energy.insert("typing".to_string(), 0);
-        source_energy.insert("click".to_string(), 0);
-        source_energy.insert("audio".to_string(), 0);
-
         Self {
             collection: HashMap::new(),
-            energy: 0,
+            pool_energy: default_pool_energy(),
             total_discoveries: 0,
             pity: PityCounters::default(),
             position: (0.0, 0.0),
             drag_mode: false,
-            dominant_source: "typing".to_string(),
-            source_energy,
             last_input_time: 0.0,
             size_index: default_size_index(),
         }

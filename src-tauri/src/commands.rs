@@ -7,7 +7,7 @@ pub fn get_state(state: State<'_, Arc<SharedState>>) -> Result<serde_json::Value
     let guard = state.lock().map_err(|e| e.to_string())?;
     Ok(serde_json::json!({
         "collection": guard.collection,
-        "energy": guard.energy,
+        "poolEnergy": guard.pool_energy,
         "totalDiscoveries": guard.total_discoveries,
         "pity": guard.pity,
         "position": guard.position,
@@ -47,7 +47,16 @@ pub fn import_save(
 
     let mut guard = state.lock().map_err(|e| e.to_string())?;
     guard.collection = save.collection;
-    guard.energy = save.progression.energy;
+    guard.pool_energy = if save.progression.pool_energy.is_empty() {
+        let legacy = save.progression.energy.unwrap_or(0);
+        let mut m = std::collections::HashMap::new();
+        m.insert("typing".to_string(), legacy);
+        m.insert("click".to_string(), 0);
+        m.insert("audio".to_string(), 0);
+        m
+    } else {
+        save.progression.pool_energy
+    };
     guard.total_discoveries = save.progression.total_discoveries;
     guard.pity = save.progression.pity;
     guard.position = save.display.position;
@@ -61,5 +70,11 @@ pub fn hide_window(app: tauri::AppHandle) -> Result<(), String> {
     if let Some(window) = app.get_webview_window("main") {
         window.hide().map_err(|e| e.to_string())?;
     }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn open_collection(app: tauri::AppHandle) -> Result<(), String> {
+    crate::tray::open_collection_from_command(&app);
     Ok(())
 }

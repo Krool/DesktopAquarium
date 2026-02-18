@@ -973,5 +973,398 @@
       ["    .------.      ", ">==|o       }==>  ", "    '------'      "],
       ["    .------.      ", ">==|o       )==>  ", "    '------'      "]
     ]
+  },
+
+  {
+    "id": "t_common_13",
+    "name": "Pike",
+    "pool": "typing",
+    "rarity": "common",
+    "category": "swimmer",
+    "width": 3,
+    "height": 1,
+    "frames": [
+      ["><>"],
+      [">=>"]
+    ]
+  },
+  {
+    "id": "t_common_14",
+    "name": "Herring",
+    "pool": "typing",
+    "rarity": "common",
+    "category": "swimmer",
+    "width": 4,
+    "height": 1,
+    "frames": [
+      ["><(>"],
+      [">((>"]
+    ]
+  },
+  {
+    "id": "t_common_15",
+    "name": "Flounder",
+    "pool": "typing",
+    "rarity": "common",
+    "category": "bottom",
+    "width": 6,
+    "height": 1,
+    "frames": [
+      ["__o=>_"],
+      ["__o->_"]
+    ]
+  },
+  {
+    "id": "t_common_16",
+    "name": "Catfish",
+    "pool": "typing",
+    "rarity": "common",
+    "category": "bottom",
+    "width": 7,
+    "height": 2,
+    "frames": [
+      ["=\\     ", ">(o(((>"],
+      ["=\\     ", ">(o((<>"]
+    ]
+  },
+  {
+    "id": "t_uncommon_07",
+    "name": "Swordfish",
+    "pool": "typing",
+    "rarity": "uncommon",
+    "category": "swimmer",
+    "width": 11,
+    "height": 1,
+    "frames": [
+      [">---=(((o>="],
+      [">---=((>o>="]
+    ]
+  },
+  {
+    "id": "t_uncommon_08",
+    "name": "Sea Snake",
+    "pool": "typing",
+    "rarity": "uncommon",
+    "category": "swimmer",
+    "width": 10,
+    "height": 1,
+    "frames": [
+      ["~o>~-~-~-~"],
+      ["~o=~-~-~-~"]
+    ]
+  },
+  {
+    "id": "t_uncommon_09",
+    "name": "Crab",
+    "pool": "typing",
+    "rarity": "uncommon",
+    "category": "bottom",
+    "width": 7,
+    "height": 2,
+    "frames": [
+      ["v     v", "=(o_o)="],
+      [" v   v ", "=(o_o)="]
+    ]
+  },
+  {
+    "id": "t_rare_05",
+    "name": "Electric Eel",
+    "pool": "typing",
+    "rarity": "rare",
+    "category": "swimmer",
+    "width": 13,
+    "height": 2,
+    "frames": [
+      ["  * ~ * ~    ", "~=o>-~-~-~-~>"],
+      ["  ~ * ~ *    ", "~=o=-~-~-~-~>"]
+    ]
+  },
+  {
+    "id": "t_rare_06",
+    "name": "Porcupinefish",
+    "pool": "typing",
+    "rarity": "rare",
+    "category": "swimmer",
+    "width": 5,
+    "height": 3,
+    "frames": [
+      ["\\|||/", "((O))", "/|||\\"],
+      [" ||| ", "<(O)>", " ||| "]
+    ]
+  },
+  {
+    "id": "t_epic_03",
+    "name": "Sawfish",
+    "pool": "typing",
+    "rarity": "epic",
+    "category": "heavy",
+    "width": 15,
+    "height": 2,
+    "frames": [
+      ["/\\/\\/\\/\\       ", ">==(o      )==>"],
+      ["/\\/\\/\\/\\       ", ">==(o     )==> "]
+    ]
+  },
+
+  {
+    "id": "c_common_13",
+    "name": "Sprat",
+    "pool": "click",
+    "rarity": "common",
+    "category": "swimmer",
+    "width": 3,
+    "height": 1,
+    "frames": [
+      ["<><"],
+      ["<=>"]
+    ]
+  },
+  {
+    "id": "c_common_14",
+    "name": "Sea Urchin",
+    "pool": "click",
+    "rarity": "common",
+    "category": "bottom",
+    "width": 5,
+    "height": 3,
+    "frames": [
+      ["\\|~|/", "-(o)-", "/|~|\\"],
+      ["\\|_|/", "-(o)-", "/| |\\"]
+    ]
+  },
+  {
+    "id": "c_common_15",
+    "name": "Sand Dollar",
+    "pool": "click",
+    "rarity": "common",
+    "category": "bottom",
+    "width": 3,
+    "height": 1,
+    "frames": [
+      ["(@)"],
+      ["(@)"]
+    ]
+  },
+  {
+    "id": "c_common_16",
+    "name": "Goby Jr.",
+    "pool": "click",
+    "rarity": "common",
+    "category": "bottom",
+    "width": 4,
+    "height": 1,
+    "frames": [
+      ["_o>_"],
+      ["_o=_"]
+    ]
+  },
+  {
+    "id": "c_uncommon_07",
+    "name": "Stingray",
+    "pool": "click",
+    "rarity": "uncommon",
+    "category": "bottom",
+    "width": 9,
+    "height": 2,
+    "frames": [
+      [" /-----\\ ", "/_o_____\\~"],
+      [" /-----\\ ", "/_o_____/~"]
+    ]
+  },
+  {
+    "id": "c_uncommon_08",
+    "name": "Fiddler Crab",
+    "pool": "click",
+    "rarity": "uncommon",
+    "category": "bottom",
+    "width": 8,
+    "height": 2,
+    "frames": [
+      ["V      v", "==(o_o)="],
+      [" V    v ", "==(o_o)="]
+    ]
+  },
+  {
+    "id": "c_uncommon_09",
+    "name": "Needlefish",
+    "pool": "click",
+    "rarity": "uncommon",
+    "category": "swimmer",
+    "width": 10,
+    "height": 1,
+    "frames": [
+      [">=---(o-->"],
+      [">=-==(o-->"]
+    ]
+  },
+  {
+    "id": "c_rare_05",
+    "name": "Barracuda",
+    "pool": "click",
+    "rarity": "rare",
+    "category": "swimmer",
+    "width": 12,
+    "height": 1,
+    "frames": [
+      [">=={{{(o>==>"],
+      [">==<{{(o>==>"]
+    ]
+  },
+  {
+    "id": "c_rare_06",
+    "name": "Sea Cucumber",
+    "pool": "click",
+    "rarity": "rare",
+    "category": "bottom",
+    "width": 9,
+    "height": 2,
+    "frames": [
+      [" .~~~~~. ", "(o      )"],
+      [" .~.~.~. ", "(o      )"]
+    ]
+  },
+  {
+    "id": "c_epic_03",
+    "name": "Giant Crab",
+    "pool": "click",
+    "rarity": "epic",
+    "category": "bottom",
+    "width": 11,
+    "height": 3,
+    "frames": [
+      ["V         V", "===(o___o)==", "  /|| | ||\\"],
+      [" V       V ", "===(o___o)==", "  \\|| | ||/"]
+    ]
+  },
+
+  {
+    "id": "a_common_13",
+    "name": "Grunt",
+    "pool": "audio",
+    "rarity": "common",
+    "category": "swimmer",
+    "width": 4,
+    "height": 1,
+    "frames": [
+      ["><{>"],
+      [">({>"]
+    ]
+  },
+  {
+    "id": "a_common_14",
+    "name": "Darter",
+    "pool": "audio",
+    "rarity": "common",
+    "category": "swimmer",
+    "width": 3,
+    "height": 1,
+    "frames": [
+      [">->"],
+      [">>>"]
+    ]
+  },
+  {
+    "id": "a_common_15",
+    "name": "Anemone",
+    "pool": "audio",
+    "rarity": "common",
+    "category": "bottom",
+    "width": 5,
+    "height": 3,
+    "frames": [
+      [") ( )", ")|o|(", " \\_/ "],
+      ["( ) (", ")|o|(", " \\_/ "]
+    ]
+  },
+  {
+    "id": "a_common_16",
+    "name": "Mudskipper",
+    "pool": "audio",
+    "rarity": "common",
+    "category": "bottom",
+    "width": 6,
+    "height": 2,
+    "frames": [
+      ["  o>  ", ">(  )_"],
+      ["  o>  ", ">( )_ "]
+    ]
+  },
+  {
+    "id": "a_uncommon_07",
+    "name": "Piranha",
+    "pool": "audio",
+    "rarity": "uncommon",
+    "category": "swimmer",
+    "width": 7,
+    "height": 1,
+    "frames": [
+      [">{{{o>="],
+      [">{{(o>="]
+    ]
+  },
+  {
+    "id": "a_uncommon_08",
+    "name": "Archerfish",
+    "pool": "audio",
+    "rarity": "uncommon",
+    "category": "swimmer",
+    "width": 8,
+    "height": 2,
+    "frames": [
+      ["    .   ", ">=((o)>="],
+      ["    '   ", ">=(<o)>="]
+    ]
+  },
+  {
+    "id": "a_uncommon_09",
+    "name": "Trumpetfish",
+    "pool": "audio",
+    "rarity": "uncommon",
+    "category": "swimmer",
+    "width": 11,
+    "height": 1,
+    "frames": [
+      [">=====((o>="],
+      [">=====(>o>="]
+    ]
+  },
+  {
+    "id": "a_rare_05",
+    "name": "Mantis Shrimp",
+    "pool": "audio",
+    "rarity": "rare",
+    "category": "bottom",
+    "width": 10,
+    "height": 2,
+    "frames": [
+      ["vv        ", "=)(o)=====>" ],
+      [" vv       ", "=)(o)=====>"]
+    ]
+  },
+  {
+    "id": "a_rare_06",
+    "name": "Barramundi",
+    "pool": "audio",
+    "rarity": "rare",
+    "category": "swimmer",
+    "width": 10,
+    "height": 1,
+    "frames": [
+      [">={((((o>="],
+      [">=<((((o>="]
+    ]
+  },
+  {
+    "id": "a_epic_03",
+    "name": "Megalodon",
+    "pool": "audio",
+    "rarity": "epic",
+    "category": "heavy",
+    "width": 16,
+    "height": 3,
+    "frames": [
+      ["    /|          ", ">==( o     }===>", "    \\|          "],
+      ["    /|          ", ">=={ o     }===>", "    \\|          "]
+    ]
   }
 ]

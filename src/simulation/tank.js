@@ -1,7 +1,7 @@
 // Tank display system: spawn cycle, lifetime, weighted selection, rarest slot
 
 import { CreatureInstance } from "./creature.js";
-import { drawString, COLS, ROWS } from "../renderer/canvas.js";
+import { drawString, drawStringBg, COLS, ROWS } from "../renderer/canvas.js";
 import { ENV_COLORS, DISPLAY_WEIGHTS, SCORE_VALUES, RARITY_COLORS } from "../renderer/colors.js";
 import { getMyRank } from "./leaderboard.js";
 
@@ -144,13 +144,14 @@ export function renderTank(timestamp) {
   const scoreText = rank !== null
     ? `Score: ${score.toLocaleString()} #${rank}`
     : `Score: ${score.toLocaleString()}`;
-  drawString(1, ROWS - 2, scoreText, ENV_COLORS.ui);
+  const uiBg = "rgba(0, 0, 0, 0.5)";
+  drawStringBg(1, ROWS - 2, scoreText, ENV_COLORS.ui, uiBg);
 
   // Collection progress bottom-right on rock line
-  const total = 75;
+  const total = 105;
   const owned = getUniqueCount();
   const progressText = `${owned}/${total}`;
-  drawString(COLS - progressText.length - 1, ROWS - 2, progressText, ENV_COLORS.ui);
+  drawStringBg(COLS - progressText.length - 1, ROWS - 2, progressText, ENV_COLORS.ui, uiBg);
 }
 
 export function clearCreatures() {

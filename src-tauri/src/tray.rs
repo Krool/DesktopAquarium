@@ -157,16 +157,18 @@ fn reset_aquarium(app: &AppHandle, state: &Arc<SharedState>) {
     {
         let mut guard = state.lock().unwrap();
         guard.collection.clear();
-        guard.energy = 0;
-        guard.total_discoveries = 0;
-        guard.pity = crate::state::PityCounters::default();
-        guard.dominant_source = "typing".to_string();
-        for val in guard.source_energy.values_mut() {
+        for val in guard.pool_energy.values_mut() {
             *val = 0;
         }
+        guard.total_discoveries = 0;
+        guard.pity = crate::state::PityCounters::default();
         let _ = crate::save::atomic_save(&guard);
     }
     let _ = app.emit("reset-aquarium", ());
+}
+
+pub fn open_collection_from_command(app: &AppHandle) {
+    open_collection_window(app);
 }
 
 fn open_collection_window(app: &AppHandle) {

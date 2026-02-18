@@ -18,6 +18,18 @@ export const ENV_COLORS = {
   star: "#facc15",
   chest: "#d97706",
   ui: "#9E9E9E",
+  // Achievement decoration colors
+  clam: "#E8C8D8",
+  shipwreck: "#8B7355",
+  volcano: "#A0522D",
+  trident: "#FFD700",
+  keyboard: "#B0C4DE",
+  cursor: "#C0C0C0",
+  musicNotes: "#DDA0DD",
+  trophy: "#FFD700",
+  sparkle: "#E8E8FF",
+  goldenSand: "#DAA520",
+  shimmerWater: "rgba(255, 215, 0, 0.15)",
 };
 
 // Score values per rarity

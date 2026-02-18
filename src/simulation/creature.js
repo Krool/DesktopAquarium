@@ -4,7 +4,7 @@ import { drawChar, COLS, ROWS } from "../renderer/canvas.js";
 import { RARITY_COLORS } from "../renderer/colors.js";
 import { spawnBubble } from "./environment.js";
 
-const FRAME_DURATION = 500; // 0.5s per animation frame
+const FRAME_DURATION = 350; // 0.35s per animation frame
 
 export class CreatureInstance {
   constructor(spriteDef, opts = {}) {
@@ -26,7 +26,7 @@ export class CreatureInstance {
 
     // Sine oscillation
     this.sineAmplitude = opts.sineAmplitude ?? this.getDefaultSineAmplitude();
-    this.sinePeriod = opts.sinePeriod ?? (8 + Math.random() * 4); // 8-12 seconds
+    this.sinePeriod = opts.sinePeriod ?? (5 + Math.random() * 5); // 5-10 seconds
     this.sinePhase = Math.random() * Math.PI * 2;
     this.baseRow = this.row;
 
@@ -45,29 +45,35 @@ export class CreatureInstance {
   }
 
   getRowConstraints() {
+    const rockRow = ROWS - 2;
     switch (this.sprite.category) {
       case "bottom":
-        return { min: (ROWS - 2) - 4, max: (ROWS - 2) - this.sprite.height };
+        // Pinned to the floor — sit right on the rock line
+        return { min: rockRow - this.sprite.height, max: rockRow - this.sprite.height };
       case "floater":
-        return { min: 1, max: (ROWS - 2) - 5 - this.sprite.height };
+        // Upper water only — never near the floor
+        return { min: 1, max: Math.max(2, Math.floor(rockRow * 0.5)) };
       case "heavy":
+        // Mid to low water — big creatures roam the lower half
+        return { min: 2, max: rockRow - this.sprite.height - 2 };
       case "swimmer":
       default:
-        return { min: 1, max: (ROWS - 2) - this.sprite.height };
+        // Mid water — avoid the floor area
+        return { min: 1, max: rockRow - this.sprite.height - 3 };
     }
   }
 
   getDefaultSpeed() {
     switch (this.sprite.category) {
       case "bottom":
-        return 0.2 + Math.random() * 0.2; // 0.2-0.4
+        return 0.3 + Math.random() * 0.4; // 0.3-0.7
       case "floater":
-        return 0.15 + Math.random() * 0.2; // 0.15-0.35
+        return 0.25 + Math.random() * 0.35; // 0.25-0.6
       case "heavy":
-        return 0.15 + Math.random() * 0.15; // 0.15-0.3
+        return 0.2 + Math.random() * 0.3; // 0.2-0.5
       case "swimmer":
       default:
-        return 0.3 + Math.random() * 0.5; // 0.3-0.8
+        return 0.5 + Math.random() * 0.8; // 0.5-1.3
     }
   }
 
@@ -94,7 +100,7 @@ export class CreatureInstance {
 
     // Update position
     this.exactCol += this.speed * this.direction * deltaSeconds;
-    this.col = Math.round(this.exactCol);
+    this.col = Math.floor(this.exactCol);
 
     // Sine oscillation
     if (this.sineAmplitude > 0) {

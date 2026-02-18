@@ -23,7 +23,11 @@ pub struct SaveMeta {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SaveProgression {
-    pub energy: u32,
+    #[serde(default)]
+    pub pool_energy: std::collections::HashMap<String, u32>,
+    /// Legacy field for backward compat on load
+    #[serde(default, skip_serializing)]
+    pub energy: Option<u32>,
     #[serde(rename = "totalDiscoveries")]
     pub total_discoveries: u32,
     pub pity: crate::state::PityCounters,
@@ -72,7 +76,8 @@ pub fn atomic_save(state: &GameState) -> Result<(), String> {
         },
         collection: state.collection.clone(),
         progression: SaveProgression {
-            energy: state.energy,
+            pool_energy: state.pool_energy.clone(),
+            energy: None,
             total_discoveries: state.total_discoveries,
             pity: state.pity.clone(),
         },
@@ -119,21 +124,27 @@ pub fn load() -> Result<GameState, String> {
     let save: SaveFile =
         serde_json::from_str(&data).map_err(|e| format!("Failed to parse save: {}", e))?;
 
-    let mut source_energy = std::collections::HashMap::new();
-    source_energy.insert("typing".to_string(), 0);
-    source_energy.insert("click".to_string(), 0);
-    source_energy.insert("audio".to_string(), 0);
+    // Restore pool_energy, with backward compat for old saves
+    let pool_energy = if save.progression.pool_energy.is_empty() {
+        // Old save format: put legacy energy into typing pool
+        let legacy = save.progression.energy.unwrap_or(0);
+        let mut m = std::collections::HashMap::new();
+        m.insert("typing".to_string(), legacy);
+        m.insert("click".to_string(), 0);
+        m.insert("audio".to_string(), 0);
+        m
+    } else {
+        save.progression.pool_energy
+    };
 
     Ok(GameState {
         collection: save.collection,
-        energy: save.progression.energy,
+        pool_energy,
         total_discoveries: save.progression.total_discoveries,
         pity: save.progression.pity,
         position: save.display.position,
         size_index: save.display.size_index,
         drag_mode: false,
-        dominant_source: "typing".to_string(),
-        source_energy,
         last_input_time: 0.0,
     })
 }

@@ -1,13 +1,17 @@
 // Discovery burst animation and UI display
 
-import { drawString, drawChar, COLS, ROWS } from "../renderer/canvas.js";
+import { drawString, drawStringBg, drawBg, drawChar, COLS, ROWS } from "../renderer/canvas.js";
 import { RARITY_COLORS, ENV_COLORS } from "../renderer/colors.js";
 
 const BURST_DURATION = 500; // 0.5 seconds
 const NAME_DISPLAY_DURATION = 3000; // 3 seconds
+const NOTIFICATION_BG = "rgba(0, 0, 0, 0.6)";
 
 let activeBurst = null;
 let nameDisplay = null;
+let achievementToast = null;
+const achievementQueue = [];
+const ACHIEVEMENT_TOAST_DURATION = 3000;
 
 export function triggerDiscoveryBurst(creatureName, rarity, isNew) {
   const now = performance.now();
@@ -42,9 +46,33 @@ export function renderDiscovery(timestamp) {
       const visible = ripple.substring(start, start + visibleLen);
       const col = activeBurst.centerCol - Math.floor(visible.length / 2);
       const color = RARITY_COLORS[activeBurst.rarity] || RARITY_COLORS.common;
-      drawString(col, activeBurst.centerRow - 2, visible, color);
+      drawStringBg(col, activeBurst.centerRow - 2, visible, color, NOTIFICATION_BG);
     } else {
       activeBurst = null;
+    }
+  }
+
+  // Render achievement toast (queued)
+  if (!achievementToast && achievementQueue.length > 0) {
+    const next = achievementQueue.shift();
+    achievementToast = { ...next, startTime: timestamp };
+  }
+  if (achievementToast) {
+    const elapsed = timestamp - achievementToast.startTime;
+    if (elapsed < ACHIEVEMENT_TOAST_DURATION) {
+      const line1 = "* ACHIEVEMENT UNLOCKED *";
+      const line2 = achievementToast.name;
+      const line3 = achievementToast.unlock;
+      const row = Math.floor(ROWS / 2) + 5;
+      // Background block behind all 3 lines
+      const maxLen = Math.max(line1.length, line2.length, line3.length) + 2;
+      const bgCol = Math.floor((COLS - maxLen) / 2);
+      drawBg(bgCol, row, maxLen, 3, NOTIFICATION_BG);
+      drawString(Math.floor((COLS - line1.length) / 2), row, line1, ENV_COLORS.star);
+      drawString(Math.floor((COLS - line2.length) / 2), row + 1, line2, ENV_COLORS.star);
+      drawString(Math.floor((COLS - line3.length) / 2), row + 2, line3, ENV_COLORS.ui);
+    } else {
+      achievementToast = null;
     }
   }
 
@@ -56,11 +84,15 @@ export function renderDiscovery(timestamp) {
       const text = `* ${nameDisplay.name} *`;
       const col = Math.floor((COLS - text.length) / 2);
       const row = Math.floor(ROWS / 2) + 3;
-      drawString(col, row, text, color);
+      drawStringBg(col, row, text, color, NOTIFICATION_BG);
     } else {
       nameDisplay = null;
     }
   }
+}
+
+export function triggerAchievementToast(name, unlock) {
+  achievementQueue.push({ name, unlock });
 }
 
 export function isDiscoveryActive() {
