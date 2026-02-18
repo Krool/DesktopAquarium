@@ -204,7 +204,7 @@ async function init() {
 
     // 5. First-run welcome text
     if (isFirstRun && firstRunTextVisible) {
-      const text = "~ waiting for signs of life ~";
+      const text = "Passively unlock fish every time you Click, Tap, or Listen to anything. Nothing is logged. Score is sent with no identifying information.";
       const col = Math.floor((COLS - text.length) / 2);
       const row = Math.floor(ROWS / 2);
       drawStringBg(col, row, text, ENV_COLORS.ui, uiBg);

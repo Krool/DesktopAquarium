@@ -554,7 +554,7 @@ This is the only traditional UI window in the app.
 1. App launches for the first time
 2. Tank overlay appears in bottom-right corner of primary monitor with:
    - Rock line and environment elements only
-   - A single text line centered: `~ waiting for signs of life ~`
+  - A single text line centered: `Passively unlock fish every time you Click, Tap, or Listen to anything. Nothing is logged. Score is sent with no identifying information.`
 3. On macOS: native Accessibility permission dialog appears with explanation:
    "ASCII Reef counts your keystrokes and clicks to grow your aquarium. No input content is ever recorded or stored."
 4. After first 40 energy accumulated (first discovery):
