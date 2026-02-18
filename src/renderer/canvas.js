@@ -1,10 +1,10 @@
-// Character grid rendered on HTML5 Canvas at 24 FPS
+// Character grid rendered on HTML5 Canvas at 30 FPS
 // COLS and ROWS are mutable — updated via resizeTank()
 
 let COLS = 60;
 let ROWS = 24;
 const FONT_SIZE = 14;
-const FPS = 24;
+const FPS = 30;
 const FRAME_INTERVAL = 1000 / FPS;
 
 let canvas, ctx;
