@@ -1,8 +1,8 @@
 // Tank display system: spawn cycle, lifetime, weighted selection, rarest slot
 
 import { CreatureInstance } from "./creature.js";
-import { drawString, drawStringBg, COLS, ROWS } from "../renderer/canvas.js";
-import { ENV_COLORS, DISPLAY_WEIGHTS, SCORE_VALUES, RARITY_COLORS } from "../renderer/colors.js";
+import { drawStringBg, COLS, ROWS } from "../renderer/canvas.js";
+import { ENV_COLORS, DISPLAY_WEIGHTS, SCORE_VALUES } from "../renderer/colors.js";
 import { getMyRank } from "./leaderboard.js";
 
 const SOFT_TARGET = 9;
@@ -15,6 +15,23 @@ let allSprites = {}; // id -> parsed sprite def
 let collection = {}; // id -> { count, firstSeen }
 let nextSpawnTime = 0;
 let capBoostEnd = 0; // Temporary cap boost to 12 after discovery
+
+function getRenderOrderValue(creature) {
+  const order = { swimmer: 0, bottom: 1, floater: 2, heavy: 3 };
+  return order[creature.sprite.category] || 0;
+}
+
+function isCreatureHit(creature, col, row) {
+  if (col < creature.col || row < creature.row) return false;
+  const localCol = col - creature.col;
+  const localRow = row - creature.row;
+  if (localCol >= creature.sprite.width || localRow >= creature.sprite.height) return false;
+
+  const frames = creature.direction === -1 ? creature.sprite.mirroredFrames : creature.sprite.frames;
+  const frame = frames[creature.frameIndex] || frames[0];
+  if (!frame || !frame[localRow]) return false;
+  return frame[localRow][localCol] && frame[localRow][localCol] !== " ";
+}
 
 export function initTank(spriteDefs, savedCollection) {
   allSprites = spriteDefs;
@@ -129,10 +146,7 @@ export function updateTank(timestamp, deltaSeconds) {
 
 export function renderTank(timestamp) {
   // Render creatures sorted by category (heavy drawn last)
-  const sorted = [...creatures].sort((a, b) => {
-    const order = { swimmer: 0, bottom: 1, floater: 2, heavy: 3 };
-    return (order[a.sprite.category] || 0) - (order[b.sprite.category] || 0);
-  });
+  const sorted = [...creatures].sort((a, b) => getRenderOrderValue(a) - getRenderOrderValue(b));
 
   for (const creature of sorted) {
     creature.render(timestamp);
@@ -161,4 +175,16 @@ export function clearCreatures() {
 
 export function getCreatures() {
   return creatures;
+}
+
+
+export function getCreatureAtGrid(col, row) {
+  const sorted = [...creatures].sort((a, b) => getRenderOrderValue(a) - getRenderOrderValue(b));
+  for (let i = sorted.length - 1; i >= 0; i--) {
+    const creature = sorted[i];
+    if (isCreatureHit(creature, col, row)) {
+      return creature;
+    }
+  }
+  return null;
 }
