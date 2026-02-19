@@ -4,7 +4,16 @@ import { drawChar, COLS, ROWS } from "../renderer/canvas.js";
 import { RARITY_COLORS } from "../renderer/colors.js";
 import { spawnBubble, spawnSurfaceSplash, getSurfaceRow } from "./environment.js";
 
-const FRAME_DURATION = 350; // 0.35s per animation frame
+const FRAME_DURATION_BY_CATEGORY = {
+  swimmer: { min: 180, max: 300 },
+  floater: { min: 260, max: 420 },
+  bottom: { min: 300, max: 520 },
+  heavy: { min: 360, max: 580 },
+};
+
+function randomRange(min, max) {
+  return min + Math.random() * (max - min);
+}
 const GLOW_COLOR = "#FFF3B0";
 const BREACHERS = new Set(["Dolphin", "Orca", "Flying Fish"]);
 const DASHERS = new Set(["Octopus"]);
@@ -38,13 +47,15 @@ export class CreatureInstance {
 
     // Sine oscillation
     this.sineAmplitude = opts.sineAmplitude ?? this.getDefaultSineAmplitude();
-    this.sinePeriod = opts.sinePeriod ?? (5 + Math.random() * 5); // 5-10 seconds
+    this.sinePeriod = opts.sinePeriod ?? randomRange(5, 10); // 5-10 seconds
     this.sinePhase = Math.random() * Math.PI * 2;
     this.baseRow = this.row;
 
     // Animation
-    this.frameIndex = 0;
-    this.lastFrameSwap = 0;
+    this.frameIndex = Math.floor(Math.random() * this.sprite.frameCount);
+    this.frameDuration = opts.frameDuration ?? this.getFrameDuration();
+    this.frameProgress = Math.random() * this.frameDuration;
+    this.exactRow = this.row;
 
     // Lifetime
     this.lifetime = opts.lifetime ?? (20 + Math.random() * 20); // 20-40 seconds
@@ -103,6 +114,11 @@ export class CreatureInstance {
       default:
         return 0.5 + Math.random() * 0.8; // 0.5-1.3
     }
+  }
+
+  getFrameDuration() {
+    const range = FRAME_DURATION_BY_CATEGORY[this.sprite.category] || FRAME_DURATION_BY_CATEGORY.swimmer;
+    return randomRange(range.min, range.max);
   }
 
   getDefaultSineAmplitude() {
@@ -212,12 +228,11 @@ export class CreatureInstance {
         (timestamp / 1000) * ((2 * Math.PI) / this.sinePeriod) + this.sinePhase
       );
       const constraints = this.getRowConstraints();
-      this.row = Math.round(
-        Math.max(
-          constraints.min,
-          Math.min(constraints.max, this.baseRow + sineOffset * this.sineAmplitude)
-        )
+      this.exactRow = Math.max(
+        constraints.min,
+        Math.min(constraints.max, this.baseRow + sineOffset * this.sineAmplitude)
       );
+      this.row = Math.round(this.exactRow);
     }
 
     // Breach arc (toward air band)
@@ -233,10 +248,11 @@ export class CreatureInstance {
     }
 
     // Animation frame cycling
-    const frameDuration = this.tailSlapUntil > timestamp ? FRAME_DURATION / 3 : FRAME_DURATION;
-    if (timestamp - this.lastFrameSwap >= frameDuration) {
+    const frameDuration = this.tailSlapUntil > timestamp ? this.frameDuration * 0.35 : this.frameDuration;
+    this.frameProgress += deltaSeconds * 1000;
+    if (this.frameProgress >= frameDuration) {
       this.frameIndex = (this.frameIndex + 1) % this.sprite.frameCount;
-      this.lastFrameSwap = timestamp;
+      this.frameProgress %= frameDuration;
     }
 
     // Occasionally spawn bubbles from mouth
