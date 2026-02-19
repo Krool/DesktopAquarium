@@ -100,6 +100,17 @@ pub fn run() {
                 }
             }
 
+            // Apply saved position (if we have one)
+            {
+                let guard = state_for_builder.lock().unwrap();
+                let (x, y) = guard.position;
+                if (x, y) != (0.0, 0.0) {
+                    if let Some(window) = app.get_webview_window("main") {
+                        let _ = window.set_position(tauri::LogicalPosition::new(x, y));
+                    }
+                }
+            }
+
             // Setup system tray
             if let Err(e) = tray::setup_tray(&handle, state_for_builder.clone()) {
                 eprintln!("Failed to setup tray: {}", e);
@@ -131,9 +142,16 @@ pub fn run() {
             let state_for_close = state_for_builder.clone();
             if let Some(window) = app.get_webview_window("main") {
                 window.on_window_event(move |event| {
-                    if let tauri::WindowEvent::Destroyed = event {
-                        let guard = state_for_close.lock().unwrap();
-                        let _ = save::atomic_save(&guard);
+                    match event {
+                        tauri::WindowEvent::Moved(pos) => {
+                            let mut guard = state_for_close.lock().unwrap();
+                            guard.position = (pos.x as f64, pos.y as f64);
+                        }
+                        tauri::WindowEvent::Destroyed => {
+                            let guard = state_for_close.lock().unwrap();
+                            let _ = save::atomic_save(&guard);
+                        }
+                        _ => {}
                     }
                 });
             }
