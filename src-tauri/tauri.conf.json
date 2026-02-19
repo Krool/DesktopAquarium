@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "identifier": "com.kroolworld.ascii-reef",
   "build": {
+    "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "npx vite dev",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../dist"

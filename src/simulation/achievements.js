@@ -97,6 +97,52 @@ const ACHIEVEMENTS = [
     check: (col) => col.poolCounts.audio >= 35,
   },
 
+  // Surface + sky achievements
+  {
+    id: "harbor_pilot",
+    name: "Harbor Pilot",
+    description: "Discover 12 unique creatures",
+    unlock: "Fishing boat on the surface",
+    check: (col) => col.uniqueCount >= 12,
+  },
+  {
+    id: "jet_wake",
+    name: "Jet Wake",
+    description: "Collect 12 click creatures",
+    unlock: "Jet ski streaks by",
+    check: (col) => col.poolCounts.click >= 12,
+  },
+  {
+    id: "gull_friend",
+    name: "Gull Friend",
+    description: "Collect 12 audio creatures",
+    unlock: "Seabirds glide above",
+    check: (col) => col.poolCounts.audio >= 12,
+  },
+  {
+    id: "sky_flock",
+    name: "Sky Flock",
+    description: "Discover 25 unique creatures",
+    unlock: "Bird flocks appear",
+    check: (col) => col.uniqueCount >= 25,
+  },
+
+  // Settings achievements
+  {
+    id: "size_shifter",
+    name: "Size Shifter",
+    description: "Change your aquarium size",
+    unlock: "Size shifter badge",
+    check: (col) => col.sizeIndex !== null && col.sizeIndex !== 2,
+  },
+  {
+    id: "sound_on",
+    name: "Sound On",
+    description: "Enable ambient music",
+    unlock: "Ambient loop enabled",
+    check: (col) => col.soundEnabled === true,
+  },
+
   // Rarity achievements
   {
     id: "rare_finder",
@@ -126,7 +172,7 @@ const ACHIEVEMENTS = [
     name: "Top 10",
     description: "Reach leaderboard top 10",
     unlock: "Trophy decoration",
-    check: (col) => col.leaderboardRank !== null && col.leaderboardRank <= 10,
+    check: (col) => col.sendScoresEnabled && col.leaderboardRank !== null && col.leaderboardRank <= 10,
   },
 ];
 
@@ -137,7 +183,7 @@ export function getAchievements() {
 /**
  * Build collection stats object used by achievement checks.
  */
-function buildCollectionStats(collection, creaturesData, leaderboardRank) {
+function buildCollectionStats(collection, creaturesData, leaderboardRank, extras = {}) {
   const uniqueCount = Object.keys(collection).length;
 
   // Count unique creatures per pool
@@ -155,14 +201,23 @@ function buildCollectionStats(collection, creaturesData, leaderboardRank) {
     if (creature.rarity === "legendary") hasRarity.legendary = true;
   }
 
-  return { uniqueCount, poolCounts, hasRarity, leaderboardRank };
+  return {
+    uniqueCount,
+    poolCounts,
+    hasRarity,
+    leaderboardRank,
+    totalDiscoveries: extras.totalDiscoveries ?? 0,
+    sizeIndex: extras.sizeIndex ?? 2,
+    soundEnabled: extras.soundEnabled ?? false,
+    sendScoresEnabled: extras.sendScoresEnabled !== false,
+  };
 }
 
 /**
  * Compute set of unlocked achievement IDs from current state.
  */
-export function computeUnlocked(collection, creaturesData, leaderboardRank) {
-  const stats = buildCollectionStats(collection, creaturesData, leaderboardRank);
+export function computeUnlocked(collection, creaturesData, leaderboardRank, extras = {}) {
+  const stats = buildCollectionStats(collection, creaturesData, leaderboardRank, extras);
   const unlocked = new Set();
   for (const achievement of ACHIEVEMENTS) {
     if (achievement.check(stats)) {

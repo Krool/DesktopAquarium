@@ -21,13 +21,13 @@ pub const SIZE_PRESETS: &[(&str, u32, u32, f64, f64)] = &[
 ];
 
 pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dyn std::error::Error>> {
-    let show_item = MenuItem::with_id(app, "show", "Show", true, None::<&str>)?;
     let collection_item = MenuItem::with_id(app, "collection", "Collection", true, None::<&str>)?;
+    let settings_item = MenuItem::with_id(app, "settings", "Settings", true, None::<&str>)?;
 
     // Get current size index from state
-    let current_size = {
+    let (current_size, send_scores_enabled, sound_enabled) = {
         let guard = state.lock().unwrap();
-        guard.size_index
+        (guard.size_index, guard.send_scores, guard.sound_enabled)
     };
 
     // Size submenu with check marks
@@ -45,14 +45,21 @@ pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dy
     let autostart_enabled = app.autolaunch().is_enabled().unwrap_or(false);
     let autostart_item = CheckMenuItem::with_id(app, "autostart", "Start on Boot", true, autostart_enabled, None::<&str>)?;
 
+    // Send Scores toggle
+    let send_scores_item = CheckMenuItem::with_id(app, "send_scores", "Send Scores", true, send_scores_enabled, None::<&str>)?;
+    // Sound toggle
+    let sound_item = CheckMenuItem::with_id(app, "sound_enabled", "Sound", true, sound_enabled, None::<&str>)?;
+
     let reset_item = MenuItem::with_id(app, "reset_aquarium", "Reset Aquarium", true, None::<&str>)?;
     let reset_pos_item = MenuItem::with_id(app, "reset_position", "Reset Position", true, None::<&str>)?;
     let quit_item = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
 
     let menu = Menu::with_items(app, &[
-        &show_item,
         &collection_item,
+        &settings_item,
         &size_submenu,
+        &send_scores_item,
+        &sound_item,
         &autostart_item,
         &reset_item,
         &reset_pos_item,
@@ -69,11 +76,31 @@ pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dy
         .on_menu_event(move |app, event| {
             let id = event.id.as_ref();
             match id {
-                "show" => {
-                    show_window(app);
-                }
                 "collection" => {
                     open_collection_window(app);
+                }
+                "settings" => {
+                    open_settings_window(app);
+                }
+                "send_scores" => {
+                    let enabled = {
+                        let mut guard = state.lock().unwrap();
+                        guard.send_scores = !guard.send_scores;
+                        let _ = crate::save::atomic_save(&guard);
+                        guard.send_scores
+                    };
+                    let _ = send_scores_item.set_checked(enabled);
+                    let _ = app.emit("send-scores", serde_json::json!({ "enabled": enabled }));
+                }
+                "sound_enabled" => {
+                    let enabled = {
+                        let mut guard = state.lock().unwrap();
+                        guard.sound_enabled = !guard.sound_enabled;
+                        let _ = crate::save::atomic_save(&guard);
+                        guard.sound_enabled
+                    };
+                    let _ = sound_item.set_checked(enabled);
+                    let _ = app.emit("sound-settings", serde_json::json!({ "enabled": enabled }));
                 }
                 "autostart" => {
                     let autolaunch = app.autolaunch();
@@ -101,21 +128,12 @@ pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dy
                     if let Some(idx_str) = id.strip_prefix("size_") {
                         if let Ok(idx) = idx_str.parse::<usize>() {
                             if idx < SIZE_PRESETS.len() {
-                                let (_, cols, rows, w, h) = SIZE_PRESETS[idx];
-
                                 // Update checkmarks: uncheck all, check selected
                                 for (i, item) in size_items.iter().enumerate() {
                                     let _ = item.set_checked(i == idx);
                                 }
 
-                                // Save selection
-                                {
-                                    let mut guard = state.lock().unwrap();
-                                    guard.size_index = idx;
-                                    let _ = crate::save::atomic_save(&guard);
-                                }
-
-                                resize_tank(app, cols, rows, w, h);
+                                let _ = apply_size_index(app, &state, idx);
                             }
                         }
                     }
@@ -153,6 +171,21 @@ fn resize_tank(app: &AppHandle, cols: u32, rows: u32, width: f64, height: f64) {
     }
 }
 
+pub fn apply_size_index(app: &AppHandle, state: &Arc<SharedState>, idx: usize) -> Result<(), String> {
+    if idx >= SIZE_PRESETS.len() {
+        return Err("Invalid size preset".to_string());
+    }
+    let (_, cols, rows, w, h) = SIZE_PRESETS[idx];
+    {
+        let mut guard = state.lock().map_err(|e| e.to_string())?;
+        guard.size_index = idx;
+        crate::save::atomic_save(&guard)?;
+    }
+    resize_tank(app, cols, rows, w, h);
+    let _ = app.emit("size-index", serde_json::json!({ "index": idx }));
+    Ok(())
+}
+
 fn reset_aquarium(app: &AppHandle, state: &Arc<SharedState>) {
     {
         let mut guard = state.lock().unwrap();
@@ -183,7 +216,25 @@ fn open_collection_window(app: &AppHandle) {
     )
     .title("ASCII Reef - Collection")
     .inner_size(600.0, 500.0)
+    .decorations(true)
     .resizable(true)
+    .build();
+}
+
+fn open_settings_window(app: &AppHandle) {
+    if app.get_webview_window("settings").is_some() {
+        return;
+    }
+
+    let _window = tauri::WebviewWindowBuilder::new(
+        app,
+        "settings",
+        tauri::WebviewUrl::App("settings.html".into()),
+    )
+    .title("ASCII Reef - Settings")
+    .inner_size(420.0, 420.0)
+    .resizable(false)
+    .decorations(true)
     .build();
 }
 

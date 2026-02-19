@@ -89,3 +89,47 @@ export const DECORATIONS = {
     height: 3,
   },
 };
+
+// Surface/sky decorations (air band + surface line)
+export const SURFACE_DECORATIONS = {
+  boat: {
+    frames: [
+      ["  /\\  ", " /__\\ ", " |__| "],
+      ["  /\\  ", " /__\\ ", " |_~| "],
+    ],
+    width: 6,
+    height: 3,
+  },
+  jetski: {
+    frames: [
+      [" _~_ ", "/_|_>", "  ~~ "],
+      [" _~_ ", "/_|_>", " ~~~ "],
+    ],
+    width: 5,
+    height: 3,
+  },
+  gull: {
+    frames: [
+      ["\\_v_/"],
+      ["-v-"],
+    ],
+    width: 5,
+    height: 1,
+  },
+  tern: {
+    frames: [
+      ["\\_/_/"],
+      ["-^-"],
+    ],
+    width: 5,
+    height: 1,
+  },
+  flock: {
+    frames: [
+      ["\\_v_/  -v-  \\_/_/"],
+      ["-v-  \\_v_/  -^-"],
+    ],
+    width: 17,
+    height: 1,
+  },
+};

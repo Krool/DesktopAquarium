@@ -38,10 +38,28 @@ pub struct SaveDisplay {
     pub position: (f64, f64),
     #[serde(default = "default_size_index")]
     pub size_index: usize,
+    #[serde(default = "default_send_scores")]
+    pub send_scores: bool,
+    #[serde(default = "default_sound_enabled")]
+    pub sound_enabled: bool,
+    #[serde(default = "default_music_volume")]
+    pub music_volume: f32,
 }
 
 fn default_size_index() -> usize {
     2
+}
+
+fn default_send_scores() -> bool {
+    true
+}
+
+fn default_sound_enabled() -> bool {
+    false
+}
+
+fn default_music_volume() -> f32 {
+    0.08
 }
 
 pub fn save_dir() -> PathBuf {
@@ -84,6 +102,9 @@ pub fn atomic_save(state: &GameState) -> Result<(), String> {
         display: SaveDisplay {
             position: state.position,
             size_index: state.size_index,
+            send_scores: state.send_scores,
+            sound_enabled: state.sound_enabled,
+            music_volume: state.music_volume,
         },
     };
 
@@ -144,6 +165,9 @@ pub fn load() -> Result<GameState, String> {
         pity: save.progression.pity,
         position: save.display.position,
         size_index: save.display.size_index,
+        send_scores: save.display.send_scores,
+        sound_enabled: save.display.sound_enabled,
+        music_volume: save.display.music_volume,
         drag_mode: false,
         last_input_time: 0.0,
     })

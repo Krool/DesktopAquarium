@@ -5,19 +5,42 @@ import creaturesData from "./data/creatures.json";
 import { computeUnlocked, getAchievements } from "./simulation/achievements.js";
 
 const { invoke } = window.__TAURI__.core;
+const { getCurrentWindow } = window.__TAURI__.window;
 
 const RARITY_ORDER = ["legendary", "epic", "rare", "uncommon", "common"];
 
 async function init() {
   const root = document.getElementById("collection-root");
+  const closeBtn = document.getElementById("collection-close");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      try {
+        getCurrentWindow().close();
+      } catch {
+        // Fallback
+      }
+    });
+  }
 
   let collection = {};
   let totalDiscoveries = 0;
+  let sendScoresEnabled = true;
+  let soundEnabled = false;
+  let sizeIndex = 2;
 
   try {
     const state = await invoke("get_state");
     collection = state.collection || {};
     totalDiscoveries = state.totalDiscoveries || 0;
+    if (typeof state.sendScores === "boolean") {
+      sendScoresEnabled = state.sendScores;
+    }
+    if (typeof state.soundEnabled === "boolean") {
+      soundEnabled = state.soundEnabled;
+    }
+    if (typeof state.sizeIndex === "number") {
+      sizeIndex = state.sizeIndex;
+    }
   } catch {
     // Backend not available
   }
@@ -45,9 +68,15 @@ async function init() {
 
   // Achievements section
   const storedRank = localStorage.getItem("ascii-reef-rank");
-  const leaderboardRank = storedRank ? parseInt(storedRank, 10) : null;
-  const unlocked = computeUnlocked(collection, creaturesData, leaderboardRank);
-  const allAchievements = getAchievements();
+  const leaderboardRank = sendScoresEnabled && storedRank ? parseInt(storedRank, 10) : null;
+  const unlocked = computeUnlocked(collection, creaturesData, leaderboardRank, {
+    sizeIndex,
+    soundEnabled,
+    sendScoresEnabled,
+  });
+  const allAchievements = getAchievements().filter((a) => {
+    return sendScoresEnabled || a.id !== "top_10";
+  });
   const unlockedCount = unlocked.size;
 
   const achSection = document.createElement("div");

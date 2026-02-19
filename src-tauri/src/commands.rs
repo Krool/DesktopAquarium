@@ -1,6 +1,6 @@
 use crate::state::SharedState;
 use std::sync::Arc;
-use tauri::{Manager, State};
+use tauri::{Emitter, Manager, State};
 
 #[tauri::command]
 pub fn get_state(state: State<'_, Arc<SharedState>>) -> Result<serde_json::Value, String> {
@@ -11,7 +11,57 @@ pub fn get_state(state: State<'_, Arc<SharedState>>) -> Result<serde_json::Value
         "totalDiscoveries": guard.total_discoveries,
         "pity": guard.pity,
         "position": guard.position,
+        "sendScores": guard.send_scores,
+        "soundEnabled": guard.sound_enabled,
+        "musicVolume": guard.music_volume,
+        "sizeIndex": guard.size_index,
     }))
+}
+
+#[tauri::command]
+pub fn set_send_scores(
+    app: tauri::AppHandle,
+    enabled: bool,
+    state: State<'_, Arc<SharedState>>,
+) -> Result<(), String> {
+    {
+        let mut guard = state.lock().map_err(|e| e.to_string())?;
+        guard.send_scores = enabled;
+        crate::save::atomic_save(&guard)?;
+    }
+    let _ = app.emit("send-scores", serde_json::json!({ "enabled": enabled }));
+    Ok(())
+}
+
+#[tauri::command]
+pub fn set_sound_enabled(
+    app: tauri::AppHandle,
+    enabled: bool,
+    state: State<'_, Arc<SharedState>>,
+) -> Result<(), String> {
+    {
+        let mut guard = state.lock().map_err(|e| e.to_string())?;
+        guard.sound_enabled = enabled;
+        crate::save::atomic_save(&guard)?;
+    }
+    let _ = app.emit("sound-settings", serde_json::json!({ "enabled": enabled }));
+    Ok(())
+}
+
+#[tauri::command]
+pub fn set_music_volume(
+    app: tauri::AppHandle,
+    volume: f32,
+    state: State<'_, Arc<SharedState>>,
+) -> Result<(), String> {
+    let clamped = volume.clamp(0.0, 1.0);
+    {
+        let mut guard = state.lock().map_err(|e| e.to_string())?;
+        guard.music_volume = clamped;
+        crate::save::atomic_save(&guard)?;
+    }
+    let _ = app.emit("sound-settings", serde_json::json!({ "volume": clamped }));
+    Ok(())
 }
 
 #[tauri::command]
@@ -77,4 +127,13 @@ pub fn hide_window(app: tauri::AppHandle) -> Result<(), String> {
 pub fn open_collection(app: tauri::AppHandle) -> Result<(), String> {
     crate::tray::open_collection_from_command(&app);
     Ok(())
+}
+
+#[tauri::command]
+pub fn set_size_index(
+    app: tauri::AppHandle,
+    idx: usize,
+    state: State<'_, Arc<SharedState>>,
+) -> Result<(), String> {
+    crate::tray::apply_size_index(&app, &state, idx)
 }

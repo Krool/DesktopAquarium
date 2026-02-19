@@ -26,8 +26,23 @@ let playerId = null;
 let leaderboardData = []; // [{name, score, rank}]
 let myRank = null;
 let initialized = false;
+let leaderboardEnabled = true;
+
+export function setLeaderboardEnabled(enabled) {
+  leaderboardEnabled = enabled;
+  if (!leaderboardEnabled) {
+    myRank = null;
+    leaderboardData = [];
+    localStorage.removeItem("ascii-reef-rank");
+  }
+}
+
+export function getLeaderboardEnabled() {
+  return leaderboardEnabled;
+}
 
 export function initLeaderboard() {
+  if (!leaderboardEnabled) return;
   try {
     if (!firebaseConfig.apiKey) {
       console.warn("Firebase not configured - leaderboard disabled");
@@ -52,7 +67,7 @@ export function initLeaderboard() {
 }
 
 export async function submitScore(score, uniqueCount) {
-  if (!initialized || !db) return;
+  if (!leaderboardEnabled || !initialized || !db) return;
 
   try {
     const playerName =
@@ -72,7 +87,7 @@ export async function submitScore(score, uniqueCount) {
 }
 
 async function fetchLeaderboard() {
-  if (!initialized || !db) return;
+  if (!leaderboardEnabled || !initialized || !db) return;
 
   try {
     const q = query(
@@ -122,5 +137,5 @@ export function getLeaderboardData() {
 
 // Refresh leaderboard every 2 minutes
 setInterval(() => {
-  if (initialized) fetchLeaderboard();
+  if (initialized && leaderboardEnabled) fetchLeaderboard();
 }, 120000);

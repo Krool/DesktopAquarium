@@ -65,10 +65,111 @@ body.collection-window {
   overflow-y: auto;
 }
 
+#collection-close {
+  position: fixed;
+  top: 8px;
+  right: 12px;
+  z-index: 50;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+#collection-close:hover {
+  color: #ffffff;
+}
+
 #collection-root {
   padding: 20px;
   max-width: 800px;
   margin: 0 auto;
+}
+
+/* Settings window styles */
+body.settings-window {
+  background: #141628;
+  color: #e0e0e0;
+  overflow: hidden;
+}
+
+#settings-root {
+  padding: 18px 20px 22px;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.settings-header h1 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+#settings-close {
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  user-select: none;
+}
+
+#settings-close:hover {
+  color: #ffffff;
+}
+
+.settings-section {
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settings-section:first-of-type {
+  border-top: none;
+}
+
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.settings-hint {
+  font-size: 12px;
+  color: #9aa0b2;
+  margin-top: 6px;
+}
+
+.settings-slider {
+  margin-top: 10px;
+}
+
+.settings-slider-label {
+  font-size: 12px;
+  color: #b7bdd1;
+  margin-bottom: 6px;
+}
+
+.settings-slider-value {
+  font-size: 12px;
+  color: #c9cff0;
+  margin-top: 6px;
+}
+
+.settings-select {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.settings-select select {
+  background: #1e223a;
+  color: #e0e0e0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px 8px;
+  font-family: "JetBrains Mono", monospace;
 }
 
 .collection-header {

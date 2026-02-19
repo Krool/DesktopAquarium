@@ -50,6 +50,10 @@ pub fn run() {
             commands::import_save,
             commands::hide_window,
             commands::open_collection,
+            commands::set_send_scores,
+            commands::set_sound_enabled,
+            commands::set_music_volume,
+            commands::set_size_index,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();

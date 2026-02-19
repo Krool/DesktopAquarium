@@ -13,6 +13,8 @@ export const ENV_COLORS = {
   rock: "#616161",
   coral: "#E0A0A0",
   water: "rgba(33, 150, 243, 0.30)",
+  surface: "rgba(120, 200, 255, 0.55)",
+  surfaceSplash: "#BFE9FF",
   bubble: "#7dd3fc",
   sand: "#a8896c",
   star: "#facc15",
@@ -30,6 +32,13 @@ export const ENV_COLORS = {
   sparkle: "#E8E8FF",
   goldenSand: "#DAA520",
   shimmerWater: "rgba(255, 215, 0, 0.15)",
+};
+
+// Progress bar colors
+export const PROGRESS_COLORS = {
+  typing: { outline: "#5EE6FF", fill: "#00B3FF", empty: "#2B4C5A" },
+  click: { outline: "#7CFF6B", fill: "#22C55E", empty: "#2B4E35" },
+  audio: { outline: "#C9A2FF", fill: "#A855F7", empty: "#3F2B5A" },
 };
 
 // Score values per rarity

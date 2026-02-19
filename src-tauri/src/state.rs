@@ -41,10 +41,31 @@ pub struct GameState {
     /// Selected size preset index
     #[serde(default = "default_size_index")]
     pub size_index: usize,
+    /// Whether leaderboard score submission is enabled
+    #[serde(default = "default_send_scores")]
+    pub send_scores: bool,
+    /// Whether ambient music is enabled
+    #[serde(default = "default_sound_enabled")]
+    pub sound_enabled: bool,
+    /// Music volume (0.0 - 1.0)
+    #[serde(default = "default_music_volume")]
+    pub music_volume: f32,
 }
 
 fn default_size_index() -> usize {
     2 // "Medium Tall" (60x24) = current default
+}
+
+fn default_send_scores() -> bool {
+    true
+}
+
+fn default_sound_enabled() -> bool {
+    false
+}
+
+fn default_music_volume() -> f32 {
+    0.08
 }
 
 fn default_pool_energy() -> HashMap<String, u32> {
@@ -66,6 +87,9 @@ impl Default for GameState {
             drag_mode: false,
             last_input_time: 0.0,
             size_index: default_size_index(),
+            send_scores: default_send_scores(),
+            sound_enabled: default_sound_enabled(),
+            music_volume: default_music_volume(),
         }
     }
 }

@@ -2,14 +2,16 @@
 
 import { drawChar, drawString, COLS, ROWS } from "../renderer/canvas.js";
 import { ENV_COLORS } from "../renderer/colors.js";
-import { DECORATIONS } from "../data/decorations.js";
+import { DECORATIONS, SURFACE_DECORATIONS } from "../data/decorations.js";
 
 // Dynamic constants
 let ROCK_ROW, SAND_ROW;
+const SURFACE_ROW = 1;
 const WATER_DENSITY = 0.06;
 const WATER_GLYPHS = ["~", ".", "\u00B0", "o"];
 const SAND_TEXTURE_GLYPHS = ["~", ".", ",", "~", "-", ".", ","];
 const CORAL = ["  _-_ ", " /   \\", " \\_-_/"];
+const SURFACE_GLYPHS = ["~", "-", "~", "~"];
 
 // State that gets regenerated on resize
 let waterParticles = [];
@@ -18,6 +20,10 @@ let kelpStalks = [];
 let coralPositions = [];
 let starfish = [];
 let chestCol = null;
+let surfaceBoatCol = null;
+let surfaceJetCol = null;
+let surfaceBirdCols = [];
+let surfaceFlockCol = null;
 
 // New decoration positions
 let clamCol = null;
@@ -39,6 +45,11 @@ const MAX_BUBBLES = 30;
 // Sparkle particles for epic_discovery
 const sparkles = [];
 const MAX_SPARKLES = 8;
+const surfaceSplashes = [];
+
+export function getSurfaceRow() {
+  return SURFACE_ROW;
+}
 
 export function setUnlockedAchievements(achievementSet) {
   unlockedSet = achievementSet;
@@ -57,6 +68,15 @@ export function spawnBubble(col, row) {
     speed: 0.02 + Math.random() * 0.03,
     drift: (Math.random() - 0.5) * 0.15,
     big: Math.random() > 0.6,
+  });
+}
+
+export function spawnSurfaceSplash(col, timestamp, width = 2) {
+  surfaceSplashes.push({
+    col,
+    width,
+    start: timestamp,
+    duration: 900 + Math.random() * 600,
   });
 }
 
@@ -158,6 +178,25 @@ function generateAll() {
 
   trophyCol = placeDecoration(3, usedPositions);
 
+  // Surface/sky decorations (air band)
+  surfaceBoatCol = placeDecoration(SURFACE_DECORATIONS.boat.width, usedPositions);
+  if (surfaceBoatCol !== null) usedPositions.push(surfaceBoatCol);
+
+  surfaceJetCol = placeDecoration(SURFACE_DECORATIONS.jetski.width, usedPositions);
+  if (surfaceJetCol !== null) usedPositions.push(surfaceJetCol);
+
+  surfaceFlockCol = placeDecoration(SURFACE_DECORATIONS.flock.width, usedPositions);
+
+  surfaceBirdCols = [];
+  const birdCount = Math.max(2, Math.floor(COLS / 30));
+  for (let i = 0; i < birdCount; i++) {
+    const bCol = placeDecoration(5, usedPositions);
+    if (bCol !== null) {
+      surfaceBirdCols.push(bCol);
+      usedPositions.push(bCol);
+    }
+  }
+
   // Clear bubbles and sparkles on resize
   bubbles.length = 0;
   sparkles.length = 0;
@@ -182,10 +221,62 @@ function renderDecoration(art, col, startRow, color) {
   }
 }
 
+function renderSurfaceDecoration(frames, col, startRow, frameIdx, color) {
+  if (col === null) return;
+  const frame = frames[frameIdx % frames.length];
+  for (let r = 0; r < frame.length; r++) {
+    drawString(col, startRow + r, frame[r], color);
+  }
+}
+
 export function renderEnvironment(timestamp) {
   ROCK_ROW = ROWS - 2;
   SAND_ROW = ROWS - 1;
   const t = timestamp / 1000;
+
+  // Surface band (top of water)
+  const waveShift = Math.floor(t * 2);
+  for (let col = 0; col < COLS; col++) {
+    const glyph = SURFACE_GLYPHS[(col + waveShift) % SURFACE_GLYPHS.length];
+    drawChar(col, SURFACE_ROW, glyph, ENV_COLORS.surface);
+  }
+
+  // Surface/sky decorations (air band + surface line)
+  const surfaceFrame = Math.floor(t * 2) % 2;
+  const birdFrame = Math.floor(t * 4) % 2;
+  if (hasAchievement("harbor_pilot")) {
+    renderSurfaceDecoration(SURFACE_DECORATIONS.boat.frames, surfaceBoatCol, 0, surfaceFrame, ENV_COLORS.ui);
+  }
+  if (hasAchievement("jet_wake")) {
+    renderSurfaceDecoration(SURFACE_DECORATIONS.jetski.frames, surfaceJetCol, 0, surfaceFrame, ENV_COLORS.ui);
+  }
+  if (hasAchievement("gull_friend")) {
+    for (let i = 0; i < surfaceBirdCols.length; i++) {
+      const col = surfaceBirdCols[i];
+      const art = i % 2 === 0 ? SURFACE_DECORATIONS.gull.frames : SURFACE_DECORATIONS.tern.frames;
+      renderSurfaceDecoration(art, col, 0, birdFrame, ENV_COLORS.ui);
+    }
+  }
+  if (hasAchievement("sky_flock")) {
+    renderSurfaceDecoration(SURFACE_DECORATIONS.flock.frames, surfaceFlockCol, 0, birdFrame, ENV_COLORS.ui);
+  }
+
+  // Surface splashes
+  for (let i = surfaceSplashes.length - 1; i >= 0; i--) {
+    const s = surfaceSplashes[i];
+    const age = timestamp - s.start;
+    if (age > s.duration) {
+      surfaceSplashes.splice(i, 1);
+      continue;
+    }
+    const phase = age / s.duration;
+    const splashGlyph = phase < 0.5 ? "^" : "~";
+    drawChar(s.col, SURFACE_ROW, splashGlyph, ENV_COLORS.surfaceSplash);
+    if (s.width > 1) {
+      drawChar(s.col - 1, SURFACE_ROW, "~", ENV_COLORS.surfaceSplash);
+      drawChar(s.col + 1, SURFACE_ROW, "~", ENV_COLORS.surfaceSplash);
+    }
+  }
 
   // Water particles - slow drift
   waterDriftOffset = (timestamp / 3000) % COLS;
@@ -194,7 +285,7 @@ export function renderEnvironment(timestamp) {
     : ENV_COLORS.water;
   for (const p of waterParticles) {
     const col = Math.floor(p.col + waterDriftOffset) % COLS;
-    if (p.row < ROCK_ROW) {
+    if (p.row < ROCK_ROW && p.row > SURFACE_ROW) {
       drawChar(col, p.row, p.glyph, waterColor);
     }
   }

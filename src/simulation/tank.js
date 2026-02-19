@@ -3,7 +3,7 @@
 import { CreatureInstance } from "./creature.js";
 import { drawString, drawStringBg, COLS, ROWS } from "../renderer/canvas.js";
 import { ENV_COLORS, DISPLAY_WEIGHTS, SCORE_VALUES, RARITY_COLORS } from "../renderer/colors.js";
-import { getMyRank } from "./leaderboard.js";
+import { getMyRank, getLeaderboardEnabled } from "./leaderboard.js";
 
 const SOFT_TARGET = 9;
 const HARD_CAP = 12;
@@ -15,6 +15,58 @@ let allSprites = {}; // id -> parsed sprite def
 let collection = {}; // id -> { count, firstSeen }
 let nextSpawnTime = 0;
 let capBoostEnd = 0; // Temporary cap boost to 12 after discovery
+
+function maybeApplySchooling(timestamp) {
+  const swimmers = creatures.filter((c) => c.sprite.category === "swimmer");
+  if (swimmers.length < 2) return;
+  for (const c of swimmers) {
+    if (timestamp < c.schoolCooldownUntil) continue;
+    if (Math.random() > 0.02) continue;
+    let closest = null;
+    let closestDist = Infinity;
+    for (const other of swimmers) {
+      if (other === c) continue;
+      const dist = Math.abs(other.col - c.col) + Math.abs(other.row - c.row);
+      if (dist < closestDist) {
+        closestDist = dist;
+        closest = other;
+      }
+    }
+    if (closest && closestDist <= 6) {
+      const until = timestamp + 1500 + Math.random() * 700;
+      c.schoolUntil = until;
+      c.schoolDir = closest.direction;
+      c.schoolSpeed = closest.baseSpeed;
+      c.schoolCooldownUntil = timestamp + 6000 + Math.random() * 4000;
+
+      closest.schoolUntil = until;
+      closest.schoolDir = c.direction;
+      closest.schoolSpeed = c.baseSpeed;
+      closest.schoolCooldownUntil = timestamp + 6000 + Math.random() * 4000;
+    }
+  }
+}
+
+function maybeTriggerCrabFights(timestamp) {
+  const crabs = creatures.filter(
+    (c) => c.sprite.category === "bottom" && c.sprite.name.includes("Crab")
+  );
+  if (crabs.length < 2) return;
+  for (let i = 0; i < crabs.length; i++) {
+    const a = crabs[i];
+    if (timestamp < a.fightCooldownUntil || a.fightUntil > timestamp) continue;
+    for (let j = i + 1; j < crabs.length; j++) {
+      const b = crabs[j];
+      if (timestamp < b.fightCooldownUntil || b.fightUntil > timestamp) continue;
+      const close = Math.abs(a.col - b.col) <= 2 && Math.abs(a.row - b.row) <= 0;
+      if (close) {
+        a.startFight(timestamp);
+        b.startFight(timestamp);
+        return;
+      }
+    }
+  }
+}
 
 export function initTank(spriteDefs, savedCollection) {
   allSprites = spriteDefs;
@@ -95,6 +147,9 @@ export function getUniqueCount() {
 }
 
 export function updateTank(timestamp, deltaSeconds) {
+  maybeApplySchooling(timestamp);
+  maybeTriggerCrabFights(timestamp);
+
   // Update existing creatures
   for (const creature of creatures) {
     creature.update(deltaSeconds, timestamp);
@@ -140,10 +195,18 @@ export function renderTank(timestamp) {
 
   // Score display on the rock line row (bottom area)
   const score = calculateScore();
-  const rank = getMyRank();
-  const scoreText = rank !== null
+  const leaderboardEnabled = getLeaderboardEnabled();
+  const rank = leaderboardEnabled ? getMyRank() : null;
+  let scoreText = rank !== null
     ? `Score: ${score.toLocaleString()} #${rank}`
     : `Score: ${score.toLocaleString()}`;
+  const maxScoreLen = Math.max(6, COLS - 2);
+  if (scoreText.length > maxScoreLen) {
+    scoreText = `Score:${score.toLocaleString()}`;
+  }
+  if (scoreText.length > maxScoreLen) {
+    scoreText = score.toLocaleString();
+  }
   const uiBg = "rgba(0, 0, 0, 0.5)";
   drawStringBg(1, ROWS - 2, scoreText, ENV_COLORS.ui, uiBg);
 
@@ -151,7 +214,11 @@ export function renderTank(timestamp) {
   const total = 105;
   const owned = getUniqueCount();
   const progressText = `${owned}/${total}`;
-  drawStringBg(COLS - progressText.length - 1, ROWS - 2, progressText, ENV_COLORS.ui, uiBg);
+  const rightCol = COLS - progressText.length - 1;
+  const scoreEnd = 1 + scoreText.length;
+  if (rightCol - scoreEnd >= 2) {
+    drawStringBg(rightCol, ROWS - 2, progressText, ENV_COLORS.ui, uiBg);
+  }
 }
 
 export function clearCreatures() {
