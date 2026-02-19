@@ -46,7 +46,7 @@ body::before {
 /* Drag overlay sits on top of canvas, covers entire window for dragging */
 #drag-overlay {
   position: absolute;
-  top: 0;
+  top: 20px;
   left: 0;
   right: 0;
   bottom: 0;

@@ -12,7 +12,6 @@ const WATER_GLYPHS = ["~", ".", "\u00B0", "o"];
 const SURFACE_GLYPHS = ["~", "-", "="];
 const SAND_TEXTURE_GLYPHS = ["~", ".", ",", "~", "-", ".", ","];
 const CORAL = ["  _-_ ", " /   \\", " \\_-_/"];
-const SURFACE_GLYPHS = ["~", "-", "~", "~"];
 
 // State that gets regenerated on resize
 let waterParticles = [];
