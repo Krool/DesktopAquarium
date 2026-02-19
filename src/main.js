@@ -481,8 +481,9 @@ async function init() {
 
     const topRightReserved = 16; // leave room for [Collection] + [X]
 
-    // 6. Three energy bars (top-left, stacked horizontally)
-    const barWidth = 8;
+    // 6. Three energy bars (top-left, scaled down on smaller aquariums)
+    const barWidth = COLS <= 45 ? 4 : COLS <= 65 ? 6 : 8;
+    const barGap = COLS <= 45 ? 1 : 2;
     const bars = [
       { label: "T", value: energyDisplay.typing, key: "typing" },
       { label: "C", value: energyDisplay.click, key: "click" },
@@ -503,7 +504,7 @@ async function init() {
         const color = i < filled ? colors.fill : colors.empty;
         drawChar(nextCol + 2 + i, 0, glyph, color);
       }
-      nextCol += barLen + 2;
+      nextCol += barLen + barGap;
     }
 
     // 7. Fish label toast on quick click
