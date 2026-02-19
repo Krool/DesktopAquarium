@@ -88,7 +88,7 @@ pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dy
                     reset_aquarium(app, &state);
                 }
                 "reset_position" => {
-                    reset_window_position(app);
+                    reset_window_position(app, &state);
                 }
                 "quit" => {
                     let guard = state.lock().unwrap();
@@ -187,9 +187,14 @@ fn open_collection_window(app: &AppHandle) {
     .build();
 }
 
-fn reset_window_position(app: &AppHandle) {
+fn reset_window_position(app: &AppHandle, state: &Arc<SharedState>) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.set_position(tauri::PhysicalPosition::new(100, 100));
+        {
+            let mut guard = state.lock().unwrap();
+            guard.position = (100.0, 100.0);
+            let _ = crate::save::atomic_save(&guard);
+        }
         let _ = window.show();
     }
 }
