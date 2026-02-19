@@ -9,12 +9,14 @@ let ROCK_ROW, SAND_ROW;
 const SURFACE_ROW = 1;
 const WATER_DENSITY = 0.06;
 const WATER_GLYPHS = ["~", ".", "\u00B0", "o"];
+const SURFACE_GLYPHS = ["~", "-", "="];
 const SAND_TEXTURE_GLYPHS = ["~", ".", ",", "~", "-", ".", ","];
 const CORAL = ["  _-_ ", " /   \\", " \\_-_/"];
 const SURFACE_GLYPHS = ["~", "-", "~", "~"];
 
 // State that gets regenerated on resize
 let waterParticles = [];
+let waterMotes = [];
 let waterDriftOffset = 0;
 let kelpStalks = [];
 let coralPositions = [];
@@ -103,6 +105,18 @@ function generateAll() {
       col: Math.floor(Math.random() * COLS),
       row: Math.floor(Math.random() * (ROWS - 2)),
       glyph: WATER_GLYPHS[Math.floor(Math.random() * WATER_GLYPHS.length)],
+    });
+  }
+
+  // Floating light motes
+  waterMotes = [];
+  const moteCount = Math.max(8, Math.floor(COLS * 0.25));
+  for (let i = 0; i < moteCount; i++) {
+    waterMotes.push({
+      col: Math.floor(Math.random() * COLS),
+      row: 1 + Math.floor(Math.random() * Math.max(1, ROWS - 4)),
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.25 + Math.random() * 0.45,
     });
   }
 
@@ -288,6 +302,20 @@ export function renderEnvironment(timestamp) {
     if (p.row < ROCK_ROW && p.row > SURFACE_ROW) {
       drawChar(col, p.row, p.glyph, waterColor);
     }
+  }
+
+  // Surface ripple accents
+  for (let col = 0; col < COLS; col++) {
+    if ((col + Math.floor(t * 3)) % 7 !== 0) continue;
+    const glyph = SURFACE_GLYPHS[(col + Math.floor(t * 2)) % SURFACE_GLYPHS.length];
+    drawChar(col, 0, glyph, "rgba(180, 235, 255, 0.22)");
+  }
+
+  // Slow drifting motes for depth.
+  for (const mote of waterMotes) {
+    const x = (mote.col + Math.sin(t * mote.speed + mote.phase) * 1.6 + COLS) % COLS;
+    const y = mote.row + Math.sin(t * (mote.speed * 0.6) + mote.phase) * 0.6;
+    drawChar(Math.round(x), Math.max(1, Math.round(y)), "·", "rgba(210, 245, 255, 0.22)");
   }
 
   // Shimmering water particles (completionist)

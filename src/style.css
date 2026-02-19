@@ -21,6 +21,7 @@ body {
   font-family: "JetBrains Mono", monospace;
 }
 
+
 #tank {
   position: absolute;
   top: 0;
@@ -28,6 +29,18 @@ body {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(125, 211, 252, 0.22));
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 22% 5%, rgba(207, 241, 255, 0.16), rgba(12, 42, 94, 0) 50%),
+    linear-gradient(160deg, rgba(137, 219, 255, 0.08), rgba(0, 0, 0, 0) 30%);
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Drag overlay sits on top of canvas, covers entire window for dragging */
