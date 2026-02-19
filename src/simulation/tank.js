@@ -108,6 +108,18 @@ function getOwnedCreatures() {
     .map((id) => allSprites[id]);
 }
 
+function getActiveCreatureCounts() {
+  const counts = new Map();
+  for (const creature of creatures) {
+    counts.set(creature.id, (counts.get(creature.id) || 0) + 1);
+  }
+  return counts;
+}
+
+function getMaxVisibleForCreature(id) {
+  return Math.max(0, collection[id]?.count || 0);
+}
+
 function getRarestOwned() {
   const rarityOrder = ["legendary", "epic", "rare", "uncommon", "common"];
   const owned = getOwnedCreatures();
@@ -181,15 +193,33 @@ export function updateTank(timestamp, deltaSeconds) {
   if (timestamp >= nextSpawnTime && creatures.length < currentCap) {
     const owned = getOwnedCreatures();
     if (owned.length > 0) {
+      const activeCounts = getActiveCreatureCounts();
+      const spawnable = owned.filter((sprite) => {
+        const active = activeCounts.get(sprite.id) || 0;
+        return active < getMaxVisibleForCreature(sprite.id);
+      });
+
+      if (spawnable.length === 0) {
+        nextSpawnTime = timestamp + SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN);
+        return;
+      }
+
       // Check if rarest slot is occupied
       const rarest = getRarestOwned();
-      const rarestOnScreen = rarest && creatures.some((c) => c.id === rarest.id);
+      const rarestOnScreen = rarest && (activeCounts.get(rarest.id) || 0) > 0;
+      const rarestCanSpawn = rarest && spawnable.some((sprite) => sprite.id === rarest.id);
+
+      // Bias toward filling empty species slots first so the aquarium feels fuller
+      // as the player unlocks more unique creatures.
+      const notOnScreen = spawnable.filter((sprite) => (activeCounts.get(sprite.id) || 0) === 0);
 
       let toSpawn;
-      if (rarest && !rarestOnScreen) {
+      if (rarest && !rarestOnScreen && rarestCanSpawn) {
         toSpawn = rarest;
+      } else if (notOnScreen.length > 0) {
+        toSpawn = weightedSelect(notOnScreen);
       } else {
-        toSpawn = weightedSelect(owned);
+        toSpawn = weightedSelect(spawnable);
       }
 
       spawnCreature(toSpawn);
