@@ -16,6 +16,7 @@ import {
   calculateScore,
   getUniqueCount,
   clearCreatures,
+  getCreatureAtGrid,
 } from "./simulation/tank.js";
 import {
   initLeaderboard,
@@ -28,6 +29,9 @@ import creaturesData from "./data/creatures.json";
 
 const { listen } = window.__TAURI__.event;
 const { invoke } = window.__TAURI__.core;
+const { getCurrentWindow } = window.__TAURI__.window;
+
+const appWindow = getCurrentWindow();
 
 let allSprites = {};
 let lastTimestamp = 0;
@@ -41,6 +45,12 @@ let soundEnabled = false;
 let musicVolume = 0.08;
 let sizeIndex = 2;
 let lastCollection = {};
+
+let fishLabelToast = null;
+
+const CLICK_DRAG_THRESHOLD = 6;
+const CLICK_MAX_DURATION_MS = 250;
+const LABEL_DURATION_MS = 1800;
 
 const MUSIC_SRC = "/audio/soft-horizon-rising-tide.wav";
 const SFX_SOURCES = {
@@ -59,6 +69,41 @@ const SFX_VOLUMES = {
 };
 let musicAudio = null;
 let sfxAudio = {};
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function getGridPositionFromPointer(event) {
+  const overlay = event.currentTarget;
+  const rect = overlay.getBoundingClientRect();
+  const { charWidth, charHeight } = getCharDimensions();
+  const relativeX = event.clientX - rect.left;
+  const relativeY = event.clientY - rect.top;
+  return {
+    col: Math.floor(relativeX / charWidth),
+    row: Math.floor(relativeY / charHeight),
+  };
+}
+
+function isCollectionProgressCell(col, row) {
+  const rockRow = ROWS - 2;
+  return row === rockRow && col >= COLS - 8;
+}
+
+function showFishLabel(creature) {
+  const text = creature.sprite.name;
+  const color = RARITY_COLORS[creature.rarity] || ENV_COLORS.ui;
+  const row = clamp(creature.row - 1, 1, ROWS - 3);
+  const col = clamp(creature.col, 1, Math.max(1, COLS - text.length - 1));
+  fishLabelToast = {
+    text,
+    color,
+    row,
+    col,
+    expiresAt: performance.now() + LABEL_DURATION_MS,
+  };
+}
 
 function wrapText(text, maxWidth) {
   const words = text.split(" ");
@@ -326,17 +371,56 @@ async function init() {
     }
   });
 
-  // Click on progress count (bottom-right) opens collection window
-  document.getElementById("drag-overlay").addEventListener("mousedown", (e) => {
-    const { charWidth, charHeight } = getCharDimensions();
-    const gridCol = Math.floor(e.offsetX / charWidth);
-    const gridRow = Math.floor(e.offsetY / charHeight);
-    const rockRow = ROWS - 2;
-    // Progress text is at the right side of the rock row
-    if (gridRow === rockRow && gridCol >= COLS - 8) {
-      e.stopPropagation();
-      e.preventDefault();
-      invoke("open_collection");
+  const dragOverlay = document.getElementById("drag-overlay");
+  let pointerState = null;
+
+  dragOverlay.addEventListener("mousedown", (event) => {
+    if (event.button !== 0) return;
+
+    const gridPos = getGridPositionFromPointer(event);
+    pointerState = {
+      startX: event.clientX,
+      startY: event.clientY,
+      startedAt: performance.now(),
+      didDrag: false,
+      gridPos,
+    };
+  });
+
+  dragOverlay.addEventListener("mousemove", (event) => {
+    if (!pointerState || pointerState.didDrag) return;
+
+    const distance = Math.hypot(event.clientX - pointerState.startX, event.clientY - pointerState.startY);
+    if (distance < CLICK_DRAG_THRESHOLD) return;
+
+    pointerState.didDrag = true;
+    appWindow.startDragging().catch(() => {
+      // no-op fallback
+    });
+  });
+
+  dragOverlay.addEventListener("mouseup", (event) => {
+    if (event.button !== 0 || !pointerState) return;
+
+    const elapsed = performance.now() - pointerState.startedAt;
+    if (!pointerState.didDrag && elapsed <= CLICK_MAX_DURATION_MS) {
+      const { col, row } = pointerState.gridPos;
+      if (isCollectionProgressCell(col, row)) {
+        invoke("open_collection");
+      } else {
+        const creature = getCreatureAtGrid(col, row);
+        if (creature) {
+          showFishLabel(creature);
+        }
+      }
+    }
+
+    pointerState = null;
+  });
+
+  dragOverlay.addEventListener("mouseleave", () => {
+    if (pointerState && !pointerState.didDrag) {
+      pointerState = null;
     }
   });
 
@@ -402,7 +486,14 @@ async function init() {
       nextCol += barLen + 2;
     }
 
-    // 7. Last discovery: sprite preview + name
+    // 7. Fish label toast on quick click
+    if (fishLabelToast && timestamp <= fishLabelToast.expiresAt) {
+      drawStringBg(fishLabelToast.col, fishLabelToast.row, fishLabelToast.text, fishLabelToast.color, uiBg);
+    } else {
+      fishLabelToast = null;
+    }
+
+    // 8. Last discovery: sprite preview + name
     if (lastDiscovery) {
       const color = RARITY_COLORS[lastDiscovery.rarity] || ENV_COLORS.ui;
       const spriteText = lastDiscovery.sprite ? `${lastDiscovery.sprite} ` : "";

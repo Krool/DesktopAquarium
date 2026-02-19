@@ -38,7 +38,6 @@ body {
   right: 0;
   bottom: 0;
   z-index: 10;
-  -webkit-app-region: drag;
 }
 
 #close-btn {
