@@ -53,6 +53,26 @@ body {
   -webkit-app-region: no-drag;
 }
 
+#collection-btn {
+  position: absolute;
+  right: 36px;
+  top: 2px;
+  z-index: 30;
+  color: rgba(255, 255, 255, 0.7);
+  background: transparent;
+  border: none;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-app-region: no-drag;
+  padding: 0;
+}
+
+#collection-btn:hover {
+  color: #ffffff;
+}
+
 #close-btn:hover {
   color: #ffffff;
 }

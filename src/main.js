@@ -424,6 +424,26 @@ async function init() {
     }
   });
 
+  // Optional collection button (top-right)
+  const collectionBtn = document.getElementById("collection-btn");
+  if (collectionBtn) {
+    let collectionOpening = false;
+    collectionBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (collectionOpening) return;
+
+      collectionOpening = true;
+      try {
+        await invoke("open_collection");
+      } catch {
+        // Fallback
+      } finally {
+        collectionOpening = false;
+      }
+    });
+  }
+
   // Start render loop
   startRenderLoop((timestamp) => {
     const delta = lastTimestamp === 0 ? 0 : (timestamp - lastTimestamp) / 1000;
@@ -459,7 +479,7 @@ async function init() {
       }
     }
 
-    const topRightReserved = 4; // leave room for [X]
+    const topRightReserved = 16; // leave room for [Collection] + [X]
 
     // 6. Three energy bars (top-left, stacked horizontally)
     const barWidth = 8;

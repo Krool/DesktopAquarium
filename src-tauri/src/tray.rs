@@ -205,11 +205,13 @@ pub fn open_collection_from_command(app: &AppHandle) {
 }
 
 fn open_collection_window(app: &AppHandle) {
-    if app.get_webview_window("collection").is_some() {
+    if let Some(window) = app.get_webview_window("collection") {
+        let _ = window.show();
+        let _ = window.set_focus();
         return;
     }
 
-    let _window = tauri::WebviewWindowBuilder::new(
+    if let Ok(window) = tauri::WebviewWindowBuilder::new(
         app,
         "collection",
         tauri::WebviewUrl::App("collection.html".into()),
@@ -218,7 +220,10 @@ fn open_collection_window(app: &AppHandle) {
     .inner_size(600.0, 500.0)
     .decorations(true)
     .resizable(true)
-    .build();
+    .build()
+    {
+        let _ = window.set_focus();
+    }
 }
 
 fn open_settings_window(app: &AppHandle) {
