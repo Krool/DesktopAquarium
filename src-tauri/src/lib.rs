@@ -11,7 +11,7 @@ mod state;
 mod tray;
 
 use input::InputCounters;
-use state::SharedState;
+use state::{GameState, SharedState};
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
 use tauri::{Listener, Manager};
@@ -24,8 +24,14 @@ fn load_creature_defs() -> Vec<energy::CreatureDef> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // Load saved state or create fresh
-    let game_state = save::load().unwrap_or_default();
+    // Load saved state or create fresh (log any load error)
+    let game_state = match save::load() {
+        Ok(state) => state,
+        Err(err) => {
+            eprintln!("Failed to load save file, falling back to defaults: {}", err);
+            GameState::default()
+        }
+    };
     let shared_state = Arc::new(Mutex::new(game_state) as SharedState);
 
     // Input counters (atomic, shared with rdev listener thread)

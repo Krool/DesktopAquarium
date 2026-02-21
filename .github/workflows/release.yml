@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 jobs:
   build:
@@ -19,7 +20,7 @@ jobs:
           - platform: macos-latest
             args: "--target aarch64-apple-darwin"
             target: aarch64-apple-darwin
-          - platform: macos-13
+          - platform: macos-latest
             args: "--target x86_64-apple-darwin"
             target: x86_64-apple-darwin
 
@@ -55,3 +56,35 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+      - name: Upload Windows latest assets
+        if: matrix.platform == 'windows-latest'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $setup = Get-ChildItem -Path src-tauri\target\release\bundle\nsis -Filter '*-setup.exe' | Select-Object -First 1
+          $msi = Get-ChildItem -Path src-tauri\target\release\bundle\msi -Filter '*.msi' | Select-Object -First 1
+          $exe = Get-ChildItem -Path src-tauri\target\release -Filter 'ascii-reef.exe' | Select-Object -First 1
+          if ($setup) { Copy-Item $setup.FullName -Destination (Join-Path $setup.Directory.FullName 'ASCII Reef_latest-setup.exe') -Force }
+          if ($msi) { Copy-Item $msi.FullName -Destination (Join-Path $msi.Directory.FullName 'ASCII Reef_latest.msi') -Force }
+          if ($exe) { Copy-Item $exe.FullName -Destination (Join-Path $exe.Directory.FullName 'ascii-reef-latest.exe') -Force }
+          if ($setup) { gh release upload $env:GITHUB_REF_NAME (Join-Path $setup.Directory.FullName 'ASCII Reef_latest-setup.exe') --clobber }
+          if ($msi) { gh release upload $env:GITHUB_REF_NAME (Join-Path $msi.Directory.FullName 'ASCII Reef_latest.msi') --clobber }
+          if ($exe) { gh release upload $env:GITHUB_REF_NAME (Join-Path $exe.Directory.FullName 'ascii-reef-latest.exe') --clobber }
+
+      - name: Upload macOS latest assets
+        if: startsWith(matrix.platform, 'macos')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ matrix.target }}" = "aarch64-apple-darwin" ]; then
+            arch="aarch64"
+          else
+            arch="x64"
+          fi
+          dmg=$(ls src-tauri/target/release/bundle/dmg/*.dmg 2>/dev/null | head -n 1 || true)
+          if [ -n "$dmg" ]; then
+            latest="src-tauri/target/release/bundle/dmg/ASCII Reef_latest-macos-${arch}.dmg"
+            cp "$dmg" "$latest"
+            gh release upload "$GITHUB_REF_NAME" "$latest" --clobber
+          fi

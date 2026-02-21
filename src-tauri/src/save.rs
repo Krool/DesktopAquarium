@@ -7,6 +7,7 @@ use std::path::PathBuf;
 pub struct SaveFile {
     pub version: u32,
     pub meta: SaveMeta,
+    #[serde(default)]
     pub collection: std::collections::HashMap<String, crate::state::OwnedCreature>,
     pub progression: SaveProgression,
     pub display: SaveDisplay,
@@ -28,13 +29,15 @@ pub struct SaveProgression {
     /// Legacy field for backward compat on load
     #[serde(default, skip_serializing)]
     pub energy: Option<u32>,
-    #[serde(rename = "totalDiscoveries")]
+    #[serde(default, rename = "totalDiscoveries")]
     pub total_discoveries: u32,
+    #[serde(default)]
     pub pity: crate::state::PityCounters,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SaveDisplay {
+    #[serde(default = "default_position")]
     pub position: (f64, f64),
     #[serde(default = "default_size_index")]
     pub size_index: usize,
@@ -56,6 +59,10 @@ pub struct SaveDisplay {
 
 fn default_size_index() -> usize {
     1
+}
+
+fn default_position() -> (f64, f64) {
+    (0.0, 0.0)
 }
 
 fn default_send_scores() -> bool {
