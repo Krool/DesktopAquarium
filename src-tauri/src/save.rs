@@ -44,10 +44,18 @@ pub struct SaveDisplay {
     pub sound_enabled: bool,
     #[serde(default = "default_music_volume")]
     pub music_volume: f32,
+    #[serde(default = "default_day_night_cycle")]
+    pub day_night_cycle: String,
+    #[serde(default = "default_message_bottles_enabled")]
+    pub message_bottles_enabled: bool,
+    #[serde(default = "default_message_bottles_prompted")]
+    pub message_bottles_prompted: bool,
+    #[serde(default = "default_close_behavior")]
+    pub close_behavior: String,
 }
 
 fn default_size_index() -> usize {
-    2
+    1
 }
 
 fn default_send_scores() -> bool {
@@ -60,6 +68,22 @@ fn default_sound_enabled() -> bool {
 
 fn default_music_volume() -> f32 {
     0.08
+}
+
+fn default_day_night_cycle() -> String {
+    "computer".to_string()
+}
+
+fn default_message_bottles_enabled() -> bool {
+    false
+}
+
+fn default_message_bottles_prompted() -> bool {
+    false
+}
+
+fn default_close_behavior() -> String {
+    "ask".to_string()
 }
 
 pub fn save_dir() -> PathBuf {
@@ -85,10 +109,17 @@ pub fn atomic_save(state: &GameState) -> Result<(), String> {
 
     let now = chrono::Utc::now().to_rfc3339();
 
+    // Preserve the original creation timestamp from the existing save file
+    let created = fs::read_to_string(save_path())
+        .ok()
+        .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
+        .and_then(|v| v["meta"]["created"].as_str().map(|s| s.to_string()))
+        .unwrap_or_else(|| now.clone());
+
     let save = SaveFile {
         version: 2,
         meta: SaveMeta {
-            created: now.clone(),
+            created,
             last_saved: now,
             app_version: "0.1.0".to_string(),
         },
@@ -105,6 +136,10 @@ pub fn atomic_save(state: &GameState) -> Result<(), String> {
             send_scores: state.send_scores,
             sound_enabled: state.sound_enabled,
             music_volume: state.music_volume,
+            day_night_cycle: state.day_night_cycle.clone(),
+            message_bottles_enabled: state.message_bottles_enabled,
+            message_bottles_prompted: state.message_bottles_prompted,
+            close_behavior: state.close_behavior.clone(),
         },
     };
 
@@ -168,7 +203,9 @@ pub fn load() -> Result<GameState, String> {
         send_scores: save.display.send_scores,
         sound_enabled: save.display.sound_enabled,
         music_volume: save.display.music_volume,
-        drag_mode: false,
-        last_input_time: 0.0,
+        day_night_cycle: save.display.day_night_cycle,
+        message_bottles_enabled: save.display.message_bottles_enabled,
+        message_bottles_prompted: save.display.message_bottles_prompted,
+        close_behavior: save.display.close_behavior,
     })
 }

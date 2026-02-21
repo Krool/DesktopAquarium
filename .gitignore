@@ -14,6 +14,7 @@ dist-ssr
 
 # Rust
 src-tauri/target
+src-tauri/target-fresh
 
 # Editor directories and files
 .vscode/*

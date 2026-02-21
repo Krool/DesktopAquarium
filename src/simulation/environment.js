@@ -1,12 +1,12 @@
 // Environment rendering: conditionally rendered based on achievement unlocks
 
-import { drawChar, drawString, COLS, ROWS } from "../renderer/canvas.js";
-import { ENV_COLORS } from "../renderer/colors.js";
+import { drawChar, drawFloatingString, drawString, COLS, ROWS, getDayPhase, getCharDimensions } from "../renderer/canvas.js";
+import { ENV_COLORS, NIGHT_COLORS } from "../renderer/colors.js";
 import { DECORATIONS, SURFACE_DECORATIONS } from "../data/decorations.js";
 
 // Dynamic constants
 let ROCK_ROW, SAND_ROW;
-const SURFACE_ROW = 1;
+const SURFACE_ROW = 2;
 const WATER_DENSITY = 0.06;
 const WATER_GLYPHS = ["~", ".", "\u00B0", "o"];
 const SURFACE_GLYPHS = ["~", "-", "="];
@@ -26,7 +26,7 @@ let surfaceJetCol = null;
 let surfaceBirdCols = [];
 let surfaceFlockCol = null;
 
-// New decoration positions
+// Achievement-unlocked decoration positions
 let clamCol = null;
 let shipwreckCol = null;
 let volcanoCol = null;
@@ -47,6 +47,22 @@ const MAX_BUBBLES = 30;
 const sparkles = [];
 const MAX_SPARKLES = 8;
 const surfaceSplashes = [];
+const bubblePops = [];
+
+// Shooting stars (night only)
+const shootingStars = [];
+const MAX_SHOOTING_STARS = 2;
+
+const MESSAGE_BOTTLE_MIN_GAP_MS = 45000;
+const MESSAGE_BOTTLE_SPAWN_CHANCE = 0.0012;
+const MESSAGE_BOTTLE_ROW = 1;
+
+let messageBottlesEnabled = false;
+let messageBottleReceiveEnabled = false;
+let messageBottle = null;
+let messageBottleSerial = 0;
+let lastMessageBottleSpawnAt = 0;
+let lastMessageBottleUpdateAt = 0;
 
 export function getSurfaceRow() {
   return SURFACE_ROW;
@@ -113,7 +129,7 @@ function generateAll() {
   for (let i = 0; i < moteCount; i++) {
     waterMotes.push({
       col: Math.floor(Math.random() * COLS),
-      row: 1 + Math.floor(Math.random() * Math.max(1, ROWS - 4)),
+      row: (SURFACE_ROW + 1) + Math.floor(Math.random() * Math.max(1, ROWS - SURFACE_ROW - 3)),
       phase: Math.random() * Math.PI * 2,
       speed: 0.25 + Math.random() * 0.45,
     });
@@ -210,9 +226,201 @@ function generateAll() {
     }
   }
 
-  // Clear bubbles and sparkles on resize
+  // Clear bubbles, sparkles, and shooting stars on resize
   bubbles.length = 0;
   sparkles.length = 0;
+  shootingStars.length = 0;
+  bubblePops.length = 0;
+}
+
+export function setMessageBottlesEnabled(enabled) {
+  messageBottlesEnabled = !!enabled;
+  if (!messageBottlesEnabled) {
+    messageBottle = null;
+  }
+}
+
+export function setMessageBottleReceiveEnabled(enabled) {
+  messageBottleReceiveEnabled = !!enabled;
+}
+
+export function getMessageBottleAtGrid(col, row) {
+  if (!messageBottle || row !== messageBottle.row) return null;
+  const startCol = Math.round(messageBottle.x);
+  if (col < startCol || col >= startCol + messageBottle.glyphs.length) return null;
+  return { id: messageBottle.id, mode: messageBottle.mode };
+}
+
+function pointInRect(col, row, left, top, width, height) {
+  return col >= left && col < left + width && row >= top && row < top + height;
+}
+
+export function getMajorDecorationAtGrid(col, row) {
+  ROCK_ROW = ROWS - 2;
+  if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return null;
+
+  if (hasAchievement("starter_tank")) {
+    for (const stalk of kelpStalks) {
+      const top = ROCK_ROW - stalk.height;
+      if (pointInRect(col, row, stalk.col - 2, top, 5, stalk.height)) {
+        return { name: "Kelp", col: stalk.col, row: Math.max(1, top) };
+      }
+    }
+  }
+
+  if (hasAchievement("reef_builder")) {
+    for (const cCol of coralPositions) {
+      const top = ROCK_ROW - CORAL.length;
+      if (pointInRect(col, row, cCol, top, CORAL[0].length, CORAL.length)) {
+        return { name: "Coral", col: cCol, row: Math.max(1, top) };
+      }
+    }
+  }
+
+  if (hasAchievement("collector")) {
+    for (const s of starfish) {
+      if (col === s.col && row === ROCK_ROW - 1) {
+        return { name: "Starfish", col: s.col, row: Math.max(1, ROCK_ROW - 2) };
+      }
+    }
+  }
+
+  if (hasAchievement("deep_diver") && chestCol !== null) {
+    const chestTop = ROCK_ROW - 2;
+    if (pointInRect(col, row, chestCol, chestTop, 4, 2)) {
+      return { name: "Treasure Chest", col: chestCol, row: Math.max(1, chestTop - 1) };
+    }
+  }
+
+  if (hasAchievement("marine_biologist") && clamCol !== null) {
+    const top = ROCK_ROW - DECORATIONS.clam.height;
+    if (pointInRect(col, row, clamCol, top, DECORATIONS.clam.width, DECORATIONS.clam.height)) {
+      return { name: "Clam", col: clamCol, row: Math.max(1, top - 1) };
+    }
+  }
+
+  if (hasAchievement("ocean_explorer") && shipwreckCol !== null) {
+    const top = ROCK_ROW - DECORATIONS.shipwreck.height;
+    if (pointInRect(col, row, shipwreckCol, top, DECORATIONS.shipwreck.width, DECORATIONS.shipwreck.height)) {
+      return { name: "Shipwreck", col: shipwreckCol, row: Math.max(1, top - 1) };
+    }
+  }
+
+  if (hasAchievement("reef_master") && volcanoCol !== null) {
+    const top = ROCK_ROW - DECORATIONS.volcano.height;
+    if (pointInRect(col, row, volcanoCol, top, DECORATIONS.volcano.width, DECORATIONS.volcano.height)) {
+      return { name: "Volcano", col: volcanoCol, row: Math.max(1, top - 1) };
+    }
+  }
+
+  if (hasAchievement("completionist") && tridentCol !== null) {
+    const top = ROCK_ROW - DECORATIONS.trident.height;
+    if (pointInRect(col, row, tridentCol, top, DECORATIONS.trident.width, DECORATIONS.trident.height)) {
+      return { name: "Trident", col: tridentCol, row: Math.max(1, top - 1) };
+    }
+  }
+
+  if (hasAchievement("typist") && keyboardCol !== null) {
+    const top = ROCK_ROW - DECORATIONS.keyboard.height;
+    if (pointInRect(col, row, keyboardCol, top, DECORATIONS.keyboard.width, DECORATIONS.keyboard.height)) {
+      return { name: "Keyboard Coral", col: keyboardCol, row: Math.max(1, top - 1) };
+    }
+  }
+
+  if (hasAchievement("clicker") && cursorCol !== null) {
+    const top = ROCK_ROW - DECORATIONS.cursor.height;
+    if (pointInRect(col, row, cursorCol, top, DECORATIONS.cursor.width, DECORATIONS.cursor.height)) {
+      return { name: "Cursor Arrow", col: cursorCol, row: Math.max(1, top - 1) };
+    }
+  }
+
+  if (hasAchievement("dj") && musicCol !== null) {
+    const top = ROCK_ROW - DECORATIONS.musicNotes.height;
+    if (pointInRect(col, row, musicCol, top, DECORATIONS.musicNotes.width, DECORATIONS.musicNotes.height)) {
+      return { name: "Music Notes", col: musicCol, row: Math.max(1, top - 1) };
+    }
+  }
+
+  if (hasAchievement("top_10") && trophyCol !== null) {
+    const top = ROCK_ROW - DECORATIONS.trophy.height;
+    if (pointInRect(col, row, trophyCol, top, DECORATIONS.trophy.width, DECORATIONS.trophy.height)) {
+      return { name: "Trophy", col: trophyCol, row: Math.max(1, top - 1) };
+    }
+  }
+
+  return null;
+}
+
+export function consumeMessageBottle(id) {
+  if (!messageBottle) return null;
+  if (typeof id === "number" && messageBottle.id !== id) return null;
+  const consumed = { id: messageBottle.id, mode: messageBottle.mode };
+  messageBottle = null;
+  return consumed;
+}
+
+function maybeSpawnMessageBottle(timestamp) {
+  if (!messageBottlesEnabled || messageBottle) return;
+  if (timestamp - lastMessageBottleSpawnAt < MESSAGE_BOTTLE_MIN_GAP_MS) return;
+  if (Math.random() > MESSAGE_BOTTLE_SPAWN_CHANCE) return;
+
+  spawnMessageBottle(timestamp);
+}
+
+function spawnMessageBottle(timestamp, forcedMode = null) {
+  if (messageBottle) return false;
+  const mode = forcedMode === "compose" || forcedMode === "receive"
+    ? forcedMode
+    : messageBottleReceiveEnabled && Math.random() < 0.5
+      ? "receive"
+      : "compose";
+  const fromLeft = Math.random() < 0.5;
+  messageBottle = {
+    id: ++messageBottleSerial,
+    mode,
+    row: MESSAGE_BOTTLE_ROW,
+    x: fromLeft ? -4 : COLS + 1,
+    dir: fromLeft ? 1 : -1,
+    speed: 2.2 + Math.random() * 1.2,
+    bobPhase: Math.random() * Math.PI * 2,
+    bobSpeed: 1.2 + Math.random() * 0.8,
+    glyphs: mode === "compose" ? ["[", "+", "]"] : ["[", "?", "]"],
+  };
+  lastMessageBottleSpawnAt = timestamp;
+  return true;
+}
+
+export function forceSpawnMessageBottle(mode = null) {
+  return spawnMessageBottle(performance.now(), mode);
+}
+
+function updateAndRenderMessageBottle(timestamp) {
+  if (!messageBottlesEnabled) return;
+
+  if (lastMessageBottleUpdateAt === 0) {
+    lastMessageBottleUpdateAt = timestamp;
+  }
+  const dt = Math.max(0, (timestamp - lastMessageBottleUpdateAt) / 1000);
+  lastMessageBottleUpdateAt = timestamp;
+
+  maybeSpawnMessageBottle(timestamp);
+  if (!messageBottle) return;
+
+  messageBottle.x += messageBottle.dir * messageBottle.speed * dt;
+  const width = messageBottle.glyphs.length;
+  if (messageBottle.dir > 0 && messageBottle.x > COLS + width) {
+    messageBottle = null;
+    return;
+  }
+  if (messageBottle.dir < 0 && messageBottle.x < -width - 1) {
+    messageBottle = null;
+    return;
+  }
+
+  const startCol = Math.round(messageBottle.x);
+  const color = messageBottle.mode === "compose" ? "rgba(255, 208, 140, 0.92)" : "rgba(214, 236, 255, 0.95)";
+  const bobPx = 3 + Math.sin((timestamp / 1000) * messageBottle.bobSpeed + messageBottle.bobPhase) * 1.2;
+  drawFloatingString(startCol, messageBottle.row, messageBottle.glyphs.join(""), color, bobPx);
 }
 
 // Initial generation
@@ -221,10 +429,8 @@ generateAll();
 // Re-initialize for new dimensions
 export function reinitEnvironment() {
   generateAll();
-}
-
-export function getRockRow() {
-  return ROWS - 2;
+  lastMessageBottleUpdateAt = 0;
+  messageBottle = null;
 }
 
 function renderDecoration(art, col, startRow, color) {
@@ -254,24 +460,63 @@ export function renderEnvironment(timestamp) {
     drawChar(col, SURFACE_ROW, glyph, ENV_COLORS.surface);
   }
 
-  // Surface/sky decorations (air band + surface line)
+  // Day/Night phase
+  const { dayness, sourceX, isNight } = getDayPhase();
+  const showDay = dayness > 0.3;
+
+  // Sun or moon glyph in sky row 1
+  const { charWidth: cw } = getCharDimensions();
+  const glyphCol = Math.max(0, Math.min(COLS - 1, Math.floor(sourceX / cw)));
+  if (dayness > 0.05) {
+    drawChar(glyphCol, 1, "*", NIGHT_COLORS.sunGlyph);
+  } else {
+    drawChar(glyphCol, 1, "(", NIGHT_COLORS.moonGlyph);
+  }
+
+  updateAndRenderMessageBottle(timestamp);
+
+  // Day-only: surface decorations
   const surfaceFrame = Math.floor(t * 2) % 2;
   const birdFrame = Math.floor(t * 4) % 2;
-  if (hasAchievement("harbor_pilot")) {
-    renderSurfaceDecoration(SURFACE_DECORATIONS.boat.frames, surfaceBoatCol, 0, surfaceFrame, ENV_COLORS.ui);
-  }
-  if (hasAchievement("jet_wake")) {
-    renderSurfaceDecoration(SURFACE_DECORATIONS.jetski.frames, surfaceJetCol, 0, surfaceFrame, ENV_COLORS.ui);
-  }
-  if (hasAchievement("gull_friend")) {
-    for (let i = 0; i < surfaceBirdCols.length; i++) {
-      const col = surfaceBirdCols[i];
-      const art = i % 2 === 0 ? SURFACE_DECORATIONS.gull.frames : SURFACE_DECORATIONS.tern.frames;
-      renderSurfaceDecoration(art, col, 0, birdFrame, ENV_COLORS.ui);
+  if (showDay) {
+    if (hasAchievement("harbor_pilot")) {
+      renderSurfaceDecoration(SURFACE_DECORATIONS.boat.frames, surfaceBoatCol, 0, surfaceFrame, ENV_COLORS.ui);
+    }
+    if (hasAchievement("jet_wake")) {
+      renderSurfaceDecoration(SURFACE_DECORATIONS.jetski.frames, surfaceJetCol, 0, surfaceFrame, ENV_COLORS.ui);
+    }
+    if (hasAchievement("gull_friend")) {
+      for (let i = 0; i < surfaceBirdCols.length; i++) {
+        const art = i % 2 === 0 ? SURFACE_DECORATIONS.gull.frames : SURFACE_DECORATIONS.tern.frames;
+        renderSurfaceDecoration(art, surfaceBirdCols[i], 0, birdFrame, ENV_COLORS.ui);
+      }
+    }
+    if (hasAchievement("sky_flock")) {
+      renderSurfaceDecoration(SURFACE_DECORATIONS.flock.frames, surfaceFlockCol, 0, birdFrame, ENV_COLORS.ui);
     }
   }
-  if (hasAchievement("sky_flock")) {
-    renderSurfaceDecoration(SURFACE_DECORATIONS.flock.frames, surfaceFlockCol, 0, birdFrame, ENV_COLORS.ui);
+
+  // Night-only: shooting stars
+  if (isNight) {
+    if (shootingStars.length < MAX_SHOOTING_STARS && Math.random() < 0.003) {
+      shootingStars.push({
+        col: 1 + Math.floor(Math.random() * (COLS - 8)),
+        life: 0,
+        maxLife: 40 + Math.floor(Math.random() * 30),
+      });
+    }
+    for (let i = shootingStars.length - 1; i >= 0; i--) {
+      const ss = shootingStars[i];
+      ss.life++;
+      if (ss.life >= ss.maxLife) { shootingStars.splice(i, 1); continue; }
+      const trailCol = ss.col + Math.floor((ss.life / ss.maxLife) * 6);
+      const trailRow = Math.floor(ss.life / ss.maxLife * 1.5);
+      if (trailCol < COLS && trailRow < 2) {
+        drawChar(trailCol,     trailRow, "*",  NIGHT_COLORS.shootingStar);
+        drawChar(trailCol - 1, trailRow, "-",  "rgba(220,230,255,0.50)");
+        drawChar(trailCol - 2, trailRow, ".",  "rgba(220,230,255,0.25)");
+      }
+    }
   }
 
   // Surface splashes
@@ -291,6 +536,18 @@ export function renderEnvironment(timestamp) {
     }
   }
 
+  // Bubble pops (short-lived)
+  for (let i = bubblePops.length - 1; i >= 0; i--) {
+    const p = bubblePops[i];
+    p.life++;
+    if (p.life > p.maxLife) {
+      bubblePops.splice(i, 1);
+      continue;
+    }
+    const ch = p.life % 4 < 2 ? "*" : "+";
+    drawChar(p.col, p.row, ch, ENV_COLORS.bubble);
+  }
+
   // Water particles - slow drift
   waterDriftOffset = (timestamp / 3000) % COLS;
   const waterColor = hasAchievement("rare_finder")
@@ -303,18 +560,15 @@ export function renderEnvironment(timestamp) {
     }
   }
 
-  // Surface ripple accents
-  for (let col = 0; col < COLS; col++) {
-    if ((col + Math.floor(t * 3)) % 7 !== 0) continue;
-    const glyph = SURFACE_GLYPHS[(col + Math.floor(t * 2)) % SURFACE_GLYPHS.length];
-    drawChar(col, 0, glyph, "rgba(180, 235, 255, 0.22)");
-  }
-
   // Slow drifting motes for depth.
   for (const mote of waterMotes) {
     const x = (mote.col + Math.sin(t * mote.speed + mote.phase) * 1.6 + COLS) % COLS;
     const y = mote.row + Math.sin(t * (mote.speed * 0.6) + mote.phase) * 0.6;
-    drawChar(Math.round(x), Math.max(1, Math.round(y)), "·", "rgba(210, 245, 255, 0.22)");
+    drawChar(Math.round(x), Math.max(SURFACE_ROW + 1, Math.round(y)), "·",
+      dayness > 0.5 ? NIGHT_COLORS.moteDay
+        : dayness > 0
+          ? `rgba(${Math.round(60+dayness*150)},${Math.round(210-dayness*35)},${Math.round(140+dayness*115)},0.22)`
+          : NIGHT_COLORS.moteNight);
   }
 
   // Shimmering water particles (completionist)
@@ -494,7 +748,13 @@ export function renderEnvironment(timestamp) {
     const b = bubbles[i];
     b.y -= b.speed;
     b.x += b.drift * 0.05;
-    if (b.y < 1) {
+    if (b.y <= SURFACE_ROW + 0.2) {
+      bubblePops.push({
+        col: Math.round(b.x),
+        row: SURFACE_ROW,
+        life: 0,
+        maxLife: 6 + Math.floor(Math.random() * 6),
+      });
       bubbles.splice(i, 1);
       continue;
     }

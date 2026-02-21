@@ -1,3 +1,5 @@
+//! Audio detection via Windows WASAPI peak meter (polls every 1 second).
+//! Returns false unconditionally on non-Windows platforms (macOS/Linux).
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 

@@ -53,6 +53,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "dirs 5.0.1",
+ "once_cell",
  "rand 0.8.5",
  "raw-window-handle",
  "rdev",

@@ -14,11 +14,11 @@ const MIRROR_MAP = {
   "]": "[",
 };
 
-export function mirrorChar(ch) {
+function mirrorChar(ch) {
   return MIRROR_MAP[ch] || ch;
 }
 
-export function mirrorLine(line) {
+function mirrorLine(line) {
   let result = "";
   for (let i = line.length - 1; i >= 0; i--) {
     result += mirrorChar(line[i]);
@@ -26,12 +26,12 @@ export function mirrorLine(line) {
   return result;
 }
 
-export function mirrorFrame(frame) {
+function mirrorFrame(frame) {
   return frame.map(mirrorLine);
 }
 
 // Parse a creature definition into precomputed frame arrays
-export function parseCreature(def) {
+function parseCreature(def) {
   const frames = def.frames.map((frame) => {
     // Each frame is an array of strings (rows)
     // Pad all rows to the creature's width

@@ -1,10 +1,11 @@
 // ASCII Reef - Overlay bootstrap + Tauri event listeners
 
-import { initCanvas, startRenderLoop, drawChar, drawString, drawStringBg, drawBg, resizeCanvas, getCharDimensions, COLS, ROWS } from "./renderer/canvas.js";
+import { initCanvas, startRenderLoop, drawChar, drawString, drawStringBg, drawBg, resizeCanvas, setDayNightCycle, getCharDimensions, COLS, ROWS } from "./renderer/canvas.js";
 import { parseAllCreatures } from "./renderer/sprites.js";
 import { ENV_COLORS, RARITY_COLORS, PROGRESS_COLORS } from "./renderer/colors.js";
-import { renderEnvironment, reinitEnvironment, setUnlockedAchievements } from "./simulation/environment.js";
+import { consumeMessageBottle, forceSpawnMessageBottle, getMajorDecorationAtGrid, getMessageBottleAtGrid, renderEnvironment, reinitEnvironment, setMessageBottleReceiveEnabled, setMessageBottlesEnabled, setUnlockedAchievements } from "./simulation/environment.js";
 import { renderDiscovery, triggerDiscoveryBurst, triggerAchievementToast } from "./simulation/discovery.js";
+import { addGlobalBottleMessage, getRandomGlobalBottleMessage, hasAnyGlobalBottleMessages, initMessageBottles, trashGlobalBottleMessage } from "./simulation/messageBottles.js";
 import { computeUnlocked, diffAchievements, getAchievements } from "./simulation/achievements.js";
 import {
   initTank,
@@ -21,7 +22,6 @@ import {
 import {
   initLeaderboard,
   submitScore,
-  renderLeaderboardRank,
   getMyRank,
   setLeaderboardEnabled,
 } from "./simulation/leaderboard.js";
@@ -33,20 +33,68 @@ const { getCurrentWindow } = window.__TAURI__.window;
 
 const appWindow = getCurrentWindow();
 
+// Must match SIZE_PRESETS in src-tauri/src/tray.rs
+const SIZE_PRESETS = [
+  [40, 16], // Small
+  [60, 16], // Medium
+  [60, 24], // Medium Tall
+  [80, 16], // Large
+  [80, 24], // Large Tall
+  [100, 16], // Wide
+  [100, 24], // Wide Tall
+  [120, 24], // Extra Wide
+];
+
 let allSprites = {};
 let lastTimestamp = 0;
 let isFirstRun = false;
-let firstRunTextVisible = true;
+let tutorialVisible = true;
 let energyDisplay = { typing: 0, click: 0, audio: 0, threshold: 40 };
 let lastDiscovery = null;
 let currentAchievements = new Set();
 let sendScoresEnabled = true;
 let soundEnabled = false;
 let musicVolume = 0.08;
-let sizeIndex = 2;
+let sizeIndex = 1;
+let dayNightCycle = "computer";
 let lastCollection = {};
+let closeBehavior = "ask";
+let messageBottlesEnabled = false;
+let messageBottlesPrompted = false;
+let messageBottleBusy = false;
+let helpBtnEl = null;
+let stateAppliedOnce = false;
+
+function syncMessageBottleSpawnState() {
+  setMessageBottlesEnabled(messageBottlesEnabled || !messageBottlesPrompted);
+}
+
+async function refreshMessageBottleReceiveState() {
+  if (!messageBottlesEnabled) {
+    setMessageBottleReceiveEnabled(false);
+    return;
+  }
+  if (!initMessageBottles()) {
+    setMessageBottleReceiveEnabled(false);
+    return;
+  }
+  try {
+    const hasAny = await hasAnyGlobalBottleMessages();
+    setMessageBottleReceiveEnabled(hasAny);
+  } catch {
+    setMessageBottleReceiveEnabled(false);
+  }
+}
+
+function isTypingTarget(target) {
+  if (!target) return false;
+  const tag = target.tagName?.toLowerCase?.();
+  if (tag === "input" || tag === "textarea" || tag === "select") return true;
+  return !!target.isContentEditable;
+}
 
 let fishLabelToast = null;
+let hoverLabelToast = null;
 
 const CLICK_DRAG_THRESHOLD = 6;
 const CLICK_MAX_DURATION_MS = 250;
@@ -92,17 +140,43 @@ function isCollectionProgressCell(col, row) {
 }
 
 function showFishLabel(creature) {
-  const text = creature.sprite.name;
   const color = RARITY_COLORS[creature.rarity] || ENV_COLORS.ui;
-  const row = clamp(creature.row - 1, 1, ROWS - 3);
-  const col = clamp(creature.col, 1, Math.max(1, COLS - text.length - 1));
+  showWorldLabel(creature.sprite.name, creature.col, creature.row - 1, color);
+}
+
+function showWorldLabel(text, col, row, color = ENV_COLORS.ui) {
   fishLabelToast = {
     text,
     color,
-    row,
-    col,
+    row: clamp(row, 1, ROWS - 3),
+    col: clamp(col, 1, Math.max(1, COLS - text.length - 1)),
     expiresAt: performance.now() + LABEL_DURATION_MS,
   };
+}
+
+function getUiHoverHintAtGrid(col, row) {
+  if (isCollectionProgressCell(col, row)) return "Collection Progress";
+
+  if (getMessageBottleAtGrid(col, row)) return "Message Bottle";
+
+  if (row === 0) {
+    const barWidth = COLS <= 45 ? 4 : COLS <= 65 ? 6 : 8;
+    const barGap = COLS <= 45 ? 1 : 2;
+    const bars = [
+      { name: "Typing Energy" },
+      { name: "Click Energy" },
+      { name: "Audio Energy" },
+    ];
+    const barLen = barWidth + 3;
+    let nextCol = 1;
+    for (const bar of bars) {
+      if (nextCol + barLen > COLS - 1) break;
+      if (col >= nextCol && col < nextCol + barLen) return bar.name;
+      nextCol += barLen + barGap;
+    }
+  }
+
+  return null;
 }
 
 function wrapText(text, maxWidth) {
@@ -127,6 +201,176 @@ function drawCenteredTextBlock(lines, startRow, color, bg) {
     const line = lines[i];
     const col = Math.floor((COLS - line.length) / 2);
     drawStringBg(col, startRow + i, line, color, bg);
+  }
+}
+
+function drawCallout(text, textCol, textRow, arrowCol, arrowRow, arrowChar, color, bg) {
+  if (text) {
+    drawStringBg(textCol, textRow, text, color, bg);
+  }
+  if (typeof arrowCol === "number" && typeof arrowRow === "number" && arrowChar) {
+    drawChar(arrowCol, arrowRow, arrowChar, color);
+  }
+}
+
+function getMessageBottleOverlay() {
+  return document.getElementById("message-bottle-overlay");
+}
+
+function closeMessageBottleModal() {
+  const overlay = getMessageBottleOverlay();
+  if (!overlay) return;
+  overlay.classList.add("hidden");
+  overlay.innerHTML = "";
+}
+
+function showMessageBottleModal(contentHtml, bindHandlers) {
+  const overlay = getMessageBottleOverlay();
+  if (!overlay) return;
+  overlay.innerHTML = `<div class="paper-modal">${contentHtml}</div>`;
+  overlay.classList.remove("hidden");
+  bindHandlers?.(overlay);
+}
+
+async function ensureMessageBottleOptIn() {
+  if (messageBottlesPrompted) return messageBottlesEnabled;
+  const accepted = window.confirm(
+    "Enable Messages in a Bottle?\n\nYou may occasionally read or send a global message shared through Firebase."
+  );
+  messageBottlesPrompted = true;
+  messageBottlesEnabled = accepted;
+  syncMessageBottleSpawnState();
+  await refreshMessageBottleReceiveState();
+  try {
+    await invoke("set_message_bottles_preferences", {
+      enabled: accepted,
+      prompted: true,
+    });
+  } catch {
+    // Fallback
+  }
+  return accepted;
+}
+
+function showInfoMessageBottleModal(title, text) {
+  showMessageBottleModal(
+    `
+      <h2>${title}</h2>
+      <div class="paper-message-text">${text}</div>
+      <div class="paper-actions">
+        <button id="bottle-info-ok" type="button">OK</button>
+      </div>
+    `,
+    (overlay) => {
+      overlay.querySelector("#bottle-info-ok")?.addEventListener("click", () => {
+        closeMessageBottleModal();
+      });
+    }
+  );
+}
+
+async function handleComposeBottle() {
+  showMessageBottleModal(
+    `
+      <h2>Write A Message</h2>
+      <textarea id="bottle-compose-input" maxlength="280" placeholder="Type a short note to send along..."></textarea>
+      <div class="paper-actions">
+        <button id="bottle-compose-cancel" type="button">Cancel</button>
+        <button id="bottle-compose-send" type="button">Send Along</button>
+      </div>
+    `,
+    (overlay) => {
+      overlay.querySelector("#bottle-compose-cancel")?.addEventListener("click", () => {
+        closeMessageBottleModal();
+      });
+      overlay.querySelector("#bottle-compose-send")?.addEventListener("click", async () => {
+        const input = overlay.querySelector("#bottle-compose-input");
+        const message = (input?.value || "").trim();
+        if (!message) return;
+        try {
+          await addGlobalBottleMessage(message);
+          setMessageBottleReceiveEnabled(true);
+          closeMessageBottleModal();
+        } catch (err) {
+          const detail = err?.code || err?.message || "unknown_error";
+          showInfoMessageBottleModal("Unable To Send", `Firebase error: ${detail}`);
+        }
+      });
+    }
+  );
+}
+
+async function handleReceiveBottle() {
+  let received = null;
+  try {
+    received = await getRandomGlobalBottleMessage();
+  } catch {
+    received = null;
+  }
+  if (!received) {
+    setMessageBottleReceiveEnabled(false);
+    showInfoMessageBottleModal("Empty Bottle", "No shared messages found right now.");
+    return;
+  }
+
+  const escaped = received.text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  showMessageBottleModal(
+    `
+      <h2>Message Received</h2>
+      <div class="paper-message-text">${escaped}</div>
+      <div class="paper-actions">
+        <button id="bottle-send-along" type="button">Send Along</button>
+        <button id="bottle-trash" class="danger" type="button">Trash Message</button>
+      </div>
+    `,
+    (overlay) => {
+      overlay.querySelector("#bottle-send-along")?.addEventListener("click", async () => {
+        // Re-insert with a fresh timestamp so it recirculates to other players,
+        // then remove the original to avoid duplicates accumulating.
+        try {
+          await addGlobalBottleMessage(received.text);
+          await trashGlobalBottleMessage(received.id);
+        } catch {
+          // If re-add fails the original remains in the db — still fine.
+        }
+        closeMessageBottleModal();
+      });
+      overlay.querySelector("#bottle-trash")?.addEventListener("click", async () => {
+        try {
+          await trashGlobalBottleMessage(received.id);
+        } catch {
+          // ignore delete errors
+        }
+        await refreshMessageBottleReceiveState();
+        closeMessageBottleModal();
+      });
+    }
+  );
+}
+
+async function handleMessageBottleClick(gridCol, gridRow) {
+  if (messageBottleBusy) return false;
+  const hit = getMessageBottleAtGrid(gridCol, gridRow);
+  if (!hit) return false;
+  const consumed = consumeMessageBottle(hit.id);
+  if (!consumed) return true;
+
+  messageBottleBusy = true;
+  try {
+    const allowed = await ensureMessageBottleOptIn();
+    if (!allowed) return true;
+    if (!initMessageBottles()) {
+      showInfoMessageBottleModal("Feature Offline", "Firebase is unavailable right now.");
+      return true;
+    }
+    if (consumed.mode === "compose") {
+      await handleComposeBottle();
+      return true;
+    }
+    await handleReceiveBottle();
+    return true;
+  } finally {
+    messageBottleBusy = false;
   }
 }
 
@@ -193,6 +437,22 @@ function playUnlockSfx(rarity) {
   }
 }
 
+function setFirstRunState(collection) {
+  const empty = Object.keys(collection || {}).length === 0;
+  isFirstRun = empty;
+  tutorialVisible = empty;
+  updateHelpButtonState();
+}
+
+function updateHelpButtonState() {
+  if (!helpBtnEl) return;
+  if (tutorialVisible) {
+    helpBtnEl.classList.add("active");
+  } else {
+    helpBtnEl.classList.remove("active");
+  }
+}
+
 async function init() {
   // Parse creature sprites
   allSprites = parseAllCreatures(creaturesData);
@@ -203,12 +463,11 @@ async function init() {
 
   initAudio();
 
-  // Request initial state from Rust backend
-  try {
-    const state = await invoke("get_state");
+  function applyState(state, { initial }) {
     const collection = state.collection || {};
-    isFirstRun = Object.keys(collection).length === 0;
     lastCollection = collection;
+    setFirstRunState(collection);
+
     if (typeof state.sendScores === "boolean") {
       sendScoresEnabled = state.sendScores;
       setLeaderboardEnabled(sendScoresEnabled);
@@ -219,37 +478,78 @@ async function init() {
     if (typeof state.musicVolume === "number") {
       musicVolume = state.musicVolume;
     }
+    if (typeof state.closeBehavior === "string") {
+      closeBehavior = state.closeBehavior;
+    }
     if (typeof state.sizeIndex === "number") {
       sizeIndex = state.sizeIndex;
+      const preset = SIZE_PRESETS[sizeIndex];
+      if (preset) {
+        resizeCanvas(preset[0], preset[1]);
+        reinitEnvironment();
+      }
     }
+    if (typeof state.dayNightCycle === "string") {
+      dayNightCycle = state.dayNightCycle;
+      setDayNightCycle(dayNightCycle);
+    }
+    if (typeof state.messageBottlesEnabled === "boolean") {
+      messageBottlesEnabled = state.messageBottlesEnabled;
+    }
+    if (typeof state.messageBottlesPrompted === "boolean") {
+      messageBottlesPrompted = state.messageBottlesPrompted;
+    }
+    syncMessageBottleSpawnState();
+    refreshMessageBottleReceiveState();
+
     if (sendScoresEnabled) {
       initLeaderboard();
     }
     applySoundSettings();
-    initTank(allSprites, collection);
+
+    if (initial) {
+      initTank(allSprites, collection);
+    } else {
+      updateCollection(collection);
+      clearCreatures();
+    }
+
     if (state.poolEnergy) {
       energyDisplay.typing = state.poolEnergy.typing || 0;
       energyDisplay.click = state.poolEnergy.click || 0;
       energyDisplay.audio = state.poolEnergy.audio || 0;
     }
 
-    // Compute initial achievements (no toasts on load)
     updateAchievements(collection, false);
 
-    // Submit initial score to leaderboard
     if (sendScoresEnabled && Object.keys(collection).length > 0) {
       const score = calculateScore();
       const unique = getUniqueCount();
       submitScore(score, unique);
     }
-  } catch {
-    isFirstRun = true;
-    initTank(allSprites, {});
-    lastCollection = {};
-    updateAchievements({}, false);
-    if (sendScoresEnabled) {
-      initLeaderboard();
+
+    stateAppliedOnce = true;
+  }
+
+  async function fetchStateWithRetry(attemptsLeft) {
+    try {
+      const state = await invoke("get_state");
+      applyState(state, { initial: !stateAppliedOnce });
+      return true;
+    } catch {
+      if (attemptsLeft <= 0) return false;
+      setTimeout(() => {
+        fetchStateWithRetry(attemptsLeft - 1);
+      }, 500);
+      return false;
     }
+  }
+
+  // Request initial state from Rust backend
+  const gotState = await fetchStateWithRetry(3);
+  if (!gotState) {
+    // Keep existing state without forcing first-run if backend is slow.
+    initTank(allSprites, lastCollection || {});
     applySoundSettings();
   }
 
@@ -267,7 +567,8 @@ async function init() {
     const sprite = allSprites[creatureId];
     if (!sprite) return;
 
-    firstRunTextVisible = false;
+    tutorialVisible = false;
+    updateHelpButtonState();
     lastDiscovery = {
       name: sprite.name,
       rarity: sprite.rarity,
@@ -284,6 +585,7 @@ async function init() {
       // Fallback
     }
     lastCollection = col;
+    setFirstRunState(col);
 
     // Check for new achievements (show toasts)
     updateAchievements(col, true);
@@ -336,6 +638,30 @@ async function init() {
     }
   });
 
+  listen("day-night-cycle", (event) => {
+    if (typeof event.payload.cycle === "string") {
+      dayNightCycle = event.payload.cycle;
+      setDayNightCycle(dayNightCycle);
+    }
+  });
+
+  listen("close-behavior", (event) => {
+    if (typeof event.payload.behavior === "string") {
+      closeBehavior = event.payload.behavior;
+    }
+  });
+
+  listen("message-bottles-settings", (event) => {
+    if (typeof event.payload.enabled === "boolean") {
+      messageBottlesEnabled = event.payload.enabled;
+    }
+    if (event.payload.prompted === true) {
+      messageBottlesPrompted = true;
+    }
+    syncMessageBottleSpawnState();
+    refreshMessageBottleReceiveState();
+  });
+
   // Listen for tank resize events from tray menu
   listen("resize-tank", (event) => {
     const { cols, rows } = event.payload;
@@ -357,22 +683,70 @@ async function init() {
     lastCollection = col;
     updateAchievements(col, false);
     clearCreatures();
-    isFirstRun = true;
-    firstRunTextVisible = true;
+    setFirstRunState(col);
   });
 
-  // Close button hides window to tray
-  document.getElementById("close-btn").addEventListener("click", async (e) => {
-    e.stopPropagation();
+  async function performCloseAction(behavior) {
+    if (behavior === "close") {
+      try {
+        await invoke("quit_app");
+      } catch {
+        try {
+          appWindow.close();
+        } catch {
+          // Fallback
+        }
+      }
+      return;
+    }
     try {
       await invoke("hide_window");
     } catch {
       // Fallback
     }
+  }
+
+  async function promptCloseBehavior() {
+    const message = "When you press the X, should ASCII Reef close completely or hide and keep earning progress?";
+    try {
+      const dialog = window.__TAURI__?.dialog;
+      if (dialog?.confirm) {
+        const shouldClose = await dialog.confirm(message, {
+          title: "Close Behavior",
+          okLabel: "Close App",
+          cancelLabel: "Hide & Keep Progress",
+        });
+        return shouldClose ? "close" : "hide";
+      }
+    } catch {
+      // Fall back to browser confirm
+    }
+
+    const shouldClose = window.confirm(`${message}\n\nOK = Close App\nCancel = Hide & Keep Progress`);
+    return shouldClose ? "close" : "hide";
+  }
+
+  // Close button hides window to tray or closes based on preference
+  document.getElementById("close-btn").addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (closeBehavior === "ask") {
+      const choice = await promptCloseBehavior();
+      closeBehavior = choice;
+      try {
+        await invoke("set_close_behavior", { behavior: choice });
+      } catch {
+        // Fallback
+      }
+      await performCloseAction(choice);
+      return;
+    }
+
+    await performCloseAction(closeBehavior);
   });
 
   const dragOverlay = document.getElementById("drag-overlay");
   let pointerState = null;
+  let hoverGridPos = null;
 
   dragOverlay.addEventListener("mousedown", (event) => {
     if (event.button !== 0) return;
@@ -388,6 +762,7 @@ async function init() {
   });
 
   dragOverlay.addEventListener("mousemove", (event) => {
+    hoverGridPos = getGridPositionFromPointer(event);
     if (!pointerState || pointerState.didDrag) return;
 
     const distance = Math.hypot(event.clientX - pointerState.startX, event.clientY - pointerState.startY);
@@ -408,10 +783,18 @@ async function init() {
       if (isCollectionProgressCell(col, row)) {
         invoke("open_collection");
       } else {
-        const creature = getCreatureAtGrid(col, row);
-        if (creature) {
-          showFishLabel(creature);
-        }
+        handleMessageBottleClick(col, row).then((handled) => {
+          if (handled) return;
+          const creature = getCreatureAtGrid(col, row);
+          if (creature) {
+            showFishLabel(creature);
+            return;
+          }
+          const decoration = getMajorDecorationAtGrid(col, row);
+          if (decoration) {
+            showWorldLabel(decoration.name, decoration.col, decoration.row, ENV_COLORS.ui);
+          }
+        });
       }
     }
 
@@ -419,9 +802,28 @@ async function init() {
   });
 
   dragOverlay.addEventListener("mouseleave", () => {
+    hoverGridPos = null;
+    hoverLabelToast = null;
     if (pointerState && !pointerState.didDrag) {
       pointerState = null;
     }
+  });
+
+  const bottleOverlay = getMessageBottleOverlay();
+  if (bottleOverlay) {
+    bottleOverlay.addEventListener("click", (event) => {
+      if (event.target === bottleOverlay) {
+        closeMessageBottleModal();
+      }
+    });
+  }
+
+  // Hidden debug hotkey: apostrophe spawns a bottle immediately.
+  window.addEventListener("keydown", (event) => {
+    if (event.repeat) return;
+    if (isTypingTarget(event.target)) return;
+    if (event.key !== "'") return;
+    forceSpawnMessageBottle();
   });
 
   // Optional collection button (top-right)
@@ -444,6 +846,38 @@ async function init() {
     });
   }
 
+  // Optional settings button (top-right)
+  const settingsBtn = document.getElementById("settings-btn");
+  if (settingsBtn) {
+    let settingsOpening = false;
+    settingsBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (settingsOpening) return;
+
+      settingsOpening = true;
+      try {
+        await invoke("open_settings");
+      } catch {
+        // Fallback
+      } finally {
+        settingsOpening = false;
+      }
+    });
+  }
+
+  // Optional help button (top-right)
+  helpBtnEl = document.getElementById("help-btn");
+  if (helpBtnEl) {
+    helpBtnEl.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      tutorialVisible = !tutorialVisible;
+      updateHelpButtonState();
+    });
+    updateHelpButtonState();
+  }
+
   // Start render loop
   startRenderLoop((timestamp) => {
     const delta = lastTimestamp === 0 ? 0 : (timestamp - lastTimestamp) / 1000;
@@ -459,27 +893,118 @@ async function init() {
     // 3. Discovery effects (on top)
     renderDiscovery(timestamp);
 
-    // 4. Leaderboard rank display
-    renderLeaderboardRank(timestamp);
-
     const uiBg = "rgba(0, 0, 0, 0.5)";
 
-    // 5. First-run welcome text
-    if (isFirstRun && firstRunTextVisible) {
-      const text = "Passively unlock fish every time you Click, Tap, or Listen to anything. Nothing is logged. Score is sent with no identifying information.";
-      const minCols = 50;
-      const minRows = 12;
-      if (COLS >= minCols && ROWS >= minRows) {
-        const maxWidth = Math.min(COLS - 4, 80);
-        const lines = wrapText(text, maxWidth);
-        const maxLines = Math.min(4, ROWS - 6);
-        const visible = lines.slice(0, maxLines);
-        const startRow = Math.floor(ROWS / 2) - Math.floor(visible.length / 2);
-        drawCenteredTextBlock(visible, startRow, ENV_COLORS.ui, uiBg);
+    const topRightReserved = 34; // leave room for [Collection] + [Settings] + [?] + [X]
+
+    // 5. First-run welcome + callouts
+    if (tutorialVisible) {
+      const maxWidth = Math.min(COLS - 4, 80);
+      const calloutColor = "rgba(220, 235, 255, 0.6)";
+
+      // Small layouts: compact tutorial only
+      if (COLS < 50 || ROWS < 12) {
+        const compact = [
+          "ASCII Reef",
+          "Type, click, or audio = fish",
+        ];
+        const wrapped = compact.flatMap((line) => wrapText(line, Math.max(10, maxWidth)));
+        const startRow = Math.max(1, Math.floor(ROWS / 2) - Math.floor(wrapped.length / 2));
+        drawCenteredTextBlock(wrapped, startRow, ENV_COLORS.ui, uiBg);
+      } else {
+        const introLines = [
+          "Welcome to ASCII Reef.",
+          "You unlock fish by typing, clicking, or playing audio.",
+          "Nothing personal is stored. Scores are anonymous.",
+        ];
+        const wrapped = introLines.flatMap((line) => wrapText(line, maxWidth));
+        const startRow = Math.max(2, Math.floor(ROWS / 2) - Math.floor(wrapped.length / 2) - 1);
+        const introEnd = startRow + wrapped.length - 1;
+        drawCenteredTextBlock(wrapped, startRow, ENV_COLORS.ui, uiBg);
+
+        const isRowFree = (row) => row > 0 && (row < startRow || row > introEnd);
+        const allowAllCallouts = COLS >= 60 && ROWS >= 16;
+        const allowTopCallouts = COLS >= 60 && ROWS >= 14;
+        const useCompactCallouts = COLS < 70 || ROWS < 18;
+
+        // Energy bars (top-left)
+        if (allowTopCallouts && isRowFree(2) && isRowFree(3)) {
+          const energyLine1 = "T typing, C clicks, A audio";
+          const energyLine2 = useCompactCallouts
+            ? "Fill bars to unlock fish"
+            : "Fill the bars to unlock fish faster";
+          const energyArrowCol = Math.min(COLS - 2, energyLine1.length + 1);
+          drawCallout(energyLine1, 1, 2, energyArrowCol, 1, "^", calloutColor, uiBg);
+          drawCallout(energyLine2, 1, 3, null, null, null, calloutColor, uiBg);
+        }
+
+        // Collection/Settings buttons (top-right)
+        if (allowTopCallouts && isRowFree(2) && isRowFree(3)) {
+          const menuLine1 = useCompactCallouts
+            ? "Collection: species + counts"
+            : "Collection: every species, rarity, and counts";
+          const menuLine2 = useCompactCallouts
+            ? "Settings: audio, size, scores"
+            : "Settings: audio, size, score sharing";
+          const menuCol = Math.max(1, COLS - menuLine1.length - 1);
+          const menuArrowCol = Math.max(1, COLS - Math.max(6, topRightReserved - 2));
+          drawCallout(menuLine1, menuCol, 2, menuArrowCol, 1, "^", calloutColor, uiBg);
+          drawCallout(menuLine2, Math.max(1, COLS - menuLine2.length - 1), 3, null, null, null, calloutColor, uiBg);
+        }
+
+        // Close button (top-right)
+        if (allowAllCallouts && isRowFree(6)) {
+          const closeText = useCompactCallouts
+            ? "Close: hide or quit"
+            : "Close: hide or quit (you choose on first click)";
+          const closeCol = Math.max(1, COLS - closeText.length - 1);
+          drawCallout(closeText, closeCol, 6, COLS - 2, 1, "^", calloutColor, uiBg);
+        }
+
+        // Score (bottom-left on rock line)
+        const scoreRow = ROWS - 3;
+        if (allowAllCallouts && isRowFree(scoreRow)) {
+          const scoreLine1 = useCompactCallouts
+            ? "Score: value + rank"
+            : "Score: total fish value + global rank";
+          const scoreLine2 = useCompactCallouts
+            ? "Toggle scores in Settings"
+            : "Disable scores in Settings anytime";
+          drawCallout(scoreLine1, 1, scoreRow, 6, ROWS - 2, "^", calloutColor, uiBg);
+          if (isRowFree(scoreRow - 1)) {
+            drawCallout(scoreLine2, 1, scoreRow - 1, null, null, null, calloutColor, uiBg);
+          }
+        }
+
+        // Collection progress (bottom-right on rock line)
+        const progressRow = ROWS - 3;
+        if (allowAllCallouts && isRowFree(progressRow)) {
+          const progressText = useCompactCallouts
+            ? "Progress: owned/total"
+            : "Collection progress: owned/total";
+          const progressCol = Math.max(1, COLS - progressText.length - 1);
+          drawCallout(progressText, progressCol, progressRow, COLS - 4, ROWS - 2, "^", calloutColor, uiBg);
+        }
+
+        // Click fish hint (center)
+        if (allowAllCallouts) {
+          const clickText = "Click a fish for its name";
+          const clickRow = Math.min(ROWS - 5, introEnd + 2);
+          if (isRowFree(clickRow)) {
+            drawCallout(
+              clickText,
+              Math.max(1, Math.floor((COLS - clickText.length) / 2)),
+              clickRow,
+              Math.floor(COLS / 2),
+              Math.min(ROWS - 4, clickRow + 1),
+              "v",
+              calloutColor,
+              uiBg
+            );
+          }
+        }
       }
     }
-
-    const topRightReserved = 16; // leave room for [Collection] + [X]
 
     // 6. Three energy bars (top-left, scaled down on smaller aquariums)
     const barWidth = COLS <= 45 ? 4 : COLS <= 65 ? 6 : 8;
@@ -514,7 +1039,28 @@ async function init() {
       fishLabelToast = null;
     }
 
-    // 8. Last discovery: sprite preview + name
+    // 8. Hover hint for UI regions
+    if (hoverGridPos && !pointerState) {
+      const hoverText = getUiHoverHintAtGrid(hoverGridPos.col, hoverGridPos.row);
+      if (hoverText) {
+        hoverLabelToast = {
+          text: hoverText,
+          color: ENV_COLORS.ui,
+          row: clamp(hoverGridPos.row - 1, 1, ROWS - 3),
+          col: clamp(hoverGridPos.col, 1, Math.max(1, COLS - hoverText.length - 1)),
+          expiresAt: timestamp + 120,
+        };
+      } else {
+        hoverLabelToast = null;
+      }
+    }
+    if (hoverLabelToast && timestamp <= hoverLabelToast.expiresAt && !fishLabelToast) {
+      drawStringBg(hoverLabelToast.col, hoverLabelToast.row, hoverLabelToast.text, hoverLabelToast.color, uiBg);
+    } else if (hoverLabelToast && timestamp > hoverLabelToast.expiresAt) {
+      hoverLabelToast = null;
+    }
+
+    // 9. Last discovery: sprite preview + name
     if (lastDiscovery) {
       const color = RARITY_COLORS[lastDiscovery.rarity] || ENV_COLORS.ui;
       const spriteText = lastDiscovery.sprite ? `${lastDiscovery.sprite} ` : "";

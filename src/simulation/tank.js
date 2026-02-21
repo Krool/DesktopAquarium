@@ -5,10 +5,14 @@ import { drawStringBg, COLS, ROWS } from "../renderer/canvas.js";
 import { ENV_COLORS, DISPLAY_WEIGHTS, SCORE_VALUES } from "../renderer/colors.js";
 import { getMyRank, getLeaderboardEnabled } from "./leaderboard.js";
 
-const SOFT_TARGET = 9;
-const HARD_CAP = 12;
-const SPAWN_MIN = 6000; // 6 seconds
+const SPAWN_MIN = 6000; // 6 seconds (only enforced near cap)
 const SPAWN_MAX = 10000; // 10 seconds
+const SPAWN_FILL_DELAY = 1200; // fast fill below threshold
+
+function getSizeCap() {
+  // Scale with tank area. Clamp to [5, 28].
+  return Math.min(28, Math.max(5, Math.floor((COLS * ROWS) / 150)));
+}
 
 let creatures = []; // Active CreatureInstance[]
 let allSprites = {}; // id -> parsed sprite def
@@ -73,6 +77,19 @@ function getRenderOrderValue(creature) {
   return order[creature.sprite.category] || 0;
 }
 
+function getRenderDepth(creature) {
+  return creature.row + creature.sprite.height;
+}
+
+function compareRenderOrder(a, b) {
+  const depthA = getRenderDepth(a);
+  const depthB = getRenderDepth(b);
+  if (depthA !== depthB) return depthA - depthB;
+  const categoryDiff = getRenderOrderValue(a) - getRenderOrderValue(b);
+  if (categoryDiff !== 0) return categoryDiff;
+  return a.id.localeCompare(b.id);
+}
+
 function isCreatureHit(creature, col, row) {
   if (col < creature.col || row < creature.row) return false;
   const localCol = col - creature.col;
@@ -82,7 +99,8 @@ function isCreatureHit(creature, col, row) {
   const frames = creature.direction === -1 ? creature.sprite.mirroredFrames : creature.sprite.frames;
   const frame = frames[creature.frameIndex] || frames[0];
   if (!frame || !frame[localRow]) return false;
-  return frame[localRow][localCol] && frame[localRow][localCol] !== " ";
+  const ch = frame[localRow][localCol];
+  return !!ch && ch !== " ";
 }
 
 export function initTank(spriteDefs, savedCollection) {
@@ -94,7 +112,7 @@ export function updateCollection(newCollection) {
   collection = newCollection;
 }
 
-export function getCollection() {
+function getCollection() {
   return collection;
 }
 
@@ -187,7 +205,14 @@ export function updateTank(timestamp, deltaSeconds) {
   // Remove dead creatures
   creatures = creatures.filter((c) => c.alive);
 
-  const currentCap = timestamp < capBoostEnd ? HARD_CAP : SOFT_TARGET;
+  const softCap = getSizeCap();
+  const hardCap = Math.round(softCap * 1.35);
+  const currentCap = timestamp < capBoostEnd ? hardCap : softCap;
+
+  // Below half the cap, fill quickly with no throttle.
+  // At or above half, apply the normal slow spawn interval.
+  const fillThreshold = Math.floor(softCap / 2);
+  const belowThreshold = creatures.length < fillThreshold;
 
   // Spawn cycle
   if (timestamp >= nextSpawnTime && creatures.length < currentCap) {
@@ -200,7 +225,7 @@ export function updateTank(timestamp, deltaSeconds) {
       });
 
       if (spawnable.length === 0) {
-        nextSpawnTime = timestamp + SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN);
+        nextSpawnTime = timestamp + (belowThreshold ? SPAWN_FILL_DELAY : SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN));
         return;
       }
 
@@ -225,13 +250,16 @@ export function updateTank(timestamp, deltaSeconds) {
       spawnCreature(toSpawn);
     }
 
-    nextSpawnTime = timestamp + SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN);
+    const delay = belowThreshold
+      ? SPAWN_FILL_DELAY
+      : SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN);
+    nextSpawnTime = timestamp + delay;
   }
 }
 
 export function renderTank(timestamp) {
-  // Render creatures sorted by category (heavy drawn last)
-  const sorted = [...creatures].sort((a, b) => getRenderOrderValue(a) - getRenderOrderValue(b));
+  // Render creatures sorted by depth (lower rows in front)
+  const sorted = [...creatures].sort(compareRenderOrder);
 
   for (const creature of sorted) {
     creature.render(timestamp);
@@ -270,13 +298,13 @@ export function clearCreatures() {
   nextSpawnTime = 0;
 }
 
-export function getCreatures() {
+function getCreatures() {
   return creatures;
 }
 
 
 export function getCreatureAtGrid(col, row) {
-  const sorted = [...creatures].sort((a, b) => getRenderOrderValue(a) - getRenderOrderValue(b));
+  const sorted = [...creatures].sort(compareRenderOrder);
   for (let i = sorted.length - 1; i >= 0; i--) {
     const creature = sorted[i];
     if (isCreatureHit(creature, col, row)) {

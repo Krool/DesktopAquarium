@@ -1,6 +1,5 @@
 // Global leaderboard via Firebase Firestore
 
-import { initializeApp } from "firebase/app";
 import {
   getFirestore,
   doc,
@@ -11,15 +10,7 @@ import {
   orderBy,
   limit,
 } from "firebase/firestore";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDoUT_dSBkTh_Ie4NeCqoxaeLEeRIsmJR4",
-  authDomain: "desktopaquar.firebaseapp.com",
-  projectId: "desktopaquar",
-  storageBucket: "desktopaquar.firebasestorage.app",
-  messagingSenderId: "692782370145",
-  appId: "1:692782370145:web:004159cc61ad94497f0920",
-};
+import { firebaseConfig, getFirebaseApp } from "./firebase.js";
 
 let db = null;
 let playerId = null;
@@ -48,7 +39,8 @@ export function initLeaderboard() {
       console.warn("Firebase not configured - leaderboard disabled");
       return;
     }
-    const app = initializeApp(firebaseConfig);
+    const app = getFirebaseApp();
+    if (!app) return;
     db = getFirestore(app);
 
     // Generate or load a persistent player ID
@@ -123,15 +115,11 @@ async function fetchLeaderboard() {
   }
 }
 
-export function renderLeaderboardRank(timestamp) {
-  // Rank is now rendered next to the score in tank.js
-}
-
 export function getMyRank() {
   return myRank;
 }
 
-export function getLeaderboardData() {
+function getLeaderboardData() {
   return leaderboardData;
 }
 

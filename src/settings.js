@@ -14,6 +14,20 @@ const SIZE_LABELS = [
   "Extra Wide",
 ];
 
+const DAY_NIGHT_OPTIONS = [
+  { value: "computer", label: "Computer Time (Default)" },
+  { value: "5min", label: "5 min day / 5 min night" },
+  { value: "10min", label: "10 min day / 10 min night" },
+  { value: "60min", label: "60 min day / 60 min night" },
+  { value: "3hours", label: "3 hours day / 3 hours night" },
+];
+
+const CLOSE_BEHAVIOR_OPTIONS = [
+  { value: "ask", label: "Ask Me Each Time" },
+  { value: "hide", label: "Hide to Tray" },
+  { value: "close", label: "Close App" },
+];
+
 async function init() {
   const root = document.getElementById("settings-root");
   if (!root) return;
@@ -21,17 +35,12 @@ async function init() {
   let sendScores = true;
   let soundEnabled = false;
   let musicVolume = 0.08;
-  let sizeIndex = 2;
-
-  try {
-    const state = await invoke("get_state");
-    sendScores = !!state.sendScores;
-    soundEnabled = !!state.soundEnabled;
-    musicVolume = typeof state.musicVolume === "number" ? state.musicVolume : 0.08;
-    sizeIndex = typeof state.sizeIndex === "number" ? state.sizeIndex : 2;
-  } catch {
-    // Backend not available
-  }
+  let sizeIndex = 1;
+  let dayNightCycle = "computer";
+  let closeBehavior = "ask";
+  let messageBottlesEnabled = false;
+  let autostartEnabled = false;
+  let windowVisible = true;
 
   root.innerHTML = `
     <div class="settings-header">
@@ -59,10 +68,47 @@ async function init() {
     </div>
     <div class="settings-section">
       <div class="settings-select">
+        <label for="day-night-cycle-select">Day/Night Cycle</label>
+        <select id="day-night-cycle-select"></select>
+      </div>
+      <div class="settings-hint">Computer time or custom cycle length per day and per night.</div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-select">
         <label for="size-select">Aquarium Size</label>
         <select id="size-select"></select>
       </div>
       <div class="settings-hint">Changes window size immediately.</div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-select">
+        <label for="close-behavior-select">When Clicking X</label>
+        <select id="close-behavior-select"></select>
+      </div>
+      <div class="settings-hint">Choose whether X asks, hides to tray, or closes the app.</div>
+    </div>
+    <div class="settings-section">
+      <label class="settings-toggle">
+        <input id="message-bottles-toggle" type="checkbox" />
+        <span>Messages in a Bottle</span>
+      </label>
+      <div class="settings-hint">Receive/send global bottle notes via Firebase.</div>
+    </div>
+    <div class="settings-section">
+      <label class="settings-toggle">
+        <input id="autostart-toggle" type="checkbox" />
+        <span>Start on Boot</span>
+      </label>
+      <div class="settings-hint">Launches ASCII Reef when your computer starts.</div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-actions">
+        <button id="toggle-window-btn" type="button"></button>
+        <button id="open-collection-btn" type="button">Open Collection</button>
+        <button id="reset-position-btn" type="button">Reset Position</button>
+        <button id="reset-aquarium-btn" type="button" class="danger">Reset Aquarium</button>
+        <button id="quit-app-btn" type="button" class="danger">Quit App</button>
+      </div>
     </div>
   `;
 
@@ -81,10 +127,58 @@ async function init() {
   const soundToggle = document.getElementById("sound-toggle");
   const volumeSlider = document.getElementById("volume-slider");
   const volumeValue = document.getElementById("volume-value");
+  const dayNightCycleSelect = document.getElementById("day-night-cycle-select");
   const sizeSelect = document.getElementById("size-select");
+  const closeBehaviorSelect = document.getElementById("close-behavior-select");
+  const messageBottlesToggle = document.getElementById("message-bottles-toggle");
+  const autostartToggle = document.getElementById("autostart-toggle");
+  const toggleWindowBtn = document.getElementById("toggle-window-btn");
+  const openCollectionBtn = document.getElementById("open-collection-btn");
+  const resetPositionBtn = document.getElementById("reset-position-btn");
+  const resetAquariumBtn = document.getElementById("reset-aquarium-btn");
+  const quitAppBtn = document.getElementById("quit-app-btn");
+
+  function applyStateToUi() {
+    if (sendScoresToggle) sendScoresToggle.checked = sendScores;
+    if (soundToggle) soundToggle.checked = soundEnabled;
+    if (volumeSlider && volumeValue) {
+      volumeSlider.value = String(Math.round(musicVolume * 100));
+      volumeValue.textContent = `${Math.round(musicVolume * 100)}%`;
+    }
+    if (sizeSelect) sizeSelect.value = String(sizeIndex);
+    if (dayNightCycleSelect) dayNightCycleSelect.value = dayNightCycle;
+    if (closeBehaviorSelect) closeBehaviorSelect.value = closeBehavior;
+    if (messageBottlesToggle) messageBottlesToggle.checked = messageBottlesEnabled;
+    if (autostartToggle) autostartToggle.checked = autostartEnabled;
+    syncToggleWindowLabel();
+  }
+
+  function syncToggleWindowLabel() {
+    if (!toggleWindowBtn) return;
+    toggleWindowBtn.textContent = windowVisible ? "Hide Aquarium" : "Show Aquarium";
+  }
+
+  if (sizeSelect) {
+    sizeSelect.innerHTML = SIZE_LABELS.map((label, idx) =>
+      `<option value="${idx}">${label}</option>`
+    ).join("");
+  }
+
+  if (dayNightCycleSelect) {
+    dayNightCycleSelect.innerHTML = DAY_NIGHT_OPTIONS.map((option) =>
+      `<option value="${option.value}">${option.label}</option>`
+    ).join("");
+  }
+
+  if (closeBehaviorSelect) {
+    closeBehaviorSelect.innerHTML = CLOSE_BEHAVIOR_OPTIONS.map((option) =>
+      `<option value="${option.value}">${option.label}</option>`
+    ).join("");
+  }
+
+  applyStateToUi();
 
   if (sendScoresToggle) {
-    sendScoresToggle.checked = sendScores;
     sendScoresToggle.addEventListener("change", async (e) => {
       const enabled = !!e.target.checked;
       try {
@@ -96,7 +190,6 @@ async function init() {
   }
 
   if (soundToggle) {
-    soundToggle.checked = soundEnabled;
     soundToggle.addEventListener("change", async (e) => {
       const enabled = !!e.target.checked;
       try {
@@ -108,8 +201,6 @@ async function init() {
   }
 
   if (volumeSlider && volumeValue) {
-    volumeSlider.value = String(Math.round(musicVolume * 100));
-    volumeValue.textContent = `${Math.round(musicVolume * 100)}%`;
     volumeSlider.addEventListener("input", async (e) => {
       const value = Number(e.target.value) / 100;
       volumeValue.textContent = `${Math.round(value * 100)}%`;
@@ -122,10 +213,6 @@ async function init() {
   }
 
   if (sizeSelect) {
-    sizeSelect.innerHTML = SIZE_LABELS.map((label, idx) => {
-      const selected = idx === sizeIndex ? "selected" : "";
-      return `<option value="${idx}" ${selected}>${label}</option>`;
-    }).join("");
     sizeSelect.addEventListener("change", async (e) => {
       const idx = parseInt(e.target.value, 10);
       if (Number.isNaN(idx)) return;
@@ -135,6 +222,125 @@ async function init() {
         // Fallback
       }
     });
+  }
+
+  if (dayNightCycleSelect) {
+    dayNightCycleSelect.addEventListener("change", async (e) => {
+      const cycle = e.target.value;
+      try {
+        await invoke("set_day_night_cycle", { cycle });
+      } catch {
+        // Fallback
+      }
+    });
+  }
+
+  if (closeBehaviorSelect) {
+    closeBehaviorSelect.addEventListener("change", async (e) => {
+      const behavior = e.target.value;
+      try {
+        await invoke("set_close_behavior", { behavior });
+      } catch {
+        // Fallback
+      }
+    });
+  }
+
+  if (autostartToggle) {
+    autostartToggle.addEventListener("change", async (e) => {
+      const enabled = !!e.target.checked;
+      try {
+        await invoke("set_autostart", { enabled });
+      } catch {
+        autostartToggle.checked = !enabled;
+      }
+    });
+  }
+
+  if (messageBottlesToggle) {
+    messageBottlesToggle.addEventListener("change", async (e) => {
+      const enabled = !!e.target.checked;
+      try {
+        await invoke("set_message_bottles_preferences", { enabled, prompted: true });
+      } catch {
+        messageBottlesToggle.checked = !enabled;
+      }
+    });
+  }
+
+  if (toggleWindowBtn) {
+    toggleWindowBtn.addEventListener("click", async () => {
+      const nextVisible = !windowVisible;
+      try {
+        await invoke("set_main_window_visibility", { show: nextVisible });
+        windowVisible = nextVisible;
+        syncToggleWindowLabel();
+      } catch {
+        // Fallback
+      }
+    });
+  }
+
+  if (openCollectionBtn) {
+    openCollectionBtn.addEventListener("click", async () => {
+      try {
+        await invoke("open_collection");
+      } catch {
+        // Fallback
+      }
+    });
+  }
+
+  if (resetPositionBtn) {
+    resetPositionBtn.addEventListener("click", async () => {
+      try {
+        await invoke("reset_window_position");
+      } catch {
+        // Fallback
+      }
+    });
+  }
+
+  if (resetAquariumBtn) {
+    resetAquariumBtn.addEventListener("click", async () => {
+      const confirmReset = window.confirm(
+        "Reset aquarium progress? This clears collection, energy, and pity counters."
+      );
+      if (!confirmReset) return;
+      try {
+        await invoke("reset_aquarium");
+      } catch {
+        // Fallback
+      }
+    });
+  }
+
+  if (quitAppBtn) {
+    quitAppBtn.addEventListener("click", async () => {
+      const confirmQuit = window.confirm("Quit ASCII Reef now?");
+      if (!confirmQuit) return;
+      try {
+        await invoke("quit_app");
+      } catch {
+        // Fallback
+      }
+    });
+  }
+
+  try {
+    const state = await invoke("get_state");
+    sendScores = !!state.sendScores;
+    soundEnabled = !!state.soundEnabled;
+    musicVolume = typeof state.musicVolume === "number" ? state.musicVolume : 0.08;
+    sizeIndex = typeof state.sizeIndex === "number" ? state.sizeIndex : sizeIndex;
+    dayNightCycle = typeof state.dayNightCycle === "string" ? state.dayNightCycle : "computer";
+    closeBehavior = typeof state.closeBehavior === "string" ? state.closeBehavior : "ask";
+    messageBottlesEnabled = !!state.messageBottlesEnabled;
+    autostartEnabled = !!state.autostartEnabled;
+    windowVisible = state.windowVisible !== false;
+    applyStateToUi();
+  } catch {
+    // Backend not available
   }
 }
 

@@ -1,3 +1,6 @@
+//! ASCII Reef — Tauri app entry point.
+//! Initialises shared state, spawns the input/audio/energy threads,
+//! sets up the system tray, and wires Tauri window events.
 mod audio;
 mod commands;
 mod energy;
@@ -50,10 +53,19 @@ pub fn run() {
             commands::import_save,
             commands::hide_window,
             commands::open_collection,
+            commands::open_settings,
+            commands::set_close_behavior,
             commands::set_send_scores,
             commands::set_sound_enabled,
             commands::set_music_volume,
             commands::set_size_index,
+            commands::set_day_night_cycle,
+            commands::set_message_bottles_preferences,
+            commands::set_autostart,
+            commands::set_main_window_visibility,
+            commands::reset_aquarium,
+            commands::reset_window_position,
+            commands::quit_app,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();
@@ -83,19 +95,25 @@ pub fn run() {
                 }
             }
 
-            // Apply saved size
+            // Apply saved size and position
             {
                 let guard = state_for_builder.lock().unwrap();
                 let idx = guard.size_index;
+                let saved_pos = guard.position;
                 if idx < tray::SIZE_PRESETS.len() {
                     let (_, cols, rows, w, h) = tray::SIZE_PRESETS[idx];
                     if let Some(window) = app.get_webview_window("main") {
                         let _ = window.set_size(tauri::LogicalSize::new(w, h));
+                        // Restore saved position (skip if default 0,0 — first run)
+                        if saved_pos.0 != 0.0 || saved_pos.1 != 0.0 {
+                            let _ = window.set_position(tauri::PhysicalPosition::new(
+                                saved_pos.0 as i32,
+                                saved_pos.1 as i32,
+                            ));
+                        }
                     }
                     // Emit resize event after a short delay so frontend is ready
                     let handle_for_resize = handle.clone();
-                    let cols = cols;
-                    let rows = rows;
                     std::thread::spawn(move || {
                         std::thread::sleep(std::time::Duration::from_millis(500));
                         use tauri::Emitter;
@@ -131,13 +149,22 @@ pub fn run() {
                 creatures_for_setup,
             );
 
-            // Save on close
+            // Track position changes and save on close
             let state_for_close = state_for_builder.clone();
             if let Some(window) = app.get_webview_window("main") {
                 window.on_window_event(move |event| {
-                    if let tauri::WindowEvent::Destroyed = event {
-                        let guard = state_for_close.lock().unwrap();
-                        let _ = save::atomic_save(&guard);
+                    match event {
+                        tauri::WindowEvent::Moved(pos) => {
+                            if let Ok(mut guard) = state_for_close.lock() {
+                                guard.position = (pos.x as f64, pos.y as f64);
+                            }
+                        }
+                        tauri::WindowEvent::Destroyed => {
+                            if let Ok(guard) = state_for_close.lock() {
+                                let _ = save::atomic_save(&guard);
+                            }
+                        }
+                        _ => {}
                     }
                 });
             }

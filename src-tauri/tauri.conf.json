@@ -15,8 +15,8 @@
       {
         "label": "main",
         "title": "ASCII Reef",
-        "width": 504,
-        "height": 390,
+        "width": 540,
+        "height": 256,
         "transparent": true,
         "decorations": false,
         "alwaysOnTop": true,

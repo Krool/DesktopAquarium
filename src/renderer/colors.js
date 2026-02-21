@@ -50,6 +50,27 @@ export const SCORE_VALUES = {
   legendary: 1500,
 };
 
+export const NIGHT_COLORS = {
+  skyNight:       "rgba(4,   8,  28, 0.97)",
+  skyNightHoriz:  "rgba(10,  18,  52, 0.95)",
+  skyDawnTop:     "rgba(60,  20,  70, 0.95)",
+  skyDawn1:       "rgba(220, 90,  30, 0.88)",
+  skyDay:         "rgba(28,  62, 110, 0.97)",
+  skyDayHoriz:    "rgba(52, 110, 160, 0.92)",
+  waterNightTop:  "rgba(10,  30,  80, 0.65)",
+  waterNightMid:  "rgba(6,   18,  50, 0.55)",
+  waterNightDeep: "rgba(2,    6,  22, 0.85)",
+  waterDayTop:    "rgba(90, 195, 240, 0.55)",
+  waterDayMid:    "rgba(26,  71, 150, 0.38)",
+  waterDayBot:    "rgba(11,  48, 118, 0.30)",
+  waterDayDeep:   "rgba(6,   16,  54, 0.78)",
+  sunGlyph:       "#FFE080",
+  moonGlyph:      "#C8D8F0",
+  moteNight:      "rgba(60, 210, 140, 0.18)",
+  moteDay:        "rgba(210, 245, 255, 0.22)",
+  shootingStar:   "rgba(220, 230, 255, 0.85)",
+};
+
 // Display weights for tank spawn selection
 export const DISPLAY_WEIGHTS = {
   common: 6,

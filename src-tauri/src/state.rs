@@ -35,9 +35,6 @@ pub struct GameState {
     pub total_discoveries: u32,
     pub pity: PityCounters,
     pub position: (f64, f64),
-    pub drag_mode: bool,
-    /// Last time idle fallback was checked
-    pub last_input_time: f64,
     /// Selected size preset index
     #[serde(default = "default_size_index")]
     pub size_index: usize,
@@ -50,10 +47,22 @@ pub struct GameState {
     /// Music volume (0.0 - 1.0)
     #[serde(default = "default_music_volume")]
     pub music_volume: f32,
+    /// Day/night cycle mode: "computer", "5min", "10min", "60min", "3hours"
+    #[serde(default = "default_day_night_cycle")]
+    pub day_night_cycle: String,
+    /// Whether message-in-a-bottle interactions are enabled
+    #[serde(default = "default_message_bottles_enabled")]
+    pub message_bottles_enabled: bool,
+    /// Whether user has already seen the first-time opt-in prompt
+    #[serde(default = "default_message_bottles_prompted")]
+    pub message_bottles_prompted: bool,
+    /// Behavior when clicking the window X button: "ask", "hide", or "close"
+    #[serde(default = "default_close_behavior")]
+    pub close_behavior: String,
 }
 
 fn default_size_index() -> usize {
-    2 // "Medium Tall" (60x24) = current default
+    1 // "Medium" (60x16) = default
 }
 
 fn default_send_scores() -> bool {
@@ -66,6 +75,22 @@ fn default_sound_enabled() -> bool {
 
 fn default_music_volume() -> f32 {
     0.08
+}
+
+fn default_day_night_cycle() -> String {
+    "computer".to_string()
+}
+
+fn default_message_bottles_enabled() -> bool {
+    false
+}
+
+fn default_message_bottles_prompted() -> bool {
+    false
+}
+
+fn default_close_behavior() -> String {
+    "ask".to_string()
 }
 
 fn default_pool_energy() -> HashMap<String, u32> {
@@ -84,12 +109,14 @@ impl Default for GameState {
             total_discoveries: 0,
             pity: PityCounters::default(),
             position: (0.0, 0.0),
-            drag_mode: false,
-            last_input_time: 0.0,
             size_index: default_size_index(),
             send_scores: default_send_scores(),
             sound_enabled: default_sound_enabled(),
             music_volume: default_music_volume(),
+            day_night_cycle: default_day_night_cycle(),
+            message_bottles_enabled: default_message_bottles_enabled(),
+            message_bottles_prompted: default_message_bottles_prompted(),
+            close_behavior: default_close_behavior(),
         }
     }
 }

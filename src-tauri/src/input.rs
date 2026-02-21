@@ -1,3 +1,5 @@
+//! Global input listener using rdev. Counts keystrokes and mouse clicks
+//! via AtomicU64 counters that the energy loop drains every 500 ms.
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::thread;

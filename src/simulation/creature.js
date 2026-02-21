@@ -1,6 +1,6 @@
 // Creature instance: position, velocity, animation, movement patterns
 
-import { drawChar, COLS, ROWS } from "../renderer/canvas.js";
+import { drawChar, clearCell, COLS, ROWS } from "../renderer/canvas.js";
 import { RARITY_COLORS } from "../renderer/colors.js";
 import { spawnBubble, spawnSurfaceSplash, getSurfaceRow } from "./environment.js";
 
@@ -25,6 +25,12 @@ const DELIGHT_WINDOWS = {
   epic: [7000, 12000],
   legendary: [6000, 10000],
 };
+const SLITHERY_KEYWORDS = ["eel", "snake"];
+
+function isSlitheryCreature(name) {
+  const lower = (name || "").toLowerCase();
+  return SLITHERY_KEYWORDS.some((key) => lower.includes(key));
+}
 
 export class CreatureInstance {
   constructor(spriteDef, opts = {}) {
@@ -81,24 +87,31 @@ export class CreatureInstance {
     this.fightUntil = 0;
     this.fightBaseCol = 0;
     this.fightCooldownUntil = 0;
+
+    // Slithery render-only undulation for eel/snake-like creatures.
+    this.isSlithery = isSlitheryCreature(this.sprite.name);
+    this.slitherWaveSpeed = 7 + Math.random() * 3.5;
+    this.slitherWaveSpacing = 0.55 + Math.random() * 0.2;
+    this.slitherWaveAmp = 0.95;
   }
 
   getRowConstraints() {
     const rockRow = ROWS - 2;
+    const waterTop = getSurfaceRow() + 1; // first row below the waterline
     switch (this.sprite.category) {
       case "bottom":
         // Pinned to the floor — sit right on the rock line
         return { min: rockRow - this.sprite.height, max: rockRow - this.sprite.height };
       case "floater":
         // Upper water only — never near the floor
-        return { min: 1, max: Math.max(2, Math.floor(rockRow * 0.5)) };
+        return { min: waterTop, max: Math.max(waterTop + 1, Math.floor(rockRow * 0.5)) };
       case "heavy":
         // Mid to low water — big creatures roam the lower half
-        return { min: 2, max: rockRow - this.sprite.height - 2 };
+        return { min: waterTop, max: rockRow - this.sprite.height - 2 };
       case "swimmer":
       default:
         // Mid water — avoid the floor area
-        return { min: 1, max: rockRow - this.sprite.height - 3 };
+        return { min: waterTop, max: rockRow - this.sprite.height - 3 };
     }
   }
 
@@ -241,7 +254,7 @@ export class CreatureInstance {
       const progress = Math.min(1, elapsed / this.breach.duration);
       const rise = Math.sin(Math.PI * progress) * this.breach.amplitude;
       const target = Math.round(this.breach.baseRow - rise);
-      this.row = Math.max(0, target);
+      this.row = Math.max(1, target); // row 0 is UI, breachers can enter sky (row 1) but no higher
       if (progress >= 1) {
         this.breach = null;
       }
@@ -286,11 +299,24 @@ export class CreatureInstance {
       color = GLOW_COLOR;
     }
 
+    const t = timestamp / 1000;
     for (let r = 0; r < frame.length; r++) {
       const line = frame[r];
       for (let c = 0; c < line.length; c++) {
-        if (line[c] !== " ") {
-          drawChar(this.col + c, this.row + r, line[c], color);
+        const ch = line[c];
+        if (ch === " ") continue;
+
+        let row = this.row + r;
+        if (this.isSlithery) {
+          const phase = t * this.slitherWaveSpeed + c * this.slitherWaveSpacing + this.sinePhase;
+          row += Math.round(Math.sin(phase) * this.slitherWaveAmp);
+        }
+
+        // "!" = invisible occlusion tile: clears whatever is behind without rendering a glyph.
+        if (ch === "!") {
+          clearCell(this.col + c, row);
+        } else {
+          drawChar(this.col + c, row, ch, color);
         }
       }
     }

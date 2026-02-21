@@ -26,7 +26,7 @@ async function init() {
   let totalDiscoveries = 0;
   let sendScoresEnabled = true;
   let soundEnabled = false;
-  let sizeIndex = 2;
+  let sizeIndex = 1;
 
   try {
     const state = await invoke("get_state");

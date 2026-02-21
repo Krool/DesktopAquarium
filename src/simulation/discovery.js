@@ -95,6 +95,6 @@ export function triggerAchievementToast(name, unlock) {
   achievementQueue.push({ name, unlock });
 }
 
-export function isDiscoveryActive() {
+function isDiscoveryActive() {
   return activeBurst !== null;
 }

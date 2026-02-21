@@ -1,3 +1,6 @@
+//! Pity-modified rarity roll. Each failed higher-tier roll increments a pity
+//! counter, increasing the next roll's probability up to a per-tier cap.
+//! Rates: Legendary 1/200 (cap 5), Epic 1/50 (cap 4), Rare 1/20 (cap 4), Uncommon 1/8 (cap 4).
 use crate::state::PityCounters;
 use rand::Rng;
 
