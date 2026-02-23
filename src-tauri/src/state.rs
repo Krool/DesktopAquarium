@@ -9,23 +9,12 @@ pub struct OwnedCreature {
     pub first_seen: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PityCounters {
     pub legendary: u32,
     pub epic: u32,
     pub rare: u32,
     pub uncommon: u32,
-}
-
-impl Default for PityCounters {
-    fn default() -> Self {
-        Self {
-            legendary: 0,
-            epic: 0,
-            rare: 0,
-            uncommon: 0,
-        }
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
