@@ -31,16 +31,14 @@ pub fn start_input_listener(counters: Arc<InputCounters>) {
         // on success, so any return (error or unexpected exit) warrants a retry.
         loop {
             let counters = counters.clone();
-            let callback = move |event: rdev::Event| {
-                match event.event_type {
-                    rdev::EventType::KeyPress(_) => {
-                        counters.keystrokes.fetch_add(1, Ordering::SeqCst);
-                    }
-                    rdev::EventType::ButtonPress(_) => {
-                        counters.clicks.fetch_add(1, Ordering::SeqCst);
-                    }
-                    _ => {}
+            let callback = move |event: rdev::Event| match event.event_type {
+                rdev::EventType::KeyPress(_) => {
+                    counters.keystrokes.fetch_add(1, Ordering::SeqCst);
                 }
+                rdev::EventType::ButtonPress(_) => {
+                    counters.clicks.fetch_add(1, Ordering::SeqCst);
+                }
+                _ => {}
             };
 
             if let Err(e) = rdev::listen(callback) {

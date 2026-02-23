@@ -96,21 +96,17 @@ pub fn export_save(path: String, state: State<'_, Arc<SharedState>>) -> Result<(
     crate::save::atomic_save(&guard)?;
 
     let save_path = crate::save::save_path();
-    std::fs::copy(&save_path, &path)
-        .map_err(|e| format!("Failed to export: {}", e))?;
+    std::fs::copy(&save_path, &path).map_err(|e| format!("Failed to export: {}", e))?;
     Ok(())
 }
 
 #[tauri::command]
-pub fn import_save(
-    path: String,
-    state: State<'_, Arc<SharedState>>,
-) -> Result<(), String> {
-    let data = std::fs::read_to_string(&path)
-        .map_err(|e| format!("Failed to read import file: {}", e))?;
+pub fn import_save(path: String, state: State<'_, Arc<SharedState>>) -> Result<(), String> {
+    let data =
+        std::fs::read_to_string(&path).map_err(|e| format!("Failed to read import file: {}", e))?;
 
-    let save: crate::save::SaveFile = serde_json::from_str(&data)
-        .map_err(|e| format!("Invalid save file: {}", e))?;
+    let save: crate::save::SaveFile =
+        serde_json::from_str(&data).map_err(|e| format!("Invalid save file: {}", e))?;
 
     let mut guard = state.lock().map_err(|e| e.to_string())?;
     guard.collection = save.collection;
@@ -174,7 +170,10 @@ pub fn set_close_behavior(
         guard.close_behavior = behavior.clone();
         crate::save::atomic_save(&guard)?;
     }
-    let _ = app.emit("close-behavior", serde_json::json!({ "behavior": behavior }));
+    let _ = app.emit(
+        "close-behavior",
+        serde_json::json!({ "behavior": behavior }),
+    );
     Ok(())
 }
 

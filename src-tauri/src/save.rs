@@ -150,8 +150,8 @@ pub fn atomic_save(state: &GameState) -> Result<(), String> {
         },
     };
 
-    let json = serde_json::to_string_pretty(&save)
-        .map_err(|e| format!("Failed to serialize: {}", e))?;
+    let json =
+        serde_json::to_string_pretty(&save).map_err(|e| format!("Failed to serialize: {}", e))?;
 
     let tmp = tmp_path();
     let main = save_path();
@@ -329,7 +329,10 @@ mod tests {
             let mut s = make_state();
             s.day_night_cycle = cycle.to_string();
             sanitize(&mut s);
-            assert_eq!(s.day_night_cycle, *cycle, "valid cycle '{cycle}' should not be changed");
+            assert_eq!(
+                s.day_night_cycle, *cycle,
+                "valid cycle '{cycle}' should not be changed"
+            );
         }
     }
 
@@ -339,7 +342,10 @@ mod tests {
             let mut s = make_state();
             s.close_behavior = behavior.to_string();
             sanitize(&mut s);
-            assert_eq!(s.close_behavior, *behavior, "valid behavior '{behavior}' should not be changed");
+            assert_eq!(
+                s.close_behavior, *behavior,
+                "valid behavior '{behavior}' should not be changed"
+            );
         }
     }
 
@@ -398,7 +404,10 @@ mod tests {
         let mut s = make_state();
         s.pool_energy.insert("hacking".to_string(), 50);
         sanitize(&mut s);
-        assert!(!s.pool_energy.contains_key("hacking"), "unknown key 'hacking' should be removed");
+        assert!(
+            !s.pool_energy.contains_key("hacking"),
+            "unknown key 'hacking' should be removed"
+        );
         assert!(s.pool_energy.contains_key("typing"));
         assert!(s.pool_energy.contains_key("click"));
         assert!(s.pool_energy.contains_key("audio"));

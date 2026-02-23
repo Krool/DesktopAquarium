@@ -1,6 +1,7 @@
 //! System tray setup, size/day-night submenus, window visibility toggle,
 //! and helpers to open the collection and settings windows.
 use crate::state::SharedState;
+use once_cell::sync::OnceCell;
 use std::sync::Arc;
 use tauri::{
     menu::{CheckMenuItem, Menu, MenuItem, Submenu},
@@ -8,7 +9,6 @@ use tauri::{
     AppHandle, Emitter, Manager,
 };
 use tauri_plugin_autostart::ManagerExt;
-use once_cell::sync::OnceCell;
 
 static WINDOW_TOGGLE_ITEM: OnceCell<MenuItem<tauri::Wry>> = OnceCell::new();
 static DAY_NIGHT_CYCLE_ITEMS: OnceCell<Vec<CheckMenuItem<tauri::Wry>>> = OnceCell::new();
@@ -16,14 +16,14 @@ static DAY_NIGHT_CYCLE_ITEMS: OnceCell<Vec<CheckMenuItem<tauri::Wry>>> = OnceCel
 // Size presets: (label, cols, rows, pixel_width, pixel_height)
 // charWidth ≈ 9, charHeight = 16
 pub const SIZE_PRESETS: &[(&str, u32, u32, f64, f64)] = &[
-    ("Small",        40, 16, 360.0, 256.0),
-    ("Medium",       60, 16, 540.0, 256.0),
-    ("Medium Tall",  60, 24, 540.0, 384.0),
-    ("Large",        80, 16, 720.0, 256.0),
-    ("Large Tall",   80, 24, 720.0, 384.0),
-    ("Wide",        100, 16, 900.0, 256.0),
-    ("Wide Tall",   100, 24, 900.0, 384.0),
-    ("Extra Wide",  120, 24, 1080.0, 384.0),
+    ("Small", 40, 16, 360.0, 256.0),
+    ("Medium", 60, 16, 540.0, 256.0),
+    ("Medium Tall", 60, 24, 540.0, 384.0),
+    ("Large", 80, 16, 720.0, 256.0),
+    ("Large Tall", 80, 24, 720.0, 384.0),
+    ("Wide", 100, 16, 900.0, 256.0),
+    ("Wide Tall", 100, 24, 900.0, 384.0),
+    ("Extra Wide", 120, 24, 1080.0, 384.0),
 ];
 
 pub const DAY_NIGHT_CYCLES: &[(&str, &str)] = &[
@@ -34,10 +34,23 @@ pub const DAY_NIGHT_CYCLES: &[(&str, &str)] = &[
     ("3hours", "3 hours day / 3 hours night"),
 ];
 
-pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dyn std::error::Error>> {
+pub fn setup_tray(
+    app: &AppHandle,
+    state: Arc<SharedState>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let window_visible = is_window_visible(app);
-    let window_toggle_label = if window_visible { "Hide Window" } else { "Show Window" };
-    let window_toggle_item = MenuItem::with_id(app, "toggle_window", window_toggle_label, true, None::<&str>)?;
+    let window_toggle_label = if window_visible {
+        "Hide Window"
+    } else {
+        "Show Window"
+    };
+    let window_toggle_item = MenuItem::with_id(
+        app,
+        "toggle_window",
+        window_toggle_label,
+        true,
+        None::<&str>,
+    )?;
     let _ = WINDOW_TOGGLE_ITEM.set(window_toggle_item.clone());
     let collection_item = MenuItem::with_id(app, "collection", "Collection", true, None::<&str>)?;
     let settings_item = MenuItem::with_id(app, "settings", "Settings", true, None::<&str>)?;
@@ -62,7 +75,10 @@ pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dy
         let item = CheckMenuItem::with_id(app, &id, *label, true, checked, None::<&str>)?;
         size_items.push(item);
     }
-    let size_refs: Vec<&dyn tauri::menu::IsMenuItem<tauri::Wry>> = size_items.iter().map(|i| i as &dyn tauri::menu::IsMenuItem<tauri::Wry>).collect();
+    let size_refs: Vec<&dyn tauri::menu::IsMenuItem<tauri::Wry>> = size_items
+        .iter()
+        .map(|i| i as &dyn tauri::menu::IsMenuItem<tauri::Wry>)
+        .collect();
     let size_submenu = Submenu::with_items(app, "Size", true, &size_refs)?;
 
     let mut cycle_items: Vec<CheckMenuItem<tauri::Wry>> = Vec::new();
@@ -73,17 +89,41 @@ pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dy
         cycle_items.push(item);
     }
     let _ = DAY_NIGHT_CYCLE_ITEMS.set(cycle_items.clone());
-    let cycle_refs: Vec<&dyn tauri::menu::IsMenuItem<tauri::Wry>> = cycle_items.iter().map(|i| i as &dyn tauri::menu::IsMenuItem<tauri::Wry>).collect();
+    let cycle_refs: Vec<&dyn tauri::menu::IsMenuItem<tauri::Wry>> = cycle_items
+        .iter()
+        .map(|i| i as &dyn tauri::menu::IsMenuItem<tauri::Wry>)
+        .collect();
     let cycle_submenu = Submenu::with_items(app, "Day/Night Cycle", true, &cycle_refs)?;
 
     // Autostart toggle
     let autostart_enabled = app.autolaunch().is_enabled().unwrap_or(false);
-    let autostart_item = CheckMenuItem::with_id(app, "autostart", "Start on Boot", true, autostart_enabled, None::<&str>)?;
+    let autostart_item = CheckMenuItem::with_id(
+        app,
+        "autostart",
+        "Start on Boot",
+        true,
+        autostart_enabled,
+        None::<&str>,
+    )?;
 
     // Send Scores toggle
-    let send_scores_item = CheckMenuItem::with_id(app, "send_scores", "Send Scores", true, send_scores_enabled, None::<&str>)?;
+    let send_scores_item = CheckMenuItem::with_id(
+        app,
+        "send_scores",
+        "Send Scores",
+        true,
+        send_scores_enabled,
+        None::<&str>,
+    )?;
     // Sound toggle
-    let sound_item = CheckMenuItem::with_id(app, "sound_enabled", "Sound", true, sound_enabled, None::<&str>)?;
+    let sound_item = CheckMenuItem::with_id(
+        app,
+        "sound_enabled",
+        "Sound",
+        true,
+        sound_enabled,
+        None::<&str>,
+    )?;
     let message_bottles_item = CheckMenuItem::with_id(
         app,
         "message_bottles_enabled",
@@ -93,26 +133,33 @@ pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dy
         None::<&str>,
     )?;
 
-    let reset_item = MenuItem::with_id(app, "reset_aquarium", "Reset Aquarium", true, None::<&str>)?;
-    let reset_pos_item = MenuItem::with_id(app, "reset_position", "Reset Position", true, None::<&str>)?;
+    let reset_item =
+        MenuItem::with_id(app, "reset_aquarium", "Reset Aquarium", true, None::<&str>)?;
+    let reset_pos_item =
+        MenuItem::with_id(app, "reset_position", "Reset Position", true, None::<&str>)?;
     let quit_item = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
 
-    let menu = Menu::with_items(app, &[
-        &window_toggle_item,
-        &collection_item,
-        &settings_item,
-        &size_submenu,
-        &cycle_submenu,
-        &send_scores_item,
-        &sound_item,
-        &message_bottles_item,
-        &autostart_item,
-        &reset_item,
-        &reset_pos_item,
-        &quit_item,
-    ])?;
+    let menu = Menu::with_items(
+        app,
+        &[
+            &window_toggle_item,
+            &collection_item,
+            &settings_item,
+            &size_submenu,
+            &cycle_submenu,
+            &send_scores_item,
+            &sound_item,
+            &message_bottles_item,
+            &autostart_item,
+            &reset_item,
+            &reset_pos_item,
+            &quit_item,
+        ],
+    )?;
 
-    let icon = app.default_window_icon().cloned()
+    let icon = app
+        .default_window_icon()
+        .cloned()
         .ok_or("No default icon")?;
 
     let _tray = TrayIconBuilder::new()
@@ -241,7 +288,11 @@ fn is_window_visible(app: &AppHandle) -> bool {
 
 fn update_window_toggle_label(is_visible: bool) {
     if let Some(item) = WINDOW_TOGGLE_ITEM.get() {
-        let _ = item.set_text(if is_visible { "Hide Window" } else { "Show Window" });
+        let _ = item.set_text(if is_visible {
+            "Hide Window"
+        } else {
+            "Show Window"
+        });
     }
 }
 
@@ -265,11 +316,18 @@ fn toggle_window_visibility(app: &AppHandle) {
 fn resize_tank(app: &AppHandle, cols: u32, rows: u32, width: f64, height: f64) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.set_size(tauri::LogicalSize::new(width, height));
-        let _ = app.emit("resize-tank", serde_json::json!({ "cols": cols, "rows": rows }));
+        let _ = app.emit(
+            "resize-tank",
+            serde_json::json!({ "cols": cols, "rows": rows }),
+        );
     }
 }
 
-pub fn apply_size_index(app: &AppHandle, state: &Arc<SharedState>, idx: usize) -> Result<(), String> {
+pub fn apply_size_index(
+    app: &AppHandle,
+    state: &Arc<SharedState>,
+    idx: usize,
+) -> Result<(), String> {
     if idx >= SIZE_PRESETS.len() {
         return Err("Invalid size preset".to_string());
     }
@@ -303,7 +361,11 @@ pub fn open_collection_from_command(app: &AppHandle) {
     std::thread::spawn(move || open_collection_window(&app));
 }
 
-pub fn apply_day_night_cycle(app: &AppHandle, state: &Arc<SharedState>, cycle: String) -> Result<(), String> {
+pub fn apply_day_night_cycle(
+    app: &AppHandle,
+    state: &Arc<SharedState>,
+    cycle: String,
+) -> Result<(), String> {
     let cycle = match cycle.as_str() {
         "computer" | "5min" | "10min" | "60min" | "3hours" => cycle,
         _ => "computer".to_string(),

@@ -98,8 +98,8 @@ fn roll_rarity_with_rng<R: rand::Rng>(pity: &mut PityCounters, rng: &mut R) -> R
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rand::SeedableRng;
     use rand::rngs::SmallRng;
+    use rand::SeedableRng;
 
     #[test]
     fn rarity_as_str_all_variants() {
@@ -116,10 +116,30 @@ mod tests {
         let mut pity = PityCounters::default();
         for _ in 0..10_000 {
             roll_rarity_with_rng(&mut pity, &mut rng);
-            assert!(pity.legendary <= LEGENDARY_PARAMS.cap, "legendary pity {} > cap {}", pity.legendary, LEGENDARY_PARAMS.cap);
-            assert!(pity.epic      <= EPIC_PARAMS.cap,      "epic pity {} > cap {}", pity.epic, EPIC_PARAMS.cap);
-            assert!(pity.rare      <= RARE_PARAMS.cap,      "rare pity {} > cap {}", pity.rare, RARE_PARAMS.cap);
-            assert!(pity.uncommon  <= UNCOMMON_PARAMS.cap,  "uncommon pity {} > cap {}", pity.uncommon, UNCOMMON_PARAMS.cap);
+            assert!(
+                pity.legendary <= LEGENDARY_PARAMS.cap,
+                "legendary pity {} > cap {}",
+                pity.legendary,
+                LEGENDARY_PARAMS.cap
+            );
+            assert!(
+                pity.epic <= EPIC_PARAMS.cap,
+                "epic pity {} > cap {}",
+                pity.epic,
+                EPIC_PARAMS.cap
+            );
+            assert!(
+                pity.rare <= RARE_PARAMS.cap,
+                "rare pity {} > cap {}",
+                pity.rare,
+                RARE_PARAMS.cap
+            );
+            assert!(
+                pity.uncommon <= UNCOMMON_PARAMS.cap,
+                "uncommon pity {} > cap {}",
+                pity.uncommon,
+                UNCOMMON_PARAMS.cap
+            );
         }
     }
 
@@ -130,7 +150,10 @@ mod tests {
         for _ in 0..100_000 {
             let r = roll_rarity_with_rng(&mut pity, &mut rng);
             if r == Rarity::Legendary {
-                assert_eq!(pity.legendary, 0, "legendary pity must reset to 0 after a hit");
+                assert_eq!(
+                    pity.legendary, 0,
+                    "legendary pity must reset to 0 after a hit"
+                );
                 return;
             }
         }
@@ -160,7 +183,10 @@ mod tests {
             seen.insert(roll_rarity_with_rng(&mut pity, &mut rng).as_str());
         }
         for tier in &["common", "uncommon", "rare", "epic", "legendary"] {
-            assert!(seen.contains(tier), "tier '{tier}' was never rolled in 100 000 attempts");
+            assert!(
+                seen.contains(tier),
+                "tier '{tier}' was never rolled in 100 000 attempts"
+            );
         }
     }
 
@@ -190,14 +216,23 @@ mod tests {
 
         for _ in 0..n {
             let mut pity = PityCounters::default();
-            if roll_rarity_with_rng(&mut pity, &mut rng) == Rarity::Legendary { no_pity += 1; }
+            if roll_rarity_with_rng(&mut pity, &mut rng) == Rarity::Legendary {
+                no_pity += 1;
+            }
         }
         for _ in 0..n {
-            let mut pity = PityCounters { legendary: LEGENDARY_PARAMS.cap, ..PityCounters::default() };
-            if roll_rarity_with_rng(&mut pity, &mut rng) == Rarity::Legendary { max_pity += 1; }
+            let mut pity = PityCounters {
+                legendary: LEGENDARY_PARAMS.cap,
+                ..PityCounters::default()
+            };
+            if roll_rarity_with_rng(&mut pity, &mut rng) == Rarity::Legendary {
+                max_pity += 1;
+            }
         }
 
-        assert!(max_pity > no_pity,
-            "Max pity ({max_pity}) should yield more legendaries than no pity ({no_pity})");
+        assert!(
+            max_pity > no_pity,
+            "Max pity ({max_pity}) should yield more legendaries than no pity ({no_pity})"
+        );
     }
 }

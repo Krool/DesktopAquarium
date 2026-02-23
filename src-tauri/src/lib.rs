@@ -28,7 +28,10 @@ pub fn run() {
     let game_state = match save::load() {
         Ok(state) => state,
         Err(err) => {
-            eprintln!("Failed to load save file, falling back to defaults: {}", err);
+            eprintln!(
+                "Failed to load save file, falling back to defaults: {}",
+                err
+            );
             GameState::default()
         }
     };
@@ -50,7 +53,10 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, None))
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            None,
+        ))
         .manage(shared_state.clone())
         .invoke_handler(tauri::generate_handler![
             commands::get_state,
@@ -123,7 +129,10 @@ pub fn run() {
                     std::thread::spawn(move || {
                         std::thread::sleep(std::time::Duration::from_millis(500));
                         use tauri::Emitter;
-                        let _ = handle_for_resize.emit("resize-tank", serde_json::json!({ "cols": cols, "rows": rows }));
+                        let _ = handle_for_resize.emit(
+                            "resize-tank",
+                            serde_json::json!({ "cols": cols, "rows": rows }),
+                        );
                     });
                 }
             }
@@ -158,20 +167,18 @@ pub fn run() {
             // Track position changes and save on close
             let state_for_close = state_for_builder.clone();
             if let Some(window) = app.get_webview_window("main") {
-                window.on_window_event(move |event| {
-                    match event {
-                        tauri::WindowEvent::Moved(pos) => {
-                            if let Ok(mut guard) = state_for_close.lock() {
-                                guard.position = (pos.x as f64, pos.y as f64);
-                            }
+                window.on_window_event(move |event| match event {
+                    tauri::WindowEvent::Moved(pos) => {
+                        if let Ok(mut guard) = state_for_close.lock() {
+                            guard.position = (pos.x as f64, pos.y as f64);
                         }
-                        tauri::WindowEvent::Destroyed => {
-                            if let Ok(guard) = state_for_close.lock() {
-                                let _ = save::atomic_save(&guard);
-                            }
-                        }
-                        _ => {}
                     }
+                    tauri::WindowEvent::Destroyed => {
+                        if let Ok(guard) = state_for_close.lock() {
+                            let _ = save::atomic_save(&guard);
+                        }
+                    }
+                    _ => {}
                 });
             }
 

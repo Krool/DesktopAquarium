@@ -72,14 +72,20 @@ pub fn start_energy_loop(
                 // Keyboard energy → typing pool
                 let key_energy = (keys / KEYS_PER_ENERGY) as u32;
                 if key_energy > 0 {
-                    let e = state_guard.pool_energy.entry("typing".to_string()).or_insert(0);
+                    let e = state_guard
+                        .pool_energy
+                        .entry("typing".to_string())
+                        .or_insert(0);
                     *e += key_energy;
                 }
 
                 // Click energy → click pool
                 let click_energy = (clicks / CLICKS_PER_ENERGY) as u32;
                 if click_energy > 0 {
-                    let e = state_guard.pool_energy.entry("click".to_string()).or_insert(0);
+                    let e = state_guard
+                        .pool_energy
+                        .entry("click".to_string())
+                        .or_insert(0);
                     *e += click_energy;
                 }
 
@@ -88,7 +94,10 @@ pub fn start_energy_loop(
                     audio_accumulator += delta;
                     while audio_accumulator >= AUDIO_SECONDS_PER_ENERGY {
                         audio_accumulator -= AUDIO_SECONDS_PER_ENERGY;
-                        let e = state_guard.pool_energy.entry("audio".to_string()).or_insert(0);
+                        let e = state_guard
+                            .pool_energy
+                            .entry("audio".to_string())
+                            .or_insert(0);
                         *e += 1;
                     }
                     last_input_seen = now;
@@ -100,7 +109,10 @@ pub fn start_energy_loop(
                     idle_accumulator += delta;
                     while idle_accumulator >= IDLE_ENERGY_INTERVAL_SECS {
                         idle_accumulator -= IDLE_ENERGY_INTERVAL_SECS;
-                        let e = state_guard.pool_energy.entry("typing".to_string()).or_insert(0);
+                        let e = state_guard
+                            .pool_energy
+                            .entry("typing".to_string())
+                            .or_insert(0);
                         *e += 1;
                     }
                 } else {
@@ -144,7 +156,8 @@ pub fn start_energy_loop(
                     }
                 }
 
-                let need_autosave = now.duration_since(last_save).as_secs_f64() >= AUTOSAVE_INTERVAL_SECS;
+                let need_autosave =
+                    now.duration_since(last_save).as_secs_f64() >= AUTOSAVE_INTERVAL_SECS;
 
                 // Save inside the lock only if needed (discoveries or autosave)
                 if !discoveries.is_empty() || need_autosave {
@@ -152,24 +165,36 @@ pub fn start_energy_loop(
                     // state_guard dropped here
                 }
 
-                TickResult { typing_e, click_e, audio_e, discoveries, need_autosave }
+                TickResult {
+                    typing_e,
+                    click_e,
+                    audio_e,
+                    discoveries,
+                    need_autosave,
+                }
                 // lock released here
             };
 
             // --- Emit events outside the lock ---
-            let _ = app.emit("energy-update", serde_json::json!({
-                "typing": result.typing_e,
-                "click": result.click_e,
-                "audio": result.audio_e,
-                "threshold": ENERGY_THRESHOLD
-            }));
+            let _ = app.emit(
+                "energy-update",
+                serde_json::json!({
+                    "typing": result.typing_e,
+                    "click": result.click_e,
+                    "audio": result.audio_e,
+                    "threshold": ENERGY_THRESHOLD
+                }),
+            );
 
             for (creature_id, rarity_str, is_new) in result.discoveries {
-                let _ = app.emit("discovery", serde_json::json!({
-                    "creatureId": creature_id,
-                    "rarity": rarity_str,
-                    "isNew": is_new,
-                }));
+                let _ = app.emit(
+                    "discovery",
+                    serde_json::json!({
+                        "creatureId": creature_id,
+                        "rarity": rarity_str,
+                        "isNew": is_new,
+                    }),
+                );
             }
 
             if result.need_autosave {

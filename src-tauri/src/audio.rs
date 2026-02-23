@@ -6,20 +6,18 @@ use std::sync::Arc;
 /// Start audio detection polling on a dedicated thread.
 /// Sets `active` to true when system audio is playing.
 pub fn start_audio_detection(active: Arc<AtomicBool>) {
-    std::thread::spawn(move || {
-        loop {
-            let is_playing = detect_audio_playback();
-            active.store(is_playing, Ordering::SeqCst);
-            std::thread::sleep(std::time::Duration::from_secs(1));
-        }
+    std::thread::spawn(move || loop {
+        let is_playing = detect_audio_playback();
+        active.store(is_playing, Ordering::SeqCst);
+        std::thread::sleep(std::time::Duration::from_secs(1));
     });
 }
 
 #[cfg(windows)]
 fn detect_audio_playback() -> bool {
     use windows::core::Interface;
-    use windows::Win32::Media::Audio::*;
     use windows::Win32::Media::Audio::Endpoints::IAudioMeterInformation;
+    use windows::Win32::Media::Audio::*;
     use windows::Win32::System::Com::*;
 
     unsafe {
