@@ -78,6 +78,7 @@ pub fn run() {
             commands::reset_aquarium,
             commands::reset_window_position,
             commands::quit_app,
+            commands::set_hidden_creatures,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();

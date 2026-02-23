@@ -8,9 +8,14 @@
     "width": 7,
     "height": 1,
     "frames": [
-      ["><(((o>"],
-      ["><((<o>"]
-    ]
+      [
+        "><(((o>"
+      ],
+      [
+        "><((<o>"
+      ]
+    ],
+    "naturalColor": "#B8C4CC"
   },
   {
     "id": "t_common_02",
@@ -21,9 +26,16 @@
     "width": 6,
     "height": 1,
     "frames": [
-      ["><((o>"],
-      ["><(<o>"]
-    ]
+      [
+        "><((o>"
+      ],
+      [
+        "><(<o>"
+      ]
+    ],
+    "naturalColor": "#5599CC",
+    "naturalColorAlt": "#FFAA44",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "t_common_03",
@@ -34,9 +46,16 @@
     "width": 5,
     "height": 1,
     "frames": [
-      ["><(o>"],
-      [">((o>"]
-    ]
+      [
+        "><(o>"
+      ],
+      [
+        ">((o>"
+      ]
+    ],
+    "naturalColor": "#BBCCCC",
+    "naturalColorAlt": "#22AAFF",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "t_common_04",
@@ -47,9 +66,16 @@
     "width": 7,
     "height": 1,
     "frames": [
-      [">=<(o>"],
-      [">=((o>"]
-    ]
+      [
+        ">=<(o>"
+      ],
+      [
+        ">=((o>"
+      ]
+    ],
+    "naturalColor": "#22AAFF",
+    "naturalColorAlt": "#FF4455",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "t_common_05",
@@ -60,9 +86,15 @@
     "width": 6,
     "height": 1,
     "frames": [
-      [">-<<o>"],
-      [">-<(o>"]
-    ]
+      [
+        ">-<<o>"
+      ],
+      [
+        ">-<(o>"
+      ]
+    ],
+    "naturalColor": "#AABBCC",
+    "naturalColorAlt": "#3377BB"
   },
   {
     "id": "t_common_06",
@@ -73,9 +105,14 @@
     "width": 7,
     "height": 1,
     "frames": [
-      [">={(o>>"],
-      [">={<<o>"]
-    ]
+      [
+        ">={(o>>"
+      ],
+      [
+        ">={<<o>"
+      ]
+    ],
+    "naturalColor": "#FF8833"
   },
   {
     "id": "t_common_07",
@@ -86,9 +123,14 @@
     "width": 8,
     "height": 1,
     "frames": [
-      ["><(((o>>"],
-      ["><((<o>>"]
-    ]
+      [
+        "><(((o>>"
+      ],
+      [
+        "><((<o>>"
+      ]
+    ],
+    "naturalColor": "#334455"
   },
   {
     "id": "t_common_08",
@@ -99,9 +141,15 @@
     "width": 6,
     "height": 1,
     "frames": [
-      [">=(o=>"],
-      [">=<o=>"]
-    ]
+      [
+        ">=(o=>"
+      ],
+      [
+        ">=<o=>"
+      ]
+    ],
+    "naturalColor": "#CC7744",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "t_common_09",
@@ -112,9 +160,14 @@
     "width": 6,
     "height": 1,
     "frames": [
-      [">_(o_>"],
-      [">_<o_>"]
-    ]
+      [
+        ">_(o_>"
+      ],
+      [
+        ">_<o_>"
+      ]
+    ],
+    "naturalColor": "#887766"
   },
   {
     "id": "t_common_10",
@@ -125,9 +178,14 @@
     "width": 7,
     "height": 1,
     "frames": [
-      [">~(((o>"],
-      [">~((<o>"]
-    ]
+      [
+        ">~(((o>"
+      ],
+      [
+        ">~((<o>"
+      ]
+    ],
+    "naturalColor": "#997755"
   },
   {
     "id": "t_common_11",
@@ -138,9 +196,14 @@
     "width": 6,
     "height": 1,
     "frames": [
-      ["><}(o>"],
-      ["><}(<o>"]
-    ]
+      [
+        "><}(o>"
+      ],
+      [
+        "><}(<o>"
+      ]
+    ],
+    "naturalColor": "#FFAA44"
   },
   {
     "id": "t_common_12",
@@ -151,9 +214,16 @@
     "width": 7,
     "height": 1,
     "frames": [
-      ["><{((o>"],
-      ["><{(<o>"]
-    ]
+      [
+        "><{((o>"
+      ],
+      [
+        "><{(<o>"
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#CCDDEE",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "t_uncommon_01",
@@ -164,9 +234,17 @@
     "width": 9,
     "height": 1,
     "frames": [
-      [">|<(((o>"],
-      [">|<((<o>"]
-    ]
+      [
+        ">|<(((o>"
+      ],
+      [
+        ">|<((<o>"
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#FF6622",
+    "naturalColorAlt": "#FFFFFF",
+    "naturalColorEye": "#221100"
   },
   {
     "id": "t_uncommon_02",
@@ -177,9 +255,19 @@
     "width": 9,
     "height": 2,
     "frames": [
-      ["  /|o>   ", "><(((_>  "],
-      ["  /|o>   ", "><((<_>  "]
-    ]
+      [
+        "  /|o>   ",
+        "><(((_>  "
+      ],
+      [
+        "  /|o>   ",
+        "><((<_>  "
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#FFDD44",
+    "naturalColorAlt": "#221100",
+    "naturalColorEye": "#332200"
   },
   {
     "id": "t_uncommon_03",
@@ -190,9 +278,17 @@
     "width": 8,
     "height": 1,
     "frames": [
-      [">=<((o=>"],
-      [">=<(<o=>"]
-    ]
+      [
+        ">=<((o=>"
+      ],
+      [
+        ">=<(<o=>"
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#33AACC",
+    "naturalColorAlt": "#FF8833",
+    "naturalAnim": "iridescent"
   },
   {
     "id": "t_uncommon_04",
@@ -203,9 +299,16 @@
     "width": 8,
     "height": 1,
     "frames": [
-      [">><((o>>"],
-      [">><(<o>>"]
-    ]
+      [
+        ">><((o>>"
+      ],
+      [
+        ">><(<o>>"
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#3377EE",
+    "naturalColorAlt": "#FFDD33"
   },
   {
     "id": "t_uncommon_05",
@@ -216,9 +319,20 @@
     "width": 4,
     "height": 4,
     "frames": [
-      [" o) ", " |/ ", " |  ", " J  "],
-      [" o) ", " |\\ ", " |  ", " J  "]
-    ]
+      [
+        " o) ",
+        " |/ ",
+        " |  ",
+        " J  "
+      ],
+      [
+        " o) ",
+        " |\\ ",
+        " |  ",
+        " J  "
+      ]
+    ],
+    "naturalColor": "#BB8833"
   },
   {
     "id": "t_uncommon_06",
@@ -229,9 +343,16 @@
     "width": 8,
     "height": 1,
     "frames": [
-      [">{<((o>>"],
-      [">{<(<o>>"]
-    ]
+      [
+        ">{<((o>>"
+      ],
+      [
+        ">{<(<o>>"
+      ]
+    ],
+    "timeOfDay": "night",
+    "naturalColor": "#CC4444",
+    "naturalColorAlt": "#332211"
   },
   {
     "id": "t_rare_01",
@@ -242,9 +363,20 @@
     "width": 10,
     "height": 3,
     "frames": [
-      ["  \\|/|/  ", "><((((o> ", "  /|\\|\\  "],
-      ["  \\|/|/  ", "><((<(o> ", "  /|\\|\\  "]
-    ]
+      [
+        "  \\|/|/  ",
+        "><((((o> ",
+        "  /|\\|\\  "
+      ],
+      [
+        "  \\|/|/  ",
+        "><((<(o> ",
+        "  /|\\|\\  "
+      ]
+    ],
+    "timeOfDay": "night",
+    "naturalColor": "#CC4433",
+    "naturalColorAlt": "#FFFFFF"
   },
   {
     "id": "t_rare_02",
@@ -255,9 +387,17 @@
     "width": 10,
     "height": 1,
     "frames": [
-      [">={((((o>="],
-      [">={((<(o>="]
-    ]
+      [
+        ">={((((o>="
+      ],
+      [
+        ">={((<(o>="
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#33BB77",
+    "naturalColorAlt": "#FF8833",
+    "naturalAnim": "iridescent"
   },
   {
     "id": "t_rare_03",
@@ -268,9 +408,18 @@
     "width": 10,
     "height": 2,
     "frames": [
-      ["  /|       ", "><((((o>  "],
-      ["  /|       ", "><((<(o>  "]
-    ]
+      [
+        "  /|       ",
+        "><((((o>  "
+      ],
+      [
+        "  /|       ",
+        "><((<(o>  "
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#3388BB",
+    "naturalColorAlt": "#FFCC33"
   },
   {
     "id": "t_rare_04",
@@ -281,9 +430,18 @@
     "width": 12,
     "height": 2,
     "frames": [
-      ["     o>~    ", "~~~~(  )    "],
-      ["     o>~    ", "~~~~<  )    "]
-    ]
+      [
+        "     o>~    ",
+        "~~~~(  )    "
+      ],
+      [
+        "     o>~    ",
+        "~~~~<  )    "
+      ]
+    ],
+    "timeOfDay": "night",
+    "naturalColor": "#556633",
+    "naturalColorAlt": "#AA9944"
   },
   {
     "id": "t_epic_01",
@@ -294,9 +452,22 @@
     "width": 10,
     "height": 3,
     "frames": [
-      ["    *     ", "    |     ", "><((o==>  "],
-      ["    *     ", "    |     ", "><(<o==>  "]
-    ]
+      [
+        "    *     ",
+        "    J     ",
+        "><((o==>  "
+      ],
+      [
+        "   *      ",
+        "   /      ",
+        "><(<o==>  "
+      ]
+    ],
+    "timeOfDay": "night",
+    "glowAtNight": true,
+    "nightGlowColor": "#88FF44",
+    "naturalColor": "#332211",
+    "naturalColorEye": "#880000"
   },
   {
     "id": "t_epic_02",
@@ -307,9 +478,20 @@
     "width": 13,
     "height": 3,
     "frames": [
-      ["  /-------\\  ", " /!o!!!!!!!\\ ", "/___________\\"],
-      ["  /-------\\  ", " /!o!!!!!!!\\ ", " \\_________/ "]
-    ]
+      [
+        "  /-------\\  ",
+        " /!o!!!!!!!\\ ",
+        "/___________\\"
+      ],
+      [
+        "  /-------\\  ",
+        " /!o!!!!!!!\\ ",
+        " \\_________/ "
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#223344",
+    "naturalColorAlt": "#EEEEFF"
   },
   {
     "id": "t_legendary_01",
@@ -320,9 +502,26 @@
     "width": 18,
     "height": 4,
     "frames": [
-      ["    .----------.  ", ">==|!o!!!!!!!!!!}=", "   |!!!!!!!!!!!!| ", "    '----------'  "],
-      ["    .----------.  ", ">==|!o!!!!!!!!!!)=", "   |!!!!!!!!!!!!| ", "    '----------'  "]
-    ]
+      [
+        "    .----------.  ",
+        ">==|!o!!!!!!!!!!}=",
+        "   |!!!!!!!!!!!!| ",
+        "    '----------'  "
+      ],
+      [
+        "    .----------.  ",
+        ">==|!o!!!!!!!!!!)=",
+        "   |!!!!!!!!!!!!| ",
+        "    '----------'  "
+      ]
+    ],
+    "timeOfDay": "night",
+    "glowAtNight": true,
+    "nightGlowColor": "#FFAA22",
+    "naturalColor": "#221133",
+    "naturalColorAlt": "#442255",
+    "naturalColorEye": "#FF4400",
+    "naturalAnim": "pulse"
   },
   {
     "id": "c_common_01",
@@ -333,9 +532,14 @@
     "width": 7,
     "height": 1,
     "frames": [
-      ["><}}}o>"],
-      ["><}}<o>"]
-    ]
+      [
+        "><}}}o>"
+      ],
+      [
+        "><}}<o>"
+      ]
+    ],
+    "naturalColor": "#FFAA22"
   },
   {
     "id": "c_common_02",
@@ -346,9 +550,18 @@
     "width": 8,
     "height": 2,
     "frames": [
-      ["  /|    ", "><((o>  "],
-      ["  /|    ", ">((>o>  "]
-    ]
+      [
+        "  /|    ",
+        "><((o>  "
+      ],
+      [
+        "  /|    ",
+        ">((>o>  "
+      ]
+    ],
+    "naturalColor": "#CC3355",
+    "naturalColorAlt": "#3344CC",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "c_common_03",
@@ -359,9 +572,15 @@
     "width": 5,
     "height": 1,
     "frames": [
-      ["~-(o>"],
-      ["-~(o>"]
-    ]
+      [
+        "~-(o>"
+      ],
+      [
+        "-~(o>"
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#554433"
   },
   {
     "id": "c_common_04",
@@ -372,9 +591,16 @@
     "width": 6,
     "height": 1,
     "frames": [
-      ["--<(o>"],
-      ["-=<o=>"]
-    ]
+      [
+        "--<(o>"
+      ],
+      [
+        "-=<o=>"
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#BBCCCC",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "c_common_05",
@@ -385,9 +611,14 @@
     "width": 5,
     "height": 1,
     "frames": [
-      ["e-->>"],
-      ["e--=>"]
-    ]
+      [
+        "e-->>"
+      ],
+      [
+        "e--=>"
+      ]
+    ],
+    "naturalColor": "#FFBBAA"
   },
   {
     "id": "c_common_06",
@@ -398,9 +629,17 @@
     "width": 6,
     "height": 2,
     "frames": [
-      ["  ,o  ", " /  ) "],
-      ["  .o  ", " /  ) "]
-    ]
+      [
+        "  ,o  ",
+        " /  ) "
+      ],
+      [
+        "  .o  ",
+        " /  ) "
+      ]
+    ],
+    "naturalColor": "#FFBBAA",
+    "naturalColorAlt": "#FF8888"
   },
   {
     "id": "c_common_07",
@@ -411,9 +650,15 @@
     "width": 7,
     "height": 1,
     "frames": [
-      [">=<(o>="],
-      [">=((o>="]
-    ]
+      [
+        ">=<(o>="
+      ],
+      [
+        ">=((o>="
+      ]
+    ],
+    "naturalColor": "#AACC55",
+    "naturalColorAlt": "#BB9933"
   },
   {
     "id": "c_common_08",
@@ -424,9 +669,14 @@
     "width": 6,
     "height": 1,
     "frames": [
-      ["><((o>"],
-      ["><(<o>"]
-    ]
+      [
+        "><((o>"
+      ],
+      [
+        "><(<o>"
+      ]
+    ],
+    "naturalColor": "#AABBCC"
   },
   {
     "id": "c_common_09",
@@ -437,9 +687,14 @@
     "width": 5,
     "height": 1,
     "frames": [
-      [">{(o>"],
-      [">((o>"]
-    ]
+      [
+        ">{(o>"
+      ],
+      [
+        ">((o>"
+      ]
+    ],
+    "naturalColor": "#BBCCDD"
   },
   {
     "id": "c_common_10",
@@ -450,9 +705,14 @@
     "width": 7,
     "height": 1,
     "frames": [
-      [">-<(o->"],
-      [">-((o->"]
-    ]
+      [
+        ">-<(o->"
+      ],
+      [
+        ">-((o->"
+      ]
+    ],
+    "naturalColor": "#AABBBB"
   },
   {
     "id": "c_common_11",
@@ -463,9 +723,15 @@
     "width": 7,
     "height": 1,
     "frames": [
-      ["_><(o)_"],
-      ["_><(<)_"]
-    ]
+      [
+        "_><(o)_"
+      ],
+      [
+        "_><(<)_"
+      ]
+    ],
+    "naturalColor": "#886644",
+    "naturalColorAlt": "#554433"
   },
   {
     "id": "c_common_12",
@@ -476,9 +742,16 @@
     "width": 7,
     "height": 1,
     "frames": [
-      [">=((o>="],
-      [">=(<o>="]
-    ]
+      [
+        ">=((o>="
+      ],
+      [
+        ">=(<o>="
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#CCDDEE",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "c_uncommon_01",
@@ -489,9 +762,15 @@
     "width": 8,
     "height": 1,
     "frames": [
-      [" <o)))><"],
-      ["<(o)))><"]
-    ]
+      [
+        " <o)))><"
+      ],
+      [
+        "<(o)))><"
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#DDCC55"
   },
   {
     "id": "c_uncommon_02",
@@ -499,12 +778,24 @@
     "pool": "click",
     "rarity": "uncommon",
     "category": "bottom",
-    "width": 5,
-    "height": 3,
+    "width": 7,
+    "height": 4,
     "frames": [
-      ["  *  ", " /|\\ ", "/ | \\"],
-      ["  *  ", " \\|/ ", "\\ | /"]
-    ]
+      [
+        "   *   ",
+        "  /o  ",
+        " *   * ",
+        "  _/  "
+      ],
+      [
+        "   *   ",
+        "  o/  ",
+        " *   * ",
+        "  /~/  "
+      ]
+    ],
+    "naturalColor": "#FF6622",
+    "naturalColorAlt": "#FF4400"
   },
   {
     "id": "c_uncommon_03",
@@ -515,9 +806,17 @@
     "width": 7,
     "height": 2,
     "frames": [
-      [" ,---, ", "v(o  )>"],
-      [" ,---, ", ">(o  )v"]
-    ]
+      [
+        " ,---, ",
+        "v(o  )>"
+      ],
+      [
+        " ,---, ",
+        ">(o  )v"
+      ]
+    ],
+    "naturalColor": "#AA5533",
+    "naturalColorAlt": "#887755"
   },
   {
     "id": "c_uncommon_04",
@@ -528,9 +827,19 @@
     "width": 8,
     "height": 2,
     "frames": [
-      [" ~~     ", "(o    )>"],
-      [" ~~     ", "(o   )> "]
-    ]
+      [
+        " ~~     ",
+        "(o    )>"
+      ],
+      [
+        " ~~     ",
+        "(o   )> "
+      ]
+    ],
+    "timeOfDay": "night",
+    "naturalColor": "#CC44AA",
+    "naturalColorAlt": "#FF88DD",
+    "naturalAnim": "iridescent"
   },
   {
     "id": "c_uncommon_05",
@@ -541,9 +850,18 @@
     "width": 9,
     "height": 2,
     "frames": [
-      [" _/\\_    ", "><((o>   "],
-      [" _/\\_    ", "><(<o>   "]
-    ]
+      [
+        " _/\\_    ",
+        "><((o>   "
+      ],
+      [
+        " _/\\_    ",
+        "><(<o>   "
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#AACCDD",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "c_uncommon_06",
@@ -554,9 +872,14 @@
     "width": 7,
     "height": 1,
     "frames": [
-      [">[o]==>"],
-      [">[o]-=>"]
-    ]
+      [
+        ">[o]==>"
+      ],
+      [
+        ">[o]-=>"
+      ]
+    ],
+    "naturalColor": "#FFCC33"
   },
   {
     "id": "c_rare_01",
@@ -567,9 +890,20 @@
     "width": 10,
     "height": 3,
     "frames": [
-      ["  .----.  ", " /!o!!!!\\ ", " \\_/|\\__/ "],
-      ["  .----.  ", " /!o!!!!\\ ", " \\_/|\\_/  "]
-    ]
+      [
+        "  .----.  ",
+        " /!o!!!!\\ ",
+        " \\_/|\\__/ "
+      ],
+      [
+        "  .----.  ",
+        " /!o!!!!\\ ",
+        " \\_/|\\_/  "
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#558866",
+    "naturalColorAlt": "#AABB99"
   },
   {
     "id": "c_rare_02",
@@ -580,9 +914,18 @@
     "width": 12,
     "height": 2,
     "frames": [
-      ["v  v        ", "=)(o)======>"],
-      [" v v        ", "=)(o)======>"]
-    ]
+      [
+        "v  v        ",
+        "=)(o)======>"
+      ],
+      [
+        " v v        ",
+        "=)(o)======>"
+      ]
+    ],
+    "timeOfDay": "night",
+    "naturalColor": "#CC3322",
+    "naturalColorAlt": "#AA2211"
   },
   {
     "id": "c_rare_03",
@@ -593,9 +936,21 @@
     "width": 10,
     "height": 3,
     "frames": [
-      [" .------. ", "(!!o!!!!)>", " '------' "],
-      [" .------. ", "(!!o!!!!)=", " '------' "]
-    ]
+      [
+        " .------. ",
+        "(!!o!!!!)>",
+        " '------' "
+      ],
+      [
+        " .------. ",
+        "(!!o!!!!)=",
+        " '------' "
+      ]
+    ],
+    "timeOfDay": "night",
+    "naturalColor": "#AA8855",
+    "naturalColorAlt": "#CCAA77",
+    "naturalAnim": "iridescent"
   },
   {
     "id": "c_rare_04",
@@ -606,9 +961,19 @@
     "width": 7,
     "height": 3,
     "frames": [
-      [" .---. ", "(  *  )", " '---' "],
-      [" .---. ", "( * * )", " '---' "]
-    ]
+      [
+        " .---. ",
+        "(  *  )",
+        " '---' "
+      ],
+      [
+        " .---. ",
+        "( * * )",
+        " '---' "
+      ]
+    ],
+    "naturalColor": "#AABB99",
+    "naturalColorAlt": "#CCDDAA"
   },
   {
     "id": "c_epic_01",
@@ -619,9 +984,23 @@
     "width": 9,
     "height": 4,
     "frames": [
-      ["  .---.  ", " ( o o ) ", "  )   (  ", " /|/|\\|\\ "],
-      ["  .---.  ", " ( o o ) ", "  )   (  ", " \\|\\|/|/ "]
-    ]
+      [
+        "  .---.  ",
+        " ( o o ) ",
+        "  )   (  ",
+        " /|/|\\|\\ "
+      ],
+      [
+        "  .---.  ",
+        " ( o o ) ",
+        "  )   (  ",
+        " \\|\\|/|/ "
+      ]
+    ],
+    "timeOfDay": "night",
+    "naturalColor": "#AA4422",
+    "naturalColorAlt": "#772211",
+    "naturalAnim": "pulse"
   },
   {
     "id": "c_epic_02",
@@ -632,9 +1011,19 @@
     "width": 14,
     "height": 3,
     "frames": [
-      [" o_______o    ", "  |!!!!!|     ", "  (((((((((==>"],
-      [" o_______o    ", "  |!!!!!|     ", "  (((((<((==>!"]
-    ]
+      [
+        " o_______o    ",
+        "  |!!!!!|     ",
+        "  (((((((((==>"
+      ],
+      [
+        " o_______o    ",
+        "  |!!!!!|     ",
+        "  (((((<((==>!"
+      ]
+    ],
+    "naturalColor": "#8899AA",
+    "naturalColorAlt": "#AABBCC"
   },
   {
     "id": "c_legendary_01",
@@ -645,9 +1034,28 @@
     "width": 16,
     "height": 6,
     "frames": [
-      ["    .-------.   ", "   /  O   O  \\  ", "  |    ---    | ", "  |   (   )   | ", " /|\\  |   |  /|\\", "/ | \\ |   | / | \\"],
-      ["    .-------.   ", "   /  O   O  \\  ", "  |    ---    | ", "  |   (   )   | ", " \\|/  |   |  \\|/", "\\ | / |   | \\ | /"]
-    ]
+      [
+        "    .-------.   ",
+        "   /  O   O  \\  ",
+        "  |    ---    | ",
+        "  |   (   )   | ",
+        " /|\\  |   |  /|\\",
+        "/ | \\ |   | / | \\"
+      ],
+      [
+        "    .-------.   ",
+        "   /  O   O  \\  ",
+        "  |    ---    | ",
+        "  |   (   )   | ",
+        " \\|/  |   |  \\|/",
+        "\\ | / |   | \\ | /"
+      ]
+    ],
+    "timeOfDay": "night",
+    "naturalColor": "#442255",
+    "naturalColorAlt": "#663388",
+    "naturalColorEye": "#FF0000",
+    "naturalAnim": "pulse"
   },
   {
     "id": "a_common_01",
@@ -658,9 +1066,14 @@
     "width": 7,
     "height": 1,
     "frames": [
-      ["><)))o>"],
-      ["><))<o>"]
-    ]
+      [
+        "><)))o>"
+      ],
+      [
+        "><))<o>"
+      ]
+    ],
+    "naturalColor": "#AABBCC"
   },
   {
     "id": "a_common_02",
@@ -671,9 +1084,14 @@
     "width": 6,
     "height": 1,
     "frames": [
-      ["~><(o>"],
-      ["~>((o>"]
-    ]
+      [
+        "~><(o>"
+      ],
+      [
+        "~>((o>"
+      ]
+    ],
+    "naturalColor": "#9AABBB"
   },
   {
     "id": "a_common_03",
@@ -684,9 +1102,15 @@
     "width": 7,
     "height": 1,
     "frames": [
-      [">=<(o>="],
-      [">==<o>="]
-    ]
+      [
+        ">=<(o>="
+      ],
+      [
+        ">==<o>="
+      ]
+    ],
+    "naturalColor": "#AABBCC",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "a_common_04",
@@ -697,9 +1121,14 @@
     "width": 5,
     "height": 1,
     "frames": [
-      ["<(o>="],
-      ["<(<o="]
-    ]
+      [
+        "<(o>="
+      ],
+      [
+        "<(<o="
+      ]
+    ],
+    "naturalColor": "#99AABB"
   },
   {
     "id": "a_common_05",
@@ -710,9 +1139,14 @@
     "width": 6,
     "height": 1,
     "frames": [
-      ["><)(o>"],
-      [">()<o>"]
-    ]
+      [
+        "><)(o>"
+      ],
+      [
+        ">()<o>"
+      ]
+    ],
+    "naturalColor": "#AABBCC"
   },
   {
     "id": "a_common_06",
@@ -723,9 +1157,14 @@
     "width": 8,
     "height": 1,
     "frames": [
-      [">=<((o>="],
-      [">=<(<o>="]
-    ]
+      [
+        ">=<((o>="
+      ],
+      [
+        ">=<(<o>="
+      ]
+    ],
+    "naturalColor": "#AABBCC"
   },
   {
     "id": "a_common_07",
@@ -736,9 +1175,14 @@
     "width": 7,
     "height": 1,
     "frames": [
-      ["_>((o>_"],
-      ["_>(>o>_"]
-    ]
+      [
+        "_>((o>_"
+      ],
+      [
+        "_>(>o>_"
+      ]
+    ],
+    "naturalColor": "#887766"
   },
   {
     "id": "a_common_08",
@@ -749,9 +1193,14 @@
     "width": 6,
     "height": 1,
     "frames": [
-      [">-((o>"],
-      [">-(<o>"]
-    ]
+      [
+        ">-((o>"
+      ],
+      [
+        ">-(<o>"
+      ]
+    ],
+    "naturalColor": "#9AABBB"
   },
   {
     "id": "a_common_09",
@@ -762,9 +1211,14 @@
     "width": 7,
     "height": 1,
     "frames": [
-      [">=}(o>="],
-      [">={<o>="]
-    ]
+      [
+        ">=}(o>="
+      ],
+      [
+        ">={<o>="
+      ]
+    ],
+    "naturalColor": "#AABBCC"
   },
   {
     "id": "a_common_10",
@@ -775,9 +1229,14 @@
     "width": 5,
     "height": 1,
     "frames": [
-      [">{(o>"],
-      [">((o>"]
-    ]
+      [
+        ">{(o>"
+      ],
+      [
+        ">((o>"
+      ]
+    ],
+    "naturalColor": "#AABBCC"
   },
   {
     "id": "a_common_11",
@@ -788,9 +1247,14 @@
     "width": 6,
     "height": 1,
     "frames": [
-      ["_<(o>_"],
-      ["_((o>_"]
-    ]
+      [
+        "_<(o>_"
+      ],
+      [
+        "_((o>_"
+      ]
+    ],
+    "naturalColor": "#887766"
   },
   {
     "id": "a_common_12",
@@ -801,9 +1265,14 @@
     "width": 7,
     "height": 1,
     "frames": [
-      ["><{(o>="],
-      ["><((o>="]
-    ]
+      [
+        "><{(o>="
+      ],
+      [
+        "><((o>="
+      ]
+    ],
+    "naturalColor": "#AABBCC"
   },
   {
     "id": "a_uncommon_01",
@@ -814,9 +1283,14 @@
     "width": 9,
     "height": 1,
     "frames": [
-      [">={((o>>="],
-      [">={(>o>>="]
-    ]
+      [
+        ">={((o>>="
+      ],
+      [
+        ">={(>o>>="
+      ]
+    ],
+    "naturalColor": "#CC7733"
   },
   {
     "id": "a_uncommon_02",
@@ -827,9 +1301,23 @@
     "width": 7,
     "height": 3,
     "frames": [
-      ["  ~o~  ", " ( | ) ", "  ~~~  "],
-      ["  ~o~  ", "  (|)  ", "  ~~~  "]
-    ]
+      [
+        "  ~o~  ",
+        " ( | ) ",
+        "  ~~~  "
+      ],
+      [
+        "  ~o~  ",
+        "  (|)  ",
+        "  ~~~  "
+      ]
+    ],
+    "timeOfDay": "night",
+    "glowAtNight": true,
+    "nightGlowColor": "#FF88CC",
+    "naturalColor": "#AADDFF",
+    "naturalColorAlt": "#DDBBFF",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "a_uncommon_03",
@@ -840,9 +1328,18 @@
     "width": 8,
     "height": 2,
     "frames": [
-      ["   .    ", ">=(o))>="],
-      ["   .    ", ">=<o))>="]
-    ]
+      [
+        "   .    ",
+        ">=(o))>="
+      ],
+      [
+        "   .    ",
+        ">=<o))>="
+      ]
+    ],
+    "naturalColor": "#BBEEFF",
+    "naturalColorAlt": "#88CCEE",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "a_uncommon_04",
@@ -853,9 +1350,17 @@
     "width": 9,
     "height": 2,
     "frames": [
-      [" /-----\\ ", " \\_o___/ "],
-      [" /-----\\ ", " \\_o__/  "]
-    ]
+      [
+        " /-----\\ ",
+        " \\_o___/ "
+      ],
+      [
+        " /-----\\ ",
+        " \\_o__/  "
+      ]
+    ],
+    "naturalColor": "#886655",
+    "naturalColorAlt": "#AABB99"
   },
   {
     "id": "a_uncommon_05",
@@ -866,9 +1371,20 @@
     "width": 7,
     "height": 3,
     "frames": [
-      ["|||||||", "|||o|||", "|||||||"],
-      ["|||||||", "||o||||", "|||||||"]
-    ]
+      [
+        "|||||||",
+        "|||o|||",
+        "|||||||"
+      ],
+      [
+        "|||||||",
+        "||o||||",
+        "|||||||"
+      ]
+    ],
+    "naturalColor": "#FF8833",
+    "naturalColorAlt": "#FFCC55",
+    "naturalAnim": "pulse"
   },
   {
     "id": "a_uncommon_06",
@@ -879,9 +1395,15 @@
     "width": 8,
     "height": 1,
     "frames": [
-      [">~<((o>="],
-      [">~((<o>="]
-    ]
+      [
+        ">~<((o>="
+      ],
+      [
+        ">~((<o>="
+      ]
+    ],
+    "naturalColor": "#AABBCC",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "a_rare_01",
@@ -892,9 +1414,25 @@
     "width": 7,
     "height": 4,
     "frames": [
-      [" ,---. ", "(     )", " \\|||/ ", "  |||  "],
-      [" ,---. ", "(     )", " \\|~|/ ", "  |~|  "]
-    ]
+      [
+        " ,---. ",
+        "(     )",
+        " \\|||/ ",
+        "  |||  "
+      ],
+      [
+        " ,---. ",
+        "(     )",
+        " \\|~|/ ",
+        "  |~|  "
+      ]
+    ],
+    "timeOfDay": "night",
+    "glowAtNight": true,
+    "nightGlowColor": "#BB55FF",
+    "naturalColor": "#88AAFF",
+    "naturalColorAlt": "#CCAAFF",
+    "naturalAnim": "pulse"
   },
   {
     "id": "a_rare_02",
@@ -905,9 +1443,22 @@
     "width": 8,
     "height": 3,
     "frames": [
-      [" .----, ", "( o   /@", " '----' "],
-      [" .----, ", "( o  /@ ", " '----' "]
-    ]
+      [
+        " .----, ",
+        "( o   /@",
+        " '----' "
+      ],
+      [
+        " .----, ",
+        "( o  /@ ",
+        " '----' "
+      ]
+    ],
+    "timeOfDay": "night",
+    "glowAtNight": true,
+    "nightGlowColor": "#44DDFF",
+    "naturalColor": "#CCAA88",
+    "naturalColorAlt": "#EEE8CC"
   },
   {
     "id": "a_rare_03",
@@ -916,11 +1467,21 @@
     "rarity": "rare",
     "category": "swimmer",
     "width": 12,
-    "height": 2,
+    "height": 3,
     "frames": [
-      ["   .---.    ", ">=(o!!!!)==>"],
-      ["   .---.    ", ">=<o!!!!)==>"]
-    ]
+      [
+        "   .---.    ",
+        ">=(o!!!!)==>",
+        "   '---'    "
+      ],
+      [
+        "   .---.    ",
+        ">=<o!!!!)==>",
+        "   '---'    "
+      ]
+    ],
+    "naturalColor": "#7799BB",
+    "naturalColorAlt": "#EEEEFF"
   },
   {
     "id": "a_rare_04",
@@ -931,9 +1492,19 @@
     "width": 12,
     "height": 3,
     "frames": [
-      ["  .------. ", " /!o!!!!!!)", " '--------'"],
-      ["  .------. ", " /!o!!!!!) ", " '--------'"]
-    ]
+      [
+        "  .------. ",
+        " /!o!!!!!!)",
+        " '--------'"
+      ],
+      [
+        "  .------. ",
+        " /!o!!!!!) ",
+        " '--------'"
+      ]
+    ],
+    "naturalColor": "#9AAABB",
+    "naturalColorAlt": "#BBCCCC"
   },
   {
     "id": "a_epic_01",
@@ -944,9 +1515,26 @@
     "width": 14,
     "height": 4,
     "frames": [
-      ["   .-\"\"-.     ", "  / o  o \\    ", "  \\  --  /    ", "   /\\/\\/\\/\\   "],
-      ["   .-\"\"-.     ", "  / o  o \\    ", "  \\  --  /    ", "   \\/\\/\\/\\/   "]
-    ]
+      [
+        "   .-\"\"-.     ",
+        "  / o  o \\    ",
+        "  \\  --  /    ",
+        "   /\\/\\/\\/\\   "
+      ],
+      [
+        "   .-\"\"-.     ",
+        "  / o  o \\    ",
+        "  \\  --  /    ",
+        "   \\/\\/\\/\\/   "
+      ]
+    ],
+    "timeOfDay": "night",
+    "glowAtNight": true,
+    "nightGlowColor": "#4488FF",
+    "naturalColor": "#CC5533",
+    "naturalColorAlt": "#AA3311",
+    "naturalColorEye": "#FFD700",
+    "naturalAnim": "pulse"
   },
   {
     "id": "a_epic_02",
@@ -957,9 +1545,19 @@
     "width": 16,
     "height": 3,
     "frames": [
-      ["   .---------.  ", ">=(|o!!!!!!!!!)>", "   '---------'  "],
-      ["   .---------.  ", ">=<|o!!!!!!!!!)>", "   '---------'  "]
-    ]
+      [
+        "   .---------.  ",
+        ">=(|o!!!!!!!!!)>",
+        "   '---------'  "
+      ],
+      [
+        "   .---------.  ",
+        ">=<|o!!!!!!!!!)>",
+        "   '---------'  "
+      ]
+    ],
+    "naturalColor": "#334455",
+    "naturalColorAlt": "#EEEEFF"
   },
   {
     "id": "a_legendary_01",
@@ -970,11 +1568,21 @@
     "width": 18,
     "height": 3,
     "frames": [
-      ["   _.-\"\"\"-._      ", "<(!!o!!_!!o!!)==>", "   `-._.__.-'     "],
-      ["   _.-\"\"\"-._      ", "<(!!o!!_!!o!!)=>>", "   `-._.__.-'     "]
-    ]
+      [
+        "   _.-\"\"\"-._      ",
+        "<(!!o!!_!!o!!)==>",
+        "   `-._.__.-'     "
+      ],
+      [
+        "   _.-\"\"\"-._      ",
+        "<(!!o!!_!!o!!)=>>",
+        "   `-._.__.-'     "
+      ]
+    ],
+    "naturalColor": "#6688AA",
+    "naturalColorAlt": "#8899BB",
+    "naturalAnim": "shimmer"
   },
-
   {
     "id": "t_common_13",
     "name": "Pike",
@@ -984,9 +1592,14 @@
     "width": 3,
     "height": 1,
     "frames": [
-      ["><>"],
-      [">=>"]
-    ]
+      [
+        "><>"
+      ],
+      [
+        ">=>"
+      ]
+    ],
+    "naturalColor": "#778844"
   },
   {
     "id": "t_common_14",
@@ -997,9 +1610,16 @@
     "width": 4,
     "height": 1,
     "frames": [
-      ["><(>"],
-      [">((>"]
-    ]
+      [
+        "><(>"
+      ],
+      [
+        ">((>"
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#BBCCDD",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "t_common_15",
@@ -1010,9 +1630,14 @@
     "width": 6,
     "height": 1,
     "frames": [
-      ["__o=>_"],
-      ["__o->_"]
-    ]
+      [
+        "__o=>_"
+      ],
+      [
+        "__o->_"
+      ]
+    ],
+    "naturalColor": "#AA8866"
   },
   {
     "id": "t_common_16",
@@ -1023,9 +1648,17 @@
     "width": 7,
     "height": 2,
     "frames": [
-      ["=\\     ", ">(o(((>"],
-      ["=\\     ", ">(o((<>"]
-    ]
+      [
+        "=\\     ",
+        ">(o(((>"
+      ],
+      [
+        "=\\     ",
+        ">(o((<>"
+      ]
+    ],
+    "timeOfDay": "night",
+    "naturalColor": "#778866"
   },
   {
     "id": "t_uncommon_07",
@@ -1036,9 +1669,16 @@
     "width": 11,
     "height": 1,
     "frames": [
-      [">---=(((o>="],
-      [">---=((>o>="]
-    ]
+      [
+        ">---=(((o>="
+      ],
+      [
+        ">---=((>o>="
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#7799BB",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "t_uncommon_08",
@@ -1049,9 +1689,15 @@
     "width": 10,
     "height": 1,
     "frames": [
-      ["~o>~-~-~-~"],
-      ["~o=~-~-~-~"]
-    ]
+      [
+        "~o>~-~-~-~"
+      ],
+      [
+        "~o=~-~-~-~"
+      ]
+    ],
+    "naturalColor": "#CCAA22",
+    "naturalColorAlt": "#332211"
   },
   {
     "id": "t_uncommon_09",
@@ -1062,9 +1708,16 @@
     "width": 7,
     "height": 2,
     "frames": [
-      ["v     v", "=(o_o)="],
-      [" v   v ", "=(o_o)="]
-    ]
+      [
+        "v     v",
+        "=(o_o)="
+      ],
+      [
+        " v   v ",
+        "=(o_o)="
+      ]
+    ],
+    "naturalColor": "#BB5533"
   },
   {
     "id": "t_rare_05",
@@ -1075,9 +1728,19 @@
     "width": 13,
     "height": 2,
     "frames": [
-      ["  * ~ * ~    ", "~=o>-~-~-~-~>"],
-      ["  ~ * ~ *    ", "~=o=-~-~-~-~>"]
-    ]
+      [
+        "  * ~ * ~    ",
+        "~=o>-~-~-~-~>"
+      ],
+      [
+        "  ~ * ~ *    ",
+        "~=o=-~-~-~-~>"
+      ]
+    ],
+    "timeOfDay": "night",
+    "glowAtNight": true,
+    "nightGlowColor": "#44FFEE",
+    "naturalColor": "#778866"
   },
   {
     "id": "t_rare_06",
@@ -1088,9 +1751,18 @@
     "width": 5,
     "height": 3,
     "frames": [
-      ["\\|||/", "((O))", "/|||\\"],
-      [" ||| ", "<(O)>", " ||| "]
-    ]
+      [
+        "\\|||/",
+        "((O))",
+        "/|||\\"
+      ],
+      [
+        " ||| ",
+        "<(O)>",
+        " ||| "
+      ]
+    ],
+    "naturalColor": "#AA8844"
   },
   {
     "id": "t_epic_03",
@@ -1098,14 +1770,21 @@
     "pool": "typing",
     "rarity": "epic",
     "category": "heavy",
-    "width": 15,
+    "width": 17,
     "height": 2,
     "frames": [
-      ["/\\/\\/\\/\\==>    ", ">==(o      )==>"],
-      [" /\\/\\/\\/\\==>   ", ">==(o     )==> "]
-    ]
+      [
+        "          ////",
+        ">==(o          )>"
+      ],
+      [
+        "          ///\\",
+        ">==<o          )>"
+      ]
+    ],
+    "timeOfDay": "night",
+    "naturalColor": "#887766"
   },
-
   {
     "id": "c_common_13",
     "name": "Sprat",
@@ -1115,9 +1794,15 @@
     "width": 3,
     "height": 1,
     "frames": [
-      ["<><"],
-      ["<=>"]
-    ]
+      [
+        "<><"
+      ],
+      [
+        "<=>"
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#BBCCCC"
   },
   {
     "id": "c_common_14",
@@ -1128,9 +1813,20 @@
     "width": 5,
     "height": 3,
     "frames": [
-      ["\\|~|/", "-(o)-", "/|~|\\"],
-      ["\\|_|/", "-(o)-", "/| |\\"]
-    ]
+      [
+        "\\|~|/",
+        "-(o)-",
+        "/|~|\\"
+      ],
+      [
+        "\\|_|/",
+        "-(o)-",
+        "/| |\\"
+      ]
+    ],
+    "timeOfDay": "night",
+    "naturalColor": "#554466",
+    "naturalColorAlt": "#332244"
   },
   {
     "id": "c_common_15",
@@ -1141,9 +1837,14 @@
     "width": 3,
     "height": 1,
     "frames": [
-      ["(@)"],
-      ["(@)"]
-    ]
+      [
+        "(@)"
+      ],
+      [
+        "(@)"
+      ]
+    ],
+    "naturalColor": "#CCBB99"
   },
   {
     "id": "c_common_16",
@@ -1154,9 +1855,14 @@
     "width": 4,
     "height": 1,
     "frames": [
-      ["_o>_"],
-      ["_o=_"]
-    ]
+      [
+        "_o>_"
+      ],
+      [
+        "_o=_"
+      ]
+    ],
+    "naturalColor": "#887766"
   },
   {
     "id": "c_uncommon_07",
@@ -1167,9 +1873,17 @@
     "width": 9,
     "height": 2,
     "frames": [
-      [" /-----\\ ", "/_o_____\\~"],
-      [" /-----\\ ", "/_o_____/~"]
-    ]
+      [
+        " /-----\\ ",
+        "/_o_____\\~"
+      ],
+      [
+        " /-----\\ ",
+        "/_o_____/~"
+      ]
+    ],
+    "naturalColor": "#88775F",
+    "naturalColorAlt": "#AABB99"
   },
   {
     "id": "c_uncommon_08",
@@ -1180,9 +1894,18 @@
     "width": 8,
     "height": 2,
     "frames": [
-      ["V      v", "==(o_o)="],
-      [" V    v ", "==(o_o)="]
-    ]
+      [
+        "V      v",
+        "==(o_o)="
+      ],
+      [
+        " V    v ",
+        "==(o_o)="
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#AA6633",
+    "naturalColorAlt": "#CC8844"
   },
   {
     "id": "c_uncommon_09",
@@ -1193,9 +1916,16 @@
     "width": 10,
     "height": 1,
     "frames": [
-      [">=---(o-->"],
-      [">=-==(o-->"]
-    ]
+      [
+        ">=---(o-->"
+      ],
+      [
+        ">=-==(o-->"
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#99BBAA",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "c_rare_05",
@@ -1206,9 +1936,16 @@
     "width": 12,
     "height": 1,
     "frames": [
-      [">=={{{(o>==>"],
-      [">==<{{(o>==>"]
-    ]
+      [
+        ">=={{{(o>==>"
+      ],
+      [
+        ">==<{{(o>==>"
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#9AABBB",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "c_rare_06",
@@ -1219,9 +1956,16 @@
     "width": 9,
     "height": 2,
     "frames": [
-      [" .~~~~~. ", "(o      )"],
-      [" .~.~.~. ", "(o      )"]
-    ]
+      [
+        " .~~~~~. ",
+        "(o      )"
+      ],
+      [
+        " .~.~.~. ",
+        "(o      )"
+      ]
+    ],
+    "naturalColor": "#AA8866"
   },
   {
     "id": "c_epic_03",
@@ -1232,11 +1976,21 @@
     "width": 11,
     "height": 3,
     "frames": [
-      ["V         V", "===(o___o)==", "  /|| | ||\\"],
-      [" V       V ", "===(o___o)==", "  \\|| | ||/"]
-    ]
+      [
+        "V         V",
+        "===(o___o)==",
+        "  /|| | ||\\"
+      ],
+      [
+        " V       V ",
+        "===(o___o)==",
+        "  \\|| | ||/"
+      ]
+    ],
+    "timeOfDay": "night",
+    "naturalColor": "#CC3322",
+    "naturalColorAlt": "#FF5533"
   },
-
   {
     "id": "a_common_13",
     "name": "Grunt",
@@ -1246,9 +2000,14 @@
     "width": 4,
     "height": 1,
     "frames": [
-      ["><{>"],
-      [">({>"]
-    ]
+      [
+        "><{>"
+      ],
+      [
+        ">({>"
+      ]
+    ],
+    "naturalColor": "#BB7766"
   },
   {
     "id": "a_common_14",
@@ -1259,9 +2018,14 @@
     "width": 3,
     "height": 1,
     "frames": [
-      [">->"],
-      [">>>"]
-    ]
+      [
+        ">->"
+      ],
+      [
+        ">>>"
+      ]
+    ],
+    "naturalColor": "#AABBCC"
   },
   {
     "id": "a_common_15",
@@ -1272,9 +2036,20 @@
     "width": 5,
     "height": 3,
     "frames": [
-      [") ( )", ")|o|(", " \\_/ "],
-      ["( ) (", ")|o|(", " \\_/ "]
-    ]
+      [
+        ") ( )",
+        ")|o|(",
+        " \\_/ "
+      ],
+      [
+        "( ) (",
+        ")|o|(",
+        " \\_/ "
+      ]
+    ],
+    "naturalColor": "#FF7733",
+    "naturalColorAlt": "#FF5522",
+    "naturalAnim": "pulse"
   },
   {
     "id": "a_common_16",
@@ -1285,9 +2060,18 @@
     "width": 6,
     "height": 2,
     "frames": [
-      ["  o>  ", ">(  )_"],
-      ["  o>  ", ">( )_ "]
-    ]
+      [
+        "  o>  ",
+        ">(  )_"
+      ],
+      [
+        "  o>  ",
+        ">( )_ "
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#778855",
+    "naturalColorAlt": "#998866"
   },
   {
     "id": "a_uncommon_07",
@@ -1298,9 +2082,15 @@
     "width": 7,
     "height": 1,
     "frames": [
-      [">{{{o>="],
-      [">{{(o>="]
-    ]
+      [
+        ">{{{o>="
+      ],
+      [
+        ">{{(o>="
+      ]
+    ],
+    "naturalColor": "#AABBCC",
+    "naturalColorAlt": "#CC4433"
   },
   {
     "id": "a_uncommon_08",
@@ -1311,9 +2101,18 @@
     "width": 8,
     "height": 2,
     "frames": [
-      ["    .   ", ">=((o)>="],
-      ["    '   ", ">=(<o)>="]
-    ]
+      [
+        "    .   ",
+        ">=((o)>="
+      ],
+      [
+        "    '   ",
+        ">=(<o)>="
+      ]
+    ],
+    "timeOfDay": "day",
+    "naturalColor": "#AABBCC",
+    "naturalColorAlt": "#334455"
   },
   {
     "id": "a_uncommon_09",
@@ -1324,9 +2123,14 @@
     "width": 11,
     "height": 1,
     "frames": [
-      [">=====((o>="],
-      [">=====(>o>="]
-    ]
+      [
+        ">=====((o>="
+      ],
+      [
+        ">=====(>o>="
+      ]
+    ],
+    "naturalColor": "#CCAA55"
   },
   {
     "id": "a_rare_05",
@@ -1337,9 +2141,18 @@
     "width": 10,
     "height": 2,
     "frames": [
-      ["vv        ", "=)(o)=====>" ],
-      [" vv       ", "=)(o)=====>"]
-    ]
+      [
+        "vv        ",
+        "=)(o)=====>"
+      ],
+      [
+        " vv       ",
+        "=)(o)=====>"
+      ]
+    ],
+    "naturalColor": "#44BBFF",
+    "naturalColorAlt": "#FF44BB",
+    "naturalAnim": "iridescent"
   },
   {
     "id": "a_rare_06",
@@ -1350,9 +2163,15 @@
     "width": 10,
     "height": 1,
     "frames": [
-      [">={((((o>="],
-      [">=<((((o>="]
-    ]
+      [
+        ">={((((o>="
+      ],
+      [
+        ">=<((((o>="
+      ]
+    ],
+    "naturalColor": "#BBAA77",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "a_epic_03",
@@ -1363,8 +2182,19 @@
     "width": 16,
     "height": 3,
     "frames": [
-      ["    /|          ", ">==(!o!!!!!}===>", "    \\|          "],
-      ["    /|          ", ">=={!o!!!!!}===>", "    \\|          "]
-    ]
+      [
+        "        /      ",
+        ">==(!o!!!!!}===>",
+        "        /      "
+      ],
+      [
+        "        /      ",
+        ">=={!o!!!!!}===>",
+        "        /      "
+      ]
+    ],
+    "timeOfDay": "night",
+    "naturalColor": "#8899AA",
+    "naturalColorAlt": "#AABBCC"
   }
 ]

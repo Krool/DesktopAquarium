@@ -1,7 +1,7 @@
 // Tank display system: spawn cycle, lifetime, weighted selection, rarest slot
 
 import { CreatureInstance } from "./creature.js";
-import { drawStringBg, COLS, ROWS } from "../renderer/canvas.js";
+import { drawStringBg, COLS, ROWS, getDayPhase } from "../renderer/canvas.js";
 import { ENV_COLORS, DISPLAY_WEIGHTS, SCORE_VALUES } from "../renderer/colors.js";
 import { getMyRank, getLeaderboardEnabled } from "./leaderboard.js";
 
@@ -19,6 +19,7 @@ let allSprites = {}; // id -> parsed sprite def
 let collection = {}; // id -> { count, firstSeen }
 let nextSpawnTime = 0;
 let capBoostEnd = 0; // Temporary cap boost to 12 after discovery
+let hiddenCreatures = new Set(); // IDs hidden from aquarium
 
 function maybeApplySchooling(timestamp) {
   const swimmers = creatures.filter((c) => c.sprite.category === "swimmer");
@@ -112,6 +113,12 @@ export function updateCollection(newCollection) {
   collection = newCollection;
 }
 
+export function setHiddenCreatures(ids) {
+  hiddenCreatures = new Set(ids);
+  // Evict any currently-active hidden creatures immediately
+  creatures = creatures.filter((c) => !hiddenCreatures.has(c.id));
+}
+
 function getCollection() {
   return collection;
 }
@@ -122,7 +129,7 @@ export function setCapBoost(timestamp) {
 
 function getOwnedCreatures() {
   return Object.keys(collection)
-    .filter((id) => allSprites[id])
+    .filter((id) => allSprites[id] && !hiddenCreatures.has(id))
     .map((id) => allSprites[id]);
 }
 
@@ -216,10 +223,16 @@ export function updateTank(timestamp, deltaSeconds) {
 
   // Spawn cycle
   if (timestamp >= nextSpawnTime && creatures.length < currentCap) {
+    const { isNight } = getDayPhase();
     const owned = getOwnedCreatures();
     if (owned.length > 0) {
+      const timeCompatible = owned.filter((s) =>
+        !(s.timeOfDay === "day" && isNight) &&
+        !(s.timeOfDay === "night" && !isNight)
+      );
+      const effectiveOwned = timeCompatible.length > 0 ? timeCompatible : owned;
       const activeCounts = getActiveCreatureCounts();
-      const spawnable = owned.filter((sprite) => {
+      const spawnable = effectiveOwned.filter((sprite) => {
         const active = activeCounts.get(sprite.id) || 0;
         return active < getMaxVisibleForCreature(sprite.id);
       });

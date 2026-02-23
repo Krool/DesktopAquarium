@@ -66,7 +66,6 @@ async function init() {
   root.innerHTML = `
     <div class="settings-header">
       <h1>Settings</h1>
-      <div id="settings-close" title="Close">x</div>
     </div>
     <div class="settings-section">
       <label class="settings-toggle">
@@ -132,17 +131,6 @@ async function init() {
       </div>
     </div>
   `;
-
-  const closeBtn = document.getElementById("settings-close");
-  if (closeBtn) {
-    closeBtn.addEventListener("click", () => {
-      try {
-        getCurrentWindow().close();
-      } catch (e) {
-        console.error("settings close failed:", e);
-      }
-    });
-  }
 
   const sendScoresToggle = document.getElementById("send-scores-toggle");
   const soundToggle = document.getElementById("sound-toggle");

@@ -1,7 +1,8 @@
 // Creature instance: position, velocity, animation, movement patterns
 
-import { drawChar, clearCell, COLS, ROWS } from "../renderer/canvas.js";
+import { drawChar, clearCell, COLS, ROWS, getDayPhase } from "../renderer/canvas.js";
 import { RARITY_COLORS } from "../renderer/colors.js";
+import { getColorMode, getNaturalColor } from "../renderer/colorMode.js";
 import { spawnBubble, spawnSurfaceSplash, getSurfaceRow } from "./environment.js";
 
 const FRAME_DURATION_BY_CATEGORY = {
@@ -291,13 +292,25 @@ export class CreatureInstance {
         : this.sprite.frames;
     const frame = frames[this.frameIndex];
 
-    let color = RARITY_COLORS[this.rarity] || RARITY_COLORS.common;
+    const isNatural = getColorMode() === "natural";
+    let color = isNatural && this.sprite.naturalColor
+      ? this.sprite.naturalColor
+      : RARITY_COLORS[this.rarity] || RARITY_COLORS.common;
     if (this.colorOverride && timestamp < this.colorOverrideEnd) {
       color = this.colorOverride;
+    }
+    const { isNight } = getDayPhase();
+    if (this.sprite.glowAtNight && isNight && this.sprite.nightGlowColor) {
+      color = this.sprite.nightGlowColor;
     }
     if (this.glowPulseUntil > timestamp) {
       color = GLOW_COLOR;
     }
+
+    const usePerChar = isNatural
+      && !(this.colorOverride && timestamp < this.colorOverrideEnd)
+      && this.glowPulseUntil <= timestamp
+      && !(this.sprite.glowAtNight && isNight && this.sprite.nightGlowColor);
 
     const t = timestamp / 1000;
     for (let r = 0; r < frame.length; r++) {
@@ -316,7 +329,10 @@ export class CreatureInstance {
         if (ch === "!") {
           clearCell(this.col + c, row);
         } else {
-          drawChar(this.col + c, row, ch, color);
+          const charColor = usePerChar
+            ? getNaturalColor(ch, r, c, frame.length, this.sprite, timestamp)
+            : color;
+          drawChar(this.col + c, row, ch, charColor);
         }
       }
     }

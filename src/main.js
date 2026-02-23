@@ -1,6 +1,7 @@
 // ASCII Reef - Overlay bootstrap + Tauri event listeners
 
 import { initCanvas, startRenderLoop, drawChar, drawString, drawStringBg, drawBg, resizeCanvas, setDayNightCycle, getCharDimensions, COLS, ROWS } from "./renderer/canvas.js";
+import { getColorMode, setColorMode } from "./renderer/colorMode.js";
 import { parseAllCreatures } from "./renderer/sprites.js";
 import { ENV_COLORS, RARITY_COLORS, PROGRESS_COLORS } from "./renderer/colors.js";
 import { consumeMessageBottle, forceSpawnMessageBottle, getMajorDecorationAtGrid, getMessageBottleAtGrid, renderEnvironment, reinitEnvironment, setMessageBottleReceiveEnabled, setMessageBottlesEnabled, setUnlockedAchievements } from "./simulation/environment.js";
@@ -12,6 +13,7 @@ import {
   updateTank,
   renderTank,
   updateCollection,
+  setHiddenCreatures,
   spawnDiscoveryCreature,
   setCapBoost,
   calculateScore,
@@ -507,6 +509,10 @@ async function init() {
     }
     applySoundSettings();
 
+    if (Array.isArray(state.hiddenCreatures)) {
+      setHiddenCreatures(state.hiddenCreatures);
+    }
+
     if (initial) {
       initTank(allSprites, collection);
     } else {
@@ -649,6 +655,10 @@ async function init() {
     if (typeof event.payload.behavior === "string") {
       closeBehavior = event.payload.behavior;
     }
+  });
+
+  listen("hidden-fish-changed", (event) => {
+    setHiddenCreatures(event.payload.ids || []);
   });
 
   listen("message-bottles-settings", (event) => {
@@ -876,6 +886,28 @@ async function init() {
       updateHelpButtonState();
     });
     updateHelpButtonState();
+  }
+
+  // Color mode toggle button
+  function updateColorModeBtn() {
+    const btn = document.getElementById("color-mode-btn");
+    if (!btn) return;
+    const isNatural = getColorMode() === "natural";
+    btn.classList.toggle("active", isNatural);
+    btn.title = isNatural
+      ? "Color: Natural (click for Rarity)"
+      : "Color: By Rarity (click for Natural)";
+  }
+
+  const colorModeBtn = document.getElementById("color-mode-btn");
+  if (colorModeBtn) {
+    colorModeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      setColorMode(getColorMode() === "natural" ? "rarity" : "natural");
+      updateColorModeBtn();
+    });
+    updateColorModeBtn();
   }
 
   // Start render loop

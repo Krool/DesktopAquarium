@@ -55,6 +55,8 @@ pub struct SaveDisplay {
     pub message_bottles_prompted: bool,
     #[serde(default = "default_close_behavior")]
     pub close_behavior: String,
+    #[serde(default)]
+    pub hidden_creatures: Vec<String>,
 }
 
 fn default_size_index() -> usize {
@@ -147,6 +149,7 @@ pub fn atomic_save(state: &GameState) -> Result<(), String> {
             message_bottles_enabled: state.message_bottles_enabled,
             message_bottles_prompted: state.message_bottles_prompted,
             close_behavior: state.close_behavior.clone(),
+            hidden_creatures: state.hidden_creatures.clone(),
         },
     };
 
@@ -285,6 +288,7 @@ pub fn load() -> Result<GameState, String> {
         message_bottles_enabled: save.display.message_bottles_enabled,
         message_bottles_prompted: save.display.message_bottles_prompted,
         close_behavior: save.display.close_behavior,
+        hidden_creatures: save.display.hidden_creatures,
     };
     sanitize(&mut state);
     Ok(state)

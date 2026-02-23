@@ -32,6 +32,7 @@ pub fn get_state(
         "closeBehavior": guard.close_behavior,
         "autostartEnabled": autostart_enabled,
         "windowVisible": window_visible,
+        "hiddenCreatures": guard.hidden_creatures,
     }))
 }
 
@@ -131,9 +132,25 @@ pub fn import_save(path: String, state: State<'_, Arc<SharedState>>) -> Result<(
     guard.message_bottles_enabled = save.display.message_bottles_enabled;
     guard.message_bottles_prompted = save.display.message_bottles_prompted;
     guard.close_behavior = save.display.close_behavior;
+    guard.hidden_creatures = save.display.hidden_creatures;
 
     crate::save::sanitize(&mut guard);
     crate::save::atomic_save(&guard)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn set_hidden_creatures(
+    app: tauri::AppHandle,
+    state: State<'_, Arc<SharedState>>,
+    ids: Vec<String>,
+) -> Result<(), String> {
+    {
+        let mut guard = state.lock().map_err(|e| e.to_string())?;
+        guard.hidden_creatures = ids.clone();
+        crate::save::atomic_save(&guard)?;
+    }
+    let _ = app.emit("hidden-fish-changed", serde_json::json!({ "ids": ids }));
     Ok(())
 }
 

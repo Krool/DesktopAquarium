@@ -218,19 +218,6 @@ body.collection-window {
   height: auto !important;
 }
 
-#collection-close {
-  position: fixed;
-  top: 8px;
-  right: 12px;
-  z-index: 50;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 14px;
-  cursor: pointer;
-  user-select: none;
-}
-
-#collection-close:hover { color: #fff; }
-
 #collection-root {
   padding: 20px 24px 40px;
 }
@@ -250,12 +237,91 @@ body.collection-window {
   letter-spacing: 0.04em;
 }
 
+.coll-header-complete {
+  color: #22c55e !important;
+  text-shadow: 0 0 12px rgba(34, 197, 94, 0.35);
+}
+
 .coll-stats {
   font-size: 11px;
   color: #6b7280;
   display: flex;
   gap: 14px;
   justify-content: center;
+  margin-bottom: 12px;
+}
+
+/* Progress bars */
+.coll-progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+}
+
+.coll-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 1px 0;
+}
+
+.coll-progress-label {
+  font-size: 10px;
+  color: #6b7280;
+  flex-shrink: 0;
+  width: 72px;
+}
+
+.coll-bar-track {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.coll-bar-fill {
+  height: 100%;
+  background: rgba(137, 219, 255, 0.55);
+  border-radius: 2px;
+}
+
+.coll-progress-pct {
+  font-size: 9px;
+  color: #4b5563;
+  flex-shrink: 0;
+  width: 26px;
+  text-align: right;
+}
+
+.coll-progress-nums {
+  font-size: 9px;
+  color: #374151;
+  flex-shrink: 0;
+  width: 36px;
+  text-align: right;
+}
+
+.coll-complete-badge {
+  font-size: 9px;
+  color: #22c55e;
+  flex-shrink: 0;
+  width: 36px;
+  font-weight: bold;
+  letter-spacing: 0.02em;
+}
+
+/* Completed row: label brightens, bar glows */
+.coll-progress-row--done .coll-bar-fill {
+  box-shadow: 0 0 6px currentColor;
+  opacity: 0.9;
+}
+
+.coll-progress-row--done .coll-progress-pct,
+.coll-progress-row--done .coll-progress-nums {
+  color: #16a34a;
 }
 
 /* Tab bar */
@@ -339,9 +405,13 @@ body.collection-window {
   color: rgba(255, 255, 255, 0.1);
 }
 
+.coll-card--found {
+  padding: 0 0 8px;
+}
+
 .coll-card--dim { opacity: 0.28; }
 
-/* Toggle button */
+/* Achievement hide toggle (small, absolute-positioned) */
 .coll-toggle-btn {
   position: absolute;
   top: 3px;
@@ -354,14 +424,96 @@ body.collection-window {
   cursor: pointer;
   padding: 0 2px;
   font-family: "JetBrains Mono", monospace;
-  opacity: 0;
-  transition: opacity 0.1s;
+  opacity: 0.3;
+  transition: opacity 0.15s;
 }
 
-.coll-card--found:hover .coll-toggle-btn,
-.coll-card--dim .coll-toggle-btn { opacity: 1; }
-
+.coll-card--found:hover .coll-toggle-btn { opacity: 1; }
+.coll-card--dim .coll-toggle-btn { opacity: 0.75; }
 .coll-toggle-btn:hover { color: #fff; }
+
+/* Fish card: checkbox-style show/hide toggle (full-width top strip) */
+.coll-fish-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  padding: 5px 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #4b5563;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  cursor: pointer;
+  margin-bottom: 5px;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.coll-fish-toggle:hover { color: #9ca3af; }
+
+.coll-check-icon {
+  font-size: 15px;
+  line-height: 1;
+  color: #22c55e;
+}
+
+.coll-card--dim .coll-check-icon { color: #374151; }
+.coll-card--dim .coll-fish-toggle { color: #374151; }
+
+/* Toolbar */
+.coll-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.coll-filter-group,
+.coll-sort-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.coll-filter-btn,
+.coll-sort-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #6b7280;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+.coll-filter-btn.active {
+  border-color: var(--pool-color, rgba(137, 219, 255, 0.4));
+  color: var(--pool-color, #90dfff);
+}
+
+.coll-sort-btn.active {
+  border-color: rgba(137, 219, 255, 0.4);
+  color: #90dfff;
+}
+
+.coll-filter-btn:hover,
+.coll-sort-btn:hover { color: #d9f4ff; }
+
+.coll-sort-label {
+  font-size: 10px;
+  color: #4b5563;
+}
+
+.coll-pool-icon {
+  font-size: 12px;
+  flex-shrink: 0;
+  width: 14px;
+  text-align: center;
+}
 
 /* Sprite */
 .coll-sprite {
@@ -373,16 +525,37 @@ body.collection-window {
   text-align: left;
 }
 
+/* Fish card footer: pool (left) | name (center) | count (right) */
+.coll-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 6px;
+  margin-top: 2px;
+}
+
 .coll-card-name {
   font-size: 10px;
   line-height: 1.2;
-  margin-bottom: 2px;
+  text-align: center;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 3px;
 }
 
-.coll-card-meta {
+.coll-time-badge        { font-size: 0.75em; vertical-align: middle; margin-left: 3px; opacity: 0.85; }
+.coll-time-badge--day   { color: #FFE080; }
+.coll-time-badge--night { color: #C8D8F0; }
+.coll-glow-badge        { font-size: 0.7em;  vertical-align: middle; margin-left: 2px; color: #88FF88; }
+
+.coll-card-count {
   font-size: 9px;
   color: #6b7280;
-  letter-spacing: 0.02em;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Achievement cards */
@@ -392,6 +565,19 @@ body.collection-window {
   padding: 10px 12px 10px;
 }
 
+/* Unlocked ach cards have the checkbox strip at top — remove top padding */
+.coll-ach-card:not(.coll-card--locked) {
+  padding: 0 0 12px;
+}
+
+.coll-ach-card .coll-ach-icon,
+.coll-ach-card .coll-ach-name,
+.coll-ach-card .coll-ach-desc,
+.coll-ach-card .coll-ach-unlock {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
 .coll-card--locked {
   border-color: rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.18);
@@ -399,6 +585,7 @@ body.collection-window {
 
 .coll-ach-icon {
   font-size: 18px;
+  margin-top: 8px;
   margin-bottom: 5px;
   color: #facc15;
 }
@@ -449,15 +636,6 @@ body.settings-window {
   font-weight: 600;
 }
 
-#settings-close {
-  color: rgba(255, 255, 255, 0.6);
-  cursor: pointer;
-  user-select: none;
-}
-
-#settings-close:hover {
-  color: #ffffff;
-}
 
 .settings-section {
   padding: 12px 0;

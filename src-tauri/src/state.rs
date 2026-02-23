@@ -48,6 +48,9 @@ pub struct GameState {
     /// Behavior when clicking the window X button: "ask", "hide", or "close"
     #[serde(default = "default_close_behavior")]
     pub close_behavior: String,
+    /// IDs of creatures hidden from the aquarium display
+    #[serde(default)]
+    pub hidden_creatures: Vec<String>,
 }
 
 fn default_size_index() -> usize {
@@ -106,6 +109,7 @@ impl Default for GameState {
             message_bottles_enabled: default_message_bottles_enabled(),
             message_bottles_prompted: default_message_bottles_prompted(),
             close_behavior: default_close_behavior(),
+            hidden_creatures: Vec::new(),
         }
     }
 }
