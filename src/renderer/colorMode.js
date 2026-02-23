@@ -39,19 +39,31 @@ function shiftHue(hex, deg) {
 // ch: the character; rowIdx/colIdx: position within sprite frame
 // totalRows: sprite.height; sprite: parsed sprite def; timestamp: ms
 export function getNaturalColor(ch, rowIdx, colIdx, totalRows, sprite, timestamp) {
-  const base = sprite.naturalColor     || "#AABBCC";
-  const alt  = sprite.naturalColorAlt  || null;
-  const eye  = sprite.naturalColorEye  || null;
-  const anim = sprite.naturalAnim      || null;
-  const t    = timestamp / 1000;
+  const base   = sprite.naturalColor       || "#AABBCC";
+  const alt    = sprite.naturalColorAlt    || null;
+  const stripe = sprite.naturalColorStripe || null;
+  const eye    = sprite.naturalColorEye    || null;
+  const anim   = sprite.naturalAnim        || null;
+  const t      = timestamp / 1000;
 
   // Eye characters always get eye color when defined
   if (eye && (ch === 'o' || ch === 'O')) return eye;
 
-  // Edge rows (fins/belly) get alt color on multi-row sprites
+  // Edge row detection: for 2-row sprites only row 0 is the "edge" (fin/head);
+  // row 1 is always body. For 3+ row sprites both extremes are edge rows.
+  const isEdgeRow = totalRows > 1 && (
+    rowIdx === 0 || (totalRows > 2 && rowIdx === totalRows - 1)
+  );
+
+  // Alt color applies to edge rows (fins, dorsal surface, belly outline)
   let color = base;
-  if (alt && totalRows > 1 && (rowIdx === 0 || rowIdx === totalRows - 1)) {
+  if (alt && isEdgeRow) {
     color = alt;
+  }
+
+  // Stripe alternates every 2 columns on non-alt rows (body bands, scales, etc.)
+  if (stripe && !(isEdgeRow && alt)) {
+    if (Math.floor(colIdx / 2) % 2 === 1) color = stripe;
   }
 
   // Animation modulates the resolved color

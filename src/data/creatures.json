@@ -54,8 +54,8 @@
       ]
     ],
     "naturalColor": "#BBCCCC",
-    "naturalColorAlt": "#22AAFF",
-    "naturalAnim": "shimmer"
+    "naturalAnim": "shimmer",
+    "naturalColorStripe": "#55AADD"
   },
   {
     "id": "t_common_04",
@@ -74,8 +74,8 @@
       ]
     ],
     "naturalColor": "#22AAFF",
-    "naturalColorAlt": "#FF4455",
-    "naturalAnim": "shimmer"
+    "naturalAnim": "shimmer",
+    "naturalColorStripe": "#FF2244"
   },
   {
     "id": "t_common_05",
@@ -93,8 +93,8 @@
         ">-<(o>"
       ]
     ],
-    "naturalColor": "#AABBCC",
-    "naturalColorAlt": "#3377BB"
+    "naturalColor": "#CCDDEE",
+    "naturalColorStripe": "#1155BB"
   },
   {
     "id": "t_common_06",
@@ -112,7 +112,8 @@
         ">={<<o>"
       ]
     ],
-    "naturalColor": "#FF8833"
+    "naturalColor": "#FF8833",
+    "naturalColorStripe": "#CC5511"
   },
   {
     "id": "t_common_07",
@@ -203,7 +204,8 @@
         "><}(<o>"
       ]
     ],
-    "naturalColor": "#FFAA44"
+    "naturalColor": "#FFCC44",
+    "naturalColorStripe": "#221100"
   },
   {
     "id": "t_common_12",
@@ -242,9 +244,9 @@
       ]
     ],
     "timeOfDay": "day",
-    "naturalColor": "#FF6622",
-    "naturalColorAlt": "#FFFFFF",
-    "naturalColorEye": "#221100"
+    "naturalColor": "#FF5500",
+    "naturalColorEye": "#221100",
+    "naturalColorStripe": "#FFFFFF"
   },
   {
     "id": "t_uncommon_02",
@@ -307,8 +309,8 @@
       ]
     ],
     "timeOfDay": "day",
-    "naturalColor": "#3377EE",
-    "naturalColorAlt": "#FFDD33"
+    "naturalColor": "#2266EE",
+    "naturalColorStripe": "#FFDD33"
   },
   {
     "id": "t_uncommon_05",
@@ -332,7 +334,8 @@
         " J  "
       ]
     ],
-    "naturalColor": "#BB8833"
+    "naturalColor": "#BB8833",
+    "naturalColorStripe": "#7A5520"
   },
   {
     "id": "t_uncommon_06",
@@ -351,8 +354,8 @@
       ]
     ],
     "timeOfDay": "night",
-    "naturalColor": "#CC4444",
-    "naturalColorAlt": "#332211"
+    "naturalColor": "#DD3333",
+    "naturalColorStripe": "#331100"
   },
   {
     "id": "t_rare_01",
@@ -376,7 +379,8 @@
     ],
     "timeOfDay": "night",
     "naturalColor": "#CC4433",
-    "naturalColorAlt": "#FFFFFF"
+    "naturalColorAlt": "#FFFFFF",
+    "naturalColorStripe": "#FFFFFF"
   },
   {
     "id": "t_rare_02",
@@ -396,8 +400,8 @@
     ],
     "timeOfDay": "day",
     "naturalColor": "#33BB77",
-    "naturalColorAlt": "#FF8833",
-    "naturalAnim": "iridescent"
+    "naturalAnim": "iridescent",
+    "naturalColorStripe": "#FF8844"
   },
   {
     "id": "t_rare_03",
@@ -418,8 +422,9 @@
       ]
     ],
     "timeOfDay": "day",
-    "naturalColor": "#3388BB",
-    "naturalColorAlt": "#FFCC33"
+    "naturalColor": "#2277BB",
+    "naturalColorAlt": "#FFCC33",
+    "naturalColorStripe": "#FFCC33"
   },
   {
     "id": "t_rare_04",
@@ -440,8 +445,9 @@
       ]
     ],
     "timeOfDay": "night",
-    "naturalColor": "#556633",
-    "naturalColorAlt": "#AA9944"
+    "naturalColor": "#4A5A28",
+    "naturalColorAlt": "#BBAA44",
+    "naturalColorStripe": "#BBAA44"
   },
   {
     "id": "t_epic_01",
@@ -559,9 +565,10 @@
         ">((>o>  "
       ]
     ],
-    "naturalColor": "#CC3355",
-    "naturalColorAlt": "#3344CC",
-    "naturalAnim": "shimmer"
+    "naturalColor": "#DD2244",
+    "naturalColorAlt": "#2244EE",
+    "naturalAnim": "shimmer",
+    "naturalColorStripe": "#FF6688"
   },
   {
     "id": "c_common_03",
@@ -618,7 +625,8 @@
         "e--=>"
       ]
     ],
-    "naturalColor": "#FFBBAA"
+    "naturalColor": "#FFBBAA",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "c_common_06",
@@ -676,7 +684,9 @@
         "><(<o>"
       ]
     ],
-    "naturalColor": "#AABBCC"
+    "naturalColor": "#AABBCC",
+    "naturalColorStripe": "#778899",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "c_common_09",
@@ -879,7 +889,8 @@
         ">[o]-=>"
       ]
     ],
-    "naturalColor": "#FFCC33"
+    "naturalColor": "#FFCC33",
+    "naturalColorStripe": "#AA8800"
   },
   {
     "id": "c_rare_01",
@@ -903,7 +914,8 @@
     ],
     "timeOfDay": "day",
     "naturalColor": "#558866",
-    "naturalColorAlt": "#AABB99"
+    "naturalColorAlt": "#AABB99",
+    "naturalColorStripe": "#336644"
   },
   {
     "id": "c_rare_02",
@@ -925,7 +937,8 @@
     ],
     "timeOfDay": "night",
     "naturalColor": "#CC3322",
-    "naturalColorAlt": "#AA2211"
+    "naturalColorAlt": "#FF5544",
+    "naturalColorStripe": "#882211"
   },
   {
     "id": "c_rare_03",
@@ -1000,7 +1013,8 @@
     "timeOfDay": "night",
     "naturalColor": "#AA4422",
     "naturalColorAlt": "#772211",
-    "naturalAnim": "pulse"
+    "naturalAnim": "pulse",
+    "naturalColorStripe": "#CC6644"
   },
   {
     "id": "c_epic_02",
@@ -1055,7 +1069,8 @@
     "naturalColor": "#442255",
     "naturalColorAlt": "#663388",
     "naturalColorEye": "#FF0000",
-    "naturalAnim": "pulse"
+    "naturalAnim": "pulse",
+    "naturalColorStripe": "#331144"
   },
   {
     "id": "a_common_01",
@@ -1073,7 +1088,8 @@
         "><))<o>"
       ]
     ],
-    "naturalColor": "#AABBCC"
+    "naturalColor": "#99CCDD",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "a_common_02",
@@ -1091,7 +1107,7 @@
         "~>((o>"
       ]
     ],
-    "naturalColor": "#9AABBB"
+    "naturalColor": "#CC8844"
   },
   {
     "id": "a_common_03",
@@ -1109,7 +1125,7 @@
         ">==<o>="
       ]
     ],
-    "naturalColor": "#AABBCC",
+    "naturalColor": "#88BBDD",
     "naturalAnim": "shimmer"
   },
   {
@@ -1128,7 +1144,7 @@
         "<(<o="
       ]
     ],
-    "naturalColor": "#99AABB"
+    "naturalColor": "#335577"
   },
   {
     "id": "a_common_05",
@@ -1146,7 +1162,7 @@
         ">()<o>"
       ]
     ],
-    "naturalColor": "#AABBCC"
+    "naturalColor": "#DDAA33"
   },
   {
     "id": "a_common_06",
@@ -1164,7 +1180,7 @@
         ">=<(<o>="
       ]
     ],
-    "naturalColor": "#AABBCC"
+    "naturalColor": "#445566"
   },
   {
     "id": "a_common_07",
@@ -1200,7 +1216,8 @@
         ">-(<o>"
       ]
     ],
-    "naturalColor": "#9AABBB"
+    "naturalColor": "#55AAAA",
+    "naturalAnim": "shimmer"
   },
   {
     "id": "a_common_09",
@@ -1218,7 +1235,7 @@
         ">={<o>="
       ]
     ],
-    "naturalColor": "#AABBCC"
+    "naturalColor": "#DDBB33"
   },
   {
     "id": "a_common_10",
@@ -1236,7 +1253,7 @@
         ">((o>"
       ]
     ],
-    "naturalColor": "#AABBCC"
+    "naturalColor": "#FFAABB"
   },
   {
     "id": "a_common_11",
@@ -1272,7 +1289,7 @@
         "><((o>="
       ]
     ],
-    "naturalColor": "#AABBCC"
+    "naturalColor": "#BB5544"
   },
   {
     "id": "a_uncommon_01",
@@ -1290,7 +1307,8 @@
         ">={(>o>>="
       ]
     ],
-    "naturalColor": "#CC7733"
+    "naturalColor": "#CC7733",
+    "naturalColorStripe": "#7A3A11"
   },
   {
     "id": "a_uncommon_02",
@@ -1382,9 +1400,10 @@
         "|||||||"
       ]
     ],
-    "naturalColor": "#FF8833",
-    "naturalColorAlt": "#FFCC55",
-    "naturalAnim": "pulse"
+    "naturalColor": "#FF6611",
+    "naturalColorAlt": "#FFEE88",
+    "naturalAnim": "pulse",
+    "naturalColorStripe": "#CC3300"
   },
   {
     "id": "a_uncommon_06",
@@ -1534,7 +1553,8 @@
     "naturalColor": "#CC5533",
     "naturalColorAlt": "#AA3311",
     "naturalColorEye": "#FFD700",
-    "naturalAnim": "pulse"
+    "naturalAnim": "pulse",
+    "naturalColorStripe": "#EE7744"
   },
   {
     "id": "a_epic_02",
@@ -1581,7 +1601,8 @@
     ],
     "naturalColor": "#6688AA",
     "naturalColorAlt": "#8899BB",
-    "naturalAnim": "shimmer"
+    "naturalAnim": "shimmer",
+    "naturalColorStripe": "#445577"
   },
   {
     "id": "t_common_13",
@@ -1658,7 +1679,8 @@
       ]
     ],
     "timeOfDay": "night",
-    "naturalColor": "#778866"
+    "naturalColor": "#667755",
+    "naturalColorAlt": "#AABB88"
   },
   {
     "id": "t_uncommon_07",
@@ -1696,8 +1718,8 @@
         "~o=~-~-~-~"
       ]
     ],
-    "naturalColor": "#CCAA22",
-    "naturalColorAlt": "#332211"
+    "naturalColor": "#DDCC33",
+    "naturalColorStripe": "#221100"
   },
   {
     "id": "t_uncommon_09",
@@ -1740,7 +1762,9 @@
     "timeOfDay": "night",
     "glowAtNight": true,
     "nightGlowColor": "#44FFEE",
-    "naturalColor": "#778866"
+    "naturalColor": "#667755",
+    "naturalColorAlt": "#44FFEE",
+    "naturalColorStripe": "#99DDCC"
   },
   {
     "id": "t_rare_06",
@@ -1762,7 +1786,9 @@
         " ||| "
       ]
     ],
-    "naturalColor": "#AA8844"
+    "naturalColor": "#BBAA66",
+    "naturalColorAlt": "#553300",
+    "naturalColorStripe": "#886633"
   },
   {
     "id": "t_epic_03",
@@ -1783,7 +1809,8 @@
       ]
     ],
     "timeOfDay": "night",
-    "naturalColor": "#887766"
+    "naturalColor": "#9999AA",
+    "naturalColorAlt": "#CCCCDD"
   },
   {
     "id": "c_common_13",
@@ -1825,8 +1852,9 @@
       ]
     ],
     "timeOfDay": "night",
-    "naturalColor": "#554466",
-    "naturalColorAlt": "#332244"
+    "naturalColor": "#664477",
+    "naturalColorAlt": "#221133",
+    "naturalColorStripe": "#CC66AA"
   },
   {
     "id": "c_common_15",
@@ -1945,7 +1973,8 @@
     ],
     "timeOfDay": "day",
     "naturalColor": "#9AABBB",
-    "naturalAnim": "shimmer"
+    "naturalAnim": "shimmer",
+    "naturalColorStripe": "#445566"
   },
   {
     "id": "c_rare_06",
@@ -1989,7 +2018,8 @@
     ],
     "timeOfDay": "night",
     "naturalColor": "#CC3322",
-    "naturalColorAlt": "#FF5533"
+    "naturalColorAlt": "#FF5533",
+    "naturalColorStripe": "#991100"
   },
   {
     "id": "a_common_13",
@@ -2025,7 +2055,7 @@
         ">>>"
       ]
     ],
-    "naturalColor": "#AABBCC"
+    "naturalColor": "#44BBAA"
   },
   {
     "id": "a_common_15",
@@ -2048,8 +2078,9 @@
       ]
     ],
     "naturalColor": "#FF7733",
-    "naturalColorAlt": "#FF5522",
-    "naturalAnim": "pulse"
+    "naturalColorAlt": "#FF3388",
+    "naturalAnim": "pulse",
+    "naturalColorStripe": "#FFAA22"
   },
   {
     "id": "a_common_16",
@@ -2090,7 +2121,7 @@
       ]
     ],
     "naturalColor": "#AABBCC",
-    "naturalColorAlt": "#CC4433"
+    "naturalColorStripe": "#CC3322"
   },
   {
     "id": "a_uncommon_08",
@@ -2130,7 +2161,8 @@
         ">=====(>o>="
       ]
     ],
-    "naturalColor": "#CCAA55"
+    "naturalColor": "#CCAA44",
+    "naturalColorStripe": "#886611"
   },
   {
     "id": "a_rare_05",
@@ -2195,6 +2227,7 @@
     ],
     "timeOfDay": "night",
     "naturalColor": "#8899AA",
-    "naturalColorAlt": "#AABBCC"
+    "naturalColorAlt": "#AABBCC",
+    "naturalColorStripe": "#667788"
   }
 ]

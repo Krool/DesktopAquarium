@@ -55,10 +55,11 @@ function parseCreature(def) {
     timeOfDay: def.timeOfDay || "both",
     glowAtNight: def.glowAtNight || false,
     nightGlowColor: def.nightGlowColor || null,
-    naturalColor:    def.naturalColor    || null,
-    naturalColorAlt: def.naturalColorAlt || null,
-    naturalColorEye: def.naturalColorEye || null,
-    naturalAnim:     def.naturalAnim     || null,
+    naturalColor:       def.naturalColor       || null,
+    naturalColorAlt:    def.naturalColorAlt    || null,
+    naturalColorStripe: def.naturalColorStripe || null,
+    naturalColorEye:    def.naturalColorEye    || null,
+    naturalAnim:        def.naturalAnim        || null,
   };
 }
 
