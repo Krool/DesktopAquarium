@@ -7,7 +7,43 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Check Rust formatting
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
+
+      - name: Run Clippy
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
+
+      - name: Run Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+      - name: Lint JavaScript
+        run: npm run lint
+
   build:
+    needs: lint
     permissions:
       contents: write
     strategy:
@@ -53,26 +89,23 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: "ASCII Reef ${{ github.ref_name }}"
           releaseBody: "See the assets below to download and install."
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
 
-      - name: Upload Windows latest assets
+      - name: Upload Windows stable-name assets
         if: matrix.platform == 'windows-latest'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $setup = Get-ChildItem -Path src-tauri\target\release\bundle\nsis -Filter '*-setup.exe' | Select-Object -First 1
-          $msi = Get-ChildItem -Path src-tauri\target\release\bundle\msi -Filter '*.msi' | Select-Object -First 1
-          $exe = Get-ChildItem -Path src-tauri\target\release -Filter 'ascii-reef.exe' | Select-Object -First 1
-          if ($setup) { Copy-Item $setup.FullName -Destination (Join-Path $setup.Directory.FullName 'ASCII Reef_latest-setup.exe') -Force }
-          if ($msi) { Copy-Item $msi.FullName -Destination (Join-Path $msi.Directory.FullName 'ASCII Reef_latest.msi') -Force }
-          if ($exe) { Copy-Item $exe.FullName -Destination (Join-Path $exe.Directory.FullName 'ascii-reef-latest.exe') -Force }
-          if ($setup) { gh release upload $env:GITHUB_REF_NAME (Join-Path $setup.Directory.FullName 'ASCII Reef_latest-setup.exe') --clobber }
-          if ($msi) { gh release upload $env:GITHUB_REF_NAME (Join-Path $msi.Directory.FullName 'ASCII Reef_latest.msi') --clobber }
-          if ($exe) { gh release upload $env:GITHUB_REF_NAME (Join-Path $exe.Directory.FullName 'ascii-reef-latest.exe') --clobber }
+          $msi   = Get-ChildItem -Path src-tauri\target\release\bundle\msi  -Filter '*.msi'       | Select-Object -First 1
+          if ($setup) { Copy-Item $setup.FullName -Destination (Join-Path $setup.Directory.FullName 'ASCII.Reef_latest-setup.exe') -Force }
+          if ($msi)   { Copy-Item $msi.FullName   -Destination (Join-Path $msi.Directory.FullName   'ASCII.Reef_latest.msi')       -Force }
+          if ($setup) { gh release upload $env:GITHUB_REF_NAME (Join-Path $setup.Directory.FullName 'ASCII.Reef_latest-setup.exe') --clobber }
+          if ($msi)   { gh release upload $env:GITHUB_REF_NAME (Join-Path $msi.Directory.FullName   'ASCII.Reef_latest.msi')       --clobber }
 
-      - name: Upload macOS latest assets
+      - name: Upload macOS stable-name assets
         if: startsWith(matrix.platform, 'macos')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -82,9 +115,9 @@ jobs:
           else
             arch="x64"
           fi
-          dmg=$(ls src-tauri/target/release/bundle/dmg/*.dmg 2>/dev/null | head -n 1 || true)
+          dmg=$(ls src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg 2>/dev/null | head -n 1 || true)
           if [ -n "$dmg" ]; then
-            latest="src-tauri/target/release/bundle/dmg/ASCII Reef_latest-macos-${arch}.dmg"
+            latest="src-tauri/target/${{ matrix.target }}/release/bundle/dmg/ASCII.Reef_latest-macos-${arch}.dmg"
             cp "$dmg" "$latest"
             gh release upload "$GITHUB_REF_NAME" "$latest" --clobber
           fi

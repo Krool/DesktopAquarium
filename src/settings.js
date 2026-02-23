@@ -28,6 +28,27 @@ const CLOSE_BEHAVIOR_OPTIONS = [
   { value: "close", label: "Close App" },
 ];
 
+function debounce(fn, ms) {
+  let id;
+  return (...args) => { clearTimeout(id); id = setTimeout(() => fn(...args), ms); };
+}
+
+function withConfirmation(btn, label, action) {
+  let armed = false, timer = null;
+  btn.addEventListener("click", async () => {
+    if (!armed) {
+      armed = true;
+      btn.textContent = "Sure?";
+      timer = setTimeout(() => { armed = false; btn.textContent = label; }, 3000);
+    } else {
+      clearTimeout(timer);
+      armed = false;
+      btn.textContent = label;
+      await action();
+    }
+  });
+}
+
 async function init() {
   const root = document.getElementById("settings-root");
   if (!root) return;
@@ -117,8 +138,8 @@ async function init() {
     closeBtn.addEventListener("click", () => {
       try {
         getCurrentWindow().close();
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("settings close failed:", e);
       }
     });
   }
@@ -176,15 +197,13 @@ async function init() {
     ).join("");
   }
 
-  applyStateToUi();
-
   if (sendScoresToggle) {
     sendScoresToggle.addEventListener("change", async (e) => {
       const enabled = !!e.target.checked;
       try {
         await invoke("set_send_scores", { enabled });
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to set send scores:", e);
       }
     });
   }
@@ -194,21 +213,24 @@ async function init() {
       const enabled = !!e.target.checked;
       try {
         await invoke("set_sound_enabled", { enabled });
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to set sound enabled:", e);
       }
     });
   }
 
   if (volumeSlider && volumeValue) {
-    volumeSlider.addEventListener("input", async (e) => {
-      const value = Number(e.target.value) / 100;
-      volumeValue.textContent = `${Math.round(value * 100)}%`;
+    const debouncedSetVolume = debounce(async (value) => {
       try {
         await invoke("set_music_volume", { volume: value });
-      } catch {
-        // Fallback
+      } catch (err) {
+        console.error("Failed to set music volume:", err);
       }
+    }, 150);
+    volumeSlider.addEventListener("input", (e) => {
+      const value = Number(e.target.value) / 100;
+      volumeValue.textContent = `${Math.round(value * 100)}%`;
+      debouncedSetVolume(value);
     });
   }
 
@@ -218,8 +240,8 @@ async function init() {
       if (Number.isNaN(idx)) return;
       try {
         await invoke("set_size_index", { idx });
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to set size index:", e);
       }
     });
   }
@@ -229,8 +251,8 @@ async function init() {
       const cycle = e.target.value;
       try {
         await invoke("set_day_night_cycle", { cycle });
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to set day/night cycle:", e);
       }
     });
   }
@@ -240,8 +262,8 @@ async function init() {
       const behavior = e.target.value;
       try {
         await invoke("set_close_behavior", { behavior });
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to set close behavior:", e);
       }
     });
   }
@@ -251,7 +273,8 @@ async function init() {
       const enabled = !!e.target.checked;
       try {
         await invoke("set_autostart", { enabled });
-      } catch {
+      } catch (e) {
+        console.error("Failed to set autostart:", e);
         autostartToggle.checked = !enabled;
       }
     });
@@ -262,7 +285,8 @@ async function init() {
       const enabled = !!e.target.checked;
       try {
         await invoke("set_message_bottles_preferences", { enabled, prompted: true });
-      } catch {
+      } catch (e) {
+        console.error("Failed to set message bottles preferences:", e);
         messageBottlesToggle.checked = !enabled;
       }
     });
@@ -275,8 +299,8 @@ async function init() {
         await invoke("set_main_window_visibility", { show: nextVisible });
         windowVisible = nextVisible;
         syncToggleWindowLabel();
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to set window visibility:", e);
       }
     });
   }
@@ -285,8 +309,8 @@ async function init() {
     openCollectionBtn.addEventListener("click", async () => {
       try {
         await invoke("open_collection");
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to open collection:", e);
       }
     });
   }
@@ -295,34 +319,28 @@ async function init() {
     resetPositionBtn.addEventListener("click", async () => {
       try {
         await invoke("reset_window_position");
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to reset window position:", e);
       }
     });
   }
 
   if (resetAquariumBtn) {
-    resetAquariumBtn.addEventListener("click", async () => {
-      const confirmReset = window.confirm(
-        "Reset aquarium progress? This clears collection, energy, and pity counters."
-      );
-      if (!confirmReset) return;
+    withConfirmation(resetAquariumBtn, "Reset Aquarium", async () => {
       try {
         await invoke("reset_aquarium");
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to reset aquarium:", e);
       }
     });
   }
 
   if (quitAppBtn) {
-    quitAppBtn.addEventListener("click", async () => {
-      const confirmQuit = window.confirm("Quit ASCII Reef now?");
-      if (!confirmQuit) return;
+    withConfirmation(quitAppBtn, "Quit App", async () => {
       try {
         await invoke("quit_app");
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to quit app:", e);
       }
     });
   }
@@ -339,8 +357,9 @@ async function init() {
     autostartEnabled = !!state.autostartEnabled;
     windowVisible = state.windowVisible !== false;
     applyStateToUi();
-  } catch {
-    // Backend not available
+  } catch (e) {
+    console.error("Failed to load initial settings state:", e);
+    applyStateToUi();
   }
 }
 

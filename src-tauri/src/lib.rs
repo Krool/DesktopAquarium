@@ -103,7 +103,7 @@ pub fn run() {
 
             // Apply saved size and position
             {
-                let guard = state_for_builder.lock().unwrap();
+                let guard = state_for_builder.lock().unwrap_or_else(|p| p.into_inner());
                 let idx = guard.size_index;
                 let saved_pos = guard.position;
                 if idx < tray::SIZE_PRESETS.len() {

@@ -246,8 +246,8 @@ async function ensureMessageBottleOptIn() {
       enabled: accepted,
       prompted: true,
     });
-  } catch {
-    // Fallback
+  } catch (e) {
+    console.error("Failed to persist message bottle preferences:", e);
   }
   return accepted;
 }
@@ -581,8 +581,8 @@ async function init() {
       const state = await invoke("get_state");
       col = state.collection || {};
       updateCollection(col);
-    } catch {
-      // Fallback
+    } catch (e) {
+      console.error("Failed to fetch state after discovery:", e);
     }
     lastCollection = col;
     setFirstRunState(col);
@@ -677,8 +677,8 @@ async function init() {
       const state = await invoke("get_state");
       col = state.collection || {};
       updateCollection(col);
-    } catch {
-      // Fallback
+    } catch (e) {
+      console.error("Failed to fetch state after reset:", e);
     }
     lastCollection = col;
     updateAchievements(col, false);
@@ -701,8 +701,8 @@ async function init() {
     }
     try {
       await invoke("hide_window");
-    } catch {
-      // Fallback
+    } catch (e) {
+      console.error("Failed to hide window:", e);
     }
   }
 
@@ -734,8 +734,8 @@ async function init() {
       closeBehavior = choice;
       try {
         await invoke("set_close_behavior", { behavior: choice });
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to persist close behavior:", e);
       }
       await performCloseAction(choice);
       return;
@@ -769,8 +769,8 @@ async function init() {
     if (distance < CLICK_DRAG_THRESHOLD) return;
 
     pointerState.didDrag = true;
-    appWindow.startDragging().catch(() => {
-      // no-op fallback
+    appWindow.startDragging().catch((e) => {
+      console.error("startDragging failed:", e);
     });
   });
 
@@ -781,7 +781,7 @@ async function init() {
     if (!pointerState.didDrag && elapsed <= CLICK_MAX_DURATION_MS) {
       const { col, row } = pointerState.gridPos;
       if (isCollectionProgressCell(col, row)) {
-        invoke("open_collection");
+        invoke("open_collection").catch((e) => console.error("Failed to open collection:", e));
       } else {
         handleMessageBottleClick(col, row).then((handled) => {
           if (handled) return;
@@ -838,8 +838,8 @@ async function init() {
       collectionOpening = true;
       try {
         await invoke("open_collection");
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to open collection:", e);
       } finally {
         collectionOpening = false;
       }
@@ -858,8 +858,8 @@ async function init() {
       settingsOpening = true;
       try {
         await invoke("open_settings");
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to open settings:", e);
       } finally {
         settingsOpening = false;
       }

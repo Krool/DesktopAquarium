@@ -44,7 +44,7 @@ pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dy
 
     // Get current size index from state
     let (current_size, send_scores_enabled, sound_enabled, current_cycle, message_bottles_enabled) = {
-        let guard = state.lock().unwrap();
+        let guard = state.lock().unwrap_or_else(|p| p.into_inner());
         (
             guard.size_index,
             guard.send_scores,
@@ -135,7 +135,7 @@ pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dy
                 }
                 "send_scores" => {
                     let enabled = {
-                        let mut guard = state.lock().unwrap();
+                        let mut guard = state.lock().unwrap_or_else(|p| p.into_inner());
                         guard.send_scores = !guard.send_scores;
                         let _ = crate::save::atomic_save(&guard);
                         guard.send_scores
@@ -145,7 +145,7 @@ pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dy
                 }
                 "sound_enabled" => {
                     let enabled = {
-                        let mut guard = state.lock().unwrap();
+                        let mut guard = state.lock().unwrap_or_else(|p| p.into_inner());
                         guard.sound_enabled = !guard.sound_enabled;
                         let _ = crate::save::atomic_save(&guard);
                         guard.sound_enabled
@@ -155,7 +155,7 @@ pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dy
                 }
                 "message_bottles_enabled" => {
                     let enabled = {
-                        let mut guard = state.lock().unwrap();
+                        let mut guard = state.lock().unwrap_or_else(|p| p.into_inner());
                         guard.message_bottles_enabled = !guard.message_bottles_enabled;
                         guard.message_bottles_prompted = true;
                         let _ = crate::save::atomic_save(&guard);
@@ -183,7 +183,7 @@ pub fn setup_tray(app: &AppHandle, state: Arc<SharedState>) -> Result<(), Box<dy
                     reset_window_position(app);
                 }
                 "quit" => {
-                    let guard = state.lock().unwrap();
+                    let guard = state.lock().unwrap_or_else(|p| p.into_inner());
                     let _ = crate::save::atomic_save(&guard);
                     drop(guard);
                     app.exit(0);
@@ -286,7 +286,7 @@ pub fn apply_size_index(app: &AppHandle, state: &Arc<SharedState>, idx: usize) -
 
 fn reset_aquarium(app: &AppHandle, state: &Arc<SharedState>) {
     {
-        let mut guard = state.lock().unwrap();
+        let mut guard = state.lock().unwrap_or_else(|p| p.into_inner());
         guard.collection.clear();
         for val in guard.pool_energy.values_mut() {
             *val = 0;
@@ -348,7 +348,7 @@ fn open_collection_window(app: &AppHandle) {
         tauri::WebviewUrl::App("collection.html".into()),
     )
     .title("ASCII Reef - Collection")
-    .inner_size(600.0, 500.0)
+    .inner_size(960.0, 700.0)
     .decorations(true)
     .resizable(true)
     .devtools(cfg!(debug_assertions))

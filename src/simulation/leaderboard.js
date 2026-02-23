@@ -19,6 +19,12 @@ let myRank = null;
 let initialized = false;
 let leaderboardEnabled = true;
 
+// Debounce score submissions: multiple discoveries in quick succession only
+// result in one Firestore write, using the most recent score values.
+const SUBMIT_DEBOUNCE_MS = 60_000;
+let submitTimer = null;
+let pendingScore = null;
+
 export function setLeaderboardEnabled(enabled) {
   leaderboardEnabled = enabled;
   if (!leaderboardEnabled) {
@@ -58,30 +64,55 @@ export function initLeaderboard() {
   }
 }
 
-export async function submitScore(score, uniqueCount) {
+async function withRetry(fn, label, maxAttempts = 3) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (attempt === maxAttempts) {
+        console.error(`${label} failed after ${maxAttempts} attempts:`, e);
+        return;
+      }
+      const delay = 1000 * Math.pow(2, attempt - 1); // 1s, 2s, 4s
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
+export function submitScore(score, uniqueCount) {
   if (!leaderboardEnabled || !initialized || !db) return;
 
-  try {
-    const playerName =
-      localStorage.getItem("ascii-reef-player-name") || playerId;
-    await setDoc(doc(db, "leaderboard", playerId), {
-      name: playerName,
-      score: score,
-      creatures: uniqueCount,
-      updatedAt: new Date().toISOString(),
-    });
-
-    // Refresh leaderboard after submitting
-    await fetchLeaderboard();
-  } catch (e) {
-    console.error("Failed to submit score:", e);
+  // Always keep the latest values; cancel any queued submission
+  pendingScore = { score, uniqueCount };
+  if (submitTimer !== null) {
+    clearTimeout(submitTimer);
   }
+
+  submitTimer = setTimeout(async () => {
+    submitTimer = null;
+    const { score: s, uniqueCount: u } = pendingScore;
+    pendingScore = null;
+
+    await withRetry(async () => {
+      const playerName =
+        localStorage.getItem("ascii-reef-player-name") || playerId;
+      await setDoc(doc(db, "leaderboard", playerId), {
+        name: playerName,
+        score: s,
+        creatures: u,
+        updatedAt: new Date().toISOString(),
+      });
+
+      // Refresh leaderboard after submitting
+      await fetchLeaderboard();
+    }, "submitScore");
+  }, SUBMIT_DEBOUNCE_MS);
 }
 
 async function fetchLeaderboard() {
   if (!leaderboardEnabled || !initialized || !db) return;
 
-  try {
+  await withRetry(async () => {
     const q = query(
       collection(db, "leaderboard"),
       orderBy("score", "desc"),
@@ -110,9 +141,7 @@ async function fetchLeaderboard() {
       }
       rank++;
     });
-  } catch (e) {
-    console.error("Failed to fetch leaderboard:", e);
-  }
+  }, "fetchLeaderboard");
 }
 
 export function getMyRank() {

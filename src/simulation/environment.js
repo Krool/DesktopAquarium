@@ -3,6 +3,9 @@
 import { drawChar, drawFloatingString, drawString, COLS, ROWS, getDayPhase, getCharDimensions } from "../renderer/canvas.js";
 import { ENV_COLORS, NIGHT_COLORS } from "../renderer/colors.js";
 import { DECORATIONS, SURFACE_DECORATIONS } from "../data/decorations.js";
+import { clearParticles, renderParticles, setParticleAchievements, spawnBubble, spawnSurfaceSplash } from "./particles.js";
+
+export { spawnBubble, spawnSurfaceSplash };
 
 // Dynamic constants
 let ROCK_ROW, SAND_ROW;
@@ -39,19 +42,7 @@ let trophyCol = null;
 // Achievement-gated unlock set
 let unlockedSet = new Set();
 
-// Bubbles: organic, spawned from creatures and decorations
-const bubbles = [];
-const MAX_BUBBLES = 30;
-
-// Sparkle particles for epic_discovery
-const sparkles = [];
-const MAX_SPARKLES = 8;
-const surfaceSplashes = [];
-const bubblePops = [];
-
-// Shooting stars (night only)
-const shootingStars = [];
-const MAX_SHOOTING_STARS = 2;
+// (Particle state — bubbles, sparkles, splashes, shooting stars — lives in particles.js)
 
 const MESSAGE_BOTTLE_MIN_GAP_MS = 45000;
 const MESSAGE_BOTTLE_SPAWN_CHANCE = 0.0012;
@@ -70,32 +61,13 @@ export function getSurfaceRow() {
 
 export function setUnlockedAchievements(achievementSet) {
   unlockedSet = achievementSet;
+  setParticleAchievements(achievementSet);
 }
 
 export function hasAchievement(id) {
   return unlockedSet.has(id);
 }
 
-export function spawnBubble(col, row) {
-  if (!hasAchievement("getting_hooked")) return;
-  if (bubbles.length >= MAX_BUBBLES) return;
-  bubbles.push({
-    x: col + (Math.random() - 0.5) * 0.5,
-    y: row,
-    speed: 0.02 + Math.random() * 0.03,
-    drift: (Math.random() - 0.5) * 0.15,
-    big: Math.random() > 0.6,
-  });
-}
-
-export function spawnSurfaceSplash(col, timestamp, width = 2) {
-  surfaceSplashes.push({
-    col,
-    width,
-    start: timestamp,
-    duration: 900 + Math.random() * 600,
-  });
-}
 
 function placeDecoration(width, existingPositions) {
   for (let attempt = 0; attempt < 30; attempt++) {
@@ -226,11 +198,8 @@ function generateAll() {
     }
   }
 
-  // Clear bubbles, sparkles, and shooting stars on resize
-  bubbles.length = 0;
-  sparkles.length = 0;
-  shootingStars.length = 0;
-  bubblePops.length = 0;
+  // Clear all particle systems on resize
+  clearParticles();
 }
 
 export function setMessageBottlesEnabled(enabled) {
@@ -496,58 +465,6 @@ export function renderEnvironment(timestamp) {
     }
   }
 
-  // Night-only: shooting stars
-  if (isNight) {
-    if (shootingStars.length < MAX_SHOOTING_STARS && Math.random() < 0.003) {
-      shootingStars.push({
-        col: 1 + Math.floor(Math.random() * (COLS - 8)),
-        life: 0,
-        maxLife: 40 + Math.floor(Math.random() * 30),
-      });
-    }
-    for (let i = shootingStars.length - 1; i >= 0; i--) {
-      const ss = shootingStars[i];
-      ss.life++;
-      if (ss.life >= ss.maxLife) { shootingStars.splice(i, 1); continue; }
-      const trailCol = ss.col + Math.floor((ss.life / ss.maxLife) * 6);
-      const trailRow = Math.floor(ss.life / ss.maxLife * 1.5);
-      if (trailCol < COLS && trailRow < 2) {
-        drawChar(trailCol,     trailRow, "*",  NIGHT_COLORS.shootingStar);
-        drawChar(trailCol - 1, trailRow, "-",  "rgba(220,230,255,0.50)");
-        drawChar(trailCol - 2, trailRow, ".",  "rgba(220,230,255,0.25)");
-      }
-    }
-  }
-
-  // Surface splashes
-  for (let i = surfaceSplashes.length - 1; i >= 0; i--) {
-    const s = surfaceSplashes[i];
-    const age = timestamp - s.start;
-    if (age > s.duration) {
-      surfaceSplashes.splice(i, 1);
-      continue;
-    }
-    const phase = age / s.duration;
-    const splashGlyph = phase < 0.5 ? "^" : "~";
-    drawChar(s.col, SURFACE_ROW, splashGlyph, ENV_COLORS.surfaceSplash);
-    if (s.width > 1) {
-      drawChar(s.col - 1, SURFACE_ROW, "~", ENV_COLORS.surfaceSplash);
-      drawChar(s.col + 1, SURFACE_ROW, "~", ENV_COLORS.surfaceSplash);
-    }
-  }
-
-  // Bubble pops (short-lived)
-  for (let i = bubblePops.length - 1; i >= 0; i--) {
-    const p = bubblePops[i];
-    p.life++;
-    if (p.life > p.maxLife) {
-      bubblePops.splice(i, 1);
-      continue;
-    }
-    const ch = p.life % 4 < 2 ? "*" : "+";
-    drawChar(p.col, p.row, ch, ENV_COLORS.bubble);
-  }
-
   // Water particles - slow drift
   waterDriftOffset = (timestamp / 3000) % COLS;
   const waterColor = hasAchievement("rare_finder")
@@ -581,29 +498,6 @@ export function renderEnvironment(timestamp) {
         const glyph = Math.sin(t * 2 + i) > 0 ? "*" : "+";
         drawChar(sc, sr, glyph, ENV_COLORS.shimmerWater);
       }
-    }
-  }
-
-  // Sparkle particles (epic_discovery)
-  if (hasAchievement("epic_discovery")) {
-    // Spawn new sparkles
-    if (sparkles.length < MAX_SPARKLES && Math.random() < 0.03) {
-      sparkles.push({
-        col: Math.floor(Math.random() * COLS),
-        row: 1 + Math.floor(Math.random() * (ROCK_ROW - 2)),
-        life: 0,
-        maxLife: 60 + Math.random() * 90,
-      });
-    }
-    for (let i = sparkles.length - 1; i >= 0; i--) {
-      const s = sparkles[i];
-      s.life++;
-      if (s.life > s.maxLife) {
-        sparkles.splice(i, 1);
-        continue;
-      }
-      const glyph = s.life % 30 < 15 ? "\u2726" : "\u2727";
-      drawChar(s.col, s.row, glyph, ENV_COLORS.sparkle);
     }
   }
 
@@ -743,22 +637,6 @@ export function renderEnvironment(timestamp) {
     );
   }
 
-  // Update and render bubbles (gated by getting_hooked in spawnBubble)
-  for (let i = bubbles.length - 1; i >= 0; i--) {
-    const b = bubbles[i];
-    b.y -= b.speed;
-    b.x += b.drift * 0.05;
-    if (b.y <= SURFACE_ROW + 0.2) {
-      bubblePops.push({
-        col: Math.round(b.x),
-        row: SURFACE_ROW,
-        life: 0,
-        maxLife: 6 + Math.floor(Math.random() * 6),
-      });
-      bubbles.splice(i, 1);
-      continue;
-    }
-    const ch = b.big ? "O" : "o";
-    drawChar(Math.round(b.x), Math.round(b.y), ch, ENV_COLORS.bubble);
-  }
+  // Particles: bubbles, sparkles, splashes, pops, shooting stars
+  renderParticles(timestamp, isNight);
 }

@@ -136,6 +136,7 @@ pub fn import_save(
     guard.message_bottles_prompted = save.display.message_bottles_prompted;
     guard.close_behavior = save.display.close_behavior;
 
+    crate::save::sanitize(&mut guard);
     crate::save::atomic_save(&guard)?;
     Ok(())
 }

@@ -68,7 +68,10 @@ fn detect_audio_playback() -> bool {
 
 #[cfg(not(windows))]
 fn detect_audio_playback() -> bool {
-    // macOS implementation would use CoreAudio
-    // For now, return false on non-Windows
+    // macOS/Linux: audio detection not implemented.
+    // A macOS implementation would use CoreAudio's kAudioHardwarePropertyDevices
+    // and kAudioDevicePropertyDeviceIsRunningSomewhere to check playback state.
+    // Until then, the audio energy pool will only fill via the idle fallback on
+    // non-Windows platforms.
     false
 }

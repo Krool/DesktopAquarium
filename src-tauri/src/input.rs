@@ -27,22 +27,28 @@ impl InputCounters {
 
 pub fn start_input_listener(counters: Arc<InputCounters>) {
     thread::spawn(move || {
-        let counters = counters.clone();
-        let callback = move |event: rdev::Event| {
-            match event.event_type {
-                rdev::EventType::KeyPress(_) => {
-                    counters.keystrokes.fetch_add(1, Ordering::SeqCst);
+        // Restart the listener if it crashes — rdev::listen blocks forever
+        // on success, so any return (error or unexpected exit) warrants a retry.
+        loop {
+            let counters = counters.clone();
+            let callback = move |event: rdev::Event| {
+                match event.event_type {
+                    rdev::EventType::KeyPress(_) => {
+                        counters.keystrokes.fetch_add(1, Ordering::SeqCst);
+                    }
+                    rdev::EventType::ButtonPress(_) => {
+                        counters.clicks.fetch_add(1, Ordering::SeqCst);
+                    }
+                    _ => {}
                 }
-                rdev::EventType::ButtonPress(_) => {
-                    counters.clicks.fetch_add(1, Ordering::SeqCst);
-                }
-                _ => {}
-            }
-        };
+            };
 
-        // rdev::listen blocks the thread
-        if let Err(e) = rdev::listen(callback) {
-            eprintln!("Input listener error: {:?}", e);
+            if let Err(e) = rdev::listen(callback) {
+                eprintln!("Input listener error: {:?}, restarting in 5s", e);
+            } else {
+                eprintln!("Input listener exited unexpectedly, restarting in 5s");
+            }
+            thread::sleep(std::time::Duration::from_secs(5));
         }
     });
 }

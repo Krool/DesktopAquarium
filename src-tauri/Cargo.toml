@@ -1,6 +1,6 @@
 [package]
 name = "ascii-reef"
-version = "0.1.0"
+version = "0.2.0"
 description = "ASCII Reef - Ambient Desktop Aquarium"
 authors = ["KroolWorld"]
 edition = "2021"
@@ -18,7 +18,7 @@ tauri-plugin-dialog = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 rdev = "0.5"
-rand = "0.8"
+rand = { version = "0.8", features = ["small_rng"] }
 dirs = "5"
 raw-window-handle = "0.6"
 chrono = "0.4"

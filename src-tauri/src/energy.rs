@@ -61,7 +61,13 @@ pub fn start_energy_loop(
             }
 
             let result = {
-                let mut state_guard = state.lock().unwrap();
+                let mut state_guard = match state.lock() {
+                    Ok(guard) => guard,
+                    Err(poisoned) => {
+                        eprintln!("Energy loop: state mutex poisoned, recovering");
+                        poisoned.into_inner()
+                    }
+                };
 
                 // Keyboard energy → typing pool
                 let key_energy = (keys / KEYS_PER_ENERGY) as u32;
