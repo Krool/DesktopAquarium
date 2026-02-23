@@ -1,8 +1,7 @@
 const LS_KEY = "ascii-reef-color-mode";
-let _mode = localStorage.getItem(LS_KEY) || "rarity";
 
-export function getColorMode() { return _mode; }
-export function setColorMode(m) { _mode = m; localStorage.setItem(LS_KEY, m); }
+export function getColorMode() { return localStorage.getItem(LS_KEY) || "rarity"; }
+export function setColorMode(m) { localStorage.setItem(LS_KEY, m); }
 
 // ── Color math ─────────────────────────────────────────────────────────────
 function hexToRgb(hex) {

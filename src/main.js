@@ -907,6 +907,9 @@ async function init() {
       setColorMode(getColorMode() === "natural" ? "rarity" : "natural");
       updateColorModeBtn();
     });
+    window.addEventListener("storage", (e) => {
+      if (e.key === "ascii-reef-color-mode") updateColorModeBtn();
+    });
     updateColorModeBtn();
   }
 

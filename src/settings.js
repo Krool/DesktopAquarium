@@ -49,6 +49,8 @@ function withConfirmation(btn, label, action) {
   });
 }
 
+const LS_COLOR_MODE = "ascii-reef-color-mode";
+
 async function init() {
   const root = document.getElementById("settings-root");
   if (!root) return;
@@ -95,6 +97,16 @@ async function init() {
     </div>
     <div class="settings-section">
       <div class="settings-select">
+        <label for="color-mode-select">Fish Colors</label>
+        <select id="color-mode-select">
+          <option value="rarity">By Rarity</option>
+          <option value="natural">Natural</option>
+        </select>
+      </div>
+      <div class="settings-hint">By Rarity uses rarity-tier palette. Natural uses real-world-inspired colors with shimmer, pulse, and iridescent effects.</div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-select">
         <label for="size-select">Aquarium Size</label>
         <select id="size-select"></select>
       </div>
@@ -137,6 +149,7 @@ async function init() {
   const volumeSlider = document.getElementById("volume-slider");
   const volumeValue = document.getElementById("volume-value");
   const dayNightCycleSelect = document.getElementById("day-night-cycle-select");
+  const colorModeSelect = document.getElementById("color-mode-select");
   const sizeSelect = document.getElementById("size-select");
   const closeBehaviorSelect = document.getElementById("close-behavior-select");
   const messageBottlesToggle = document.getElementById("message-bottles-toggle");
@@ -154,6 +167,7 @@ async function init() {
       volumeSlider.value = String(Math.round(musicVolume * 100));
       volumeValue.textContent = `${Math.round(musicVolume * 100)}%`;
     }
+    if (colorModeSelect) colorModeSelect.value = localStorage.getItem(LS_COLOR_MODE) || "rarity";
     if (sizeSelect) sizeSelect.value = String(sizeIndex);
     if (dayNightCycleSelect) dayNightCycleSelect.value = dayNightCycle;
     if (closeBehaviorSelect) closeBehaviorSelect.value = closeBehavior;
@@ -242,6 +256,12 @@ async function init() {
       } catch (e) {
         console.error("Failed to set day/night cycle:", e);
       }
+    });
+  }
+
+  if (colorModeSelect) {
+    colorModeSelect.addEventListener("change", (e) => {
+      localStorage.setItem(LS_COLOR_MODE, e.target.value);
     });
   }
 
