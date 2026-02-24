@@ -131,7 +131,7 @@
         "><((<o>>"
       ]
     ],
-    "naturalColor": "#334455"
+    "naturalColor": "#7799AA"
   },
   {
     "id": "t_common_08",
@@ -1577,7 +1577,8 @@
       ]
     ],
     "naturalColor": "#334455",
-    "naturalColorAlt": "#EEEEFF"
+    "naturalColorAlt": "#EEEEFF",
+    "naturalColorStripe": "#CCEEFF"
   },
   {
     "id": "a_legendary_01",
