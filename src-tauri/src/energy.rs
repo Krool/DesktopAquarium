@@ -8,7 +8,7 @@ use std::time::Instant;
 use tauri::{AppHandle, Emitter};
 
 const ENERGY_THRESHOLD: u32 = 40;
-const KEYS_PER_ENERGY: u64 = 5;
+const KEYS_PER_ENERGY: u64 = 2;
 const CLICKS_PER_ENERGY: u64 = 3;
 const AUDIO_SECONDS_PER_ENERGY: f64 = 8.0;
 const IDLE_TIMEOUT_SECS: f64 = 900.0; // 15 minutes
@@ -34,6 +34,8 @@ pub fn start_energy_loop(
     std::thread::spawn(move || {
         let mut last_tick = Instant::now();
         let mut last_save = Instant::now();
+        let mut key_accumulator: u64 = 0;
+        let mut click_accumulator: u64 = 0;
         let mut audio_accumulator: f64 = 0.0;
         let mut idle_accumulator: f64 = 0.0;
         let mut last_input_seen = Instant::now();
@@ -69,8 +71,10 @@ pub fn start_energy_loop(
                     }
                 };
 
-                // Keyboard energy → typing pool
-                let key_energy = (keys / KEYS_PER_ENERGY) as u32;
+                // Keyboard energy → typing pool (carry over remainder across ticks)
+                key_accumulator += keys;
+                let key_energy = (key_accumulator / KEYS_PER_ENERGY) as u32;
+                key_accumulator %= KEYS_PER_ENERGY;
                 if key_energy > 0 {
                     let e = state_guard
                         .pool_energy
@@ -79,8 +83,10 @@ pub fn start_energy_loop(
                     *e += key_energy;
                 }
 
-                // Click energy → click pool
-                let click_energy = (clicks / CLICKS_PER_ENERGY) as u32;
+                // Click energy → click pool (carry over remainder across ticks)
+                click_accumulator += clicks;
+                let click_energy = (click_accumulator / CLICKS_PER_ENERGY) as u32;
+                click_accumulator %= CLICKS_PER_ENERGY;
                 if click_energy > 0 {
                     let e = state_guard
                         .pool_energy

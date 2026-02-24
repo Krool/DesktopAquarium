@@ -38,6 +38,10 @@ pub fn start_input_listener(counters: Arc<InputCounters>) {
                 rdev::EventType::ButtonPress(_) => {
                     counters.clicks.fetch_add(1, Ordering::SeqCst);
                 }
+                // Each scroll notch counts toward click energy
+                rdev::EventType::Wheel { .. } => {
+                    counters.clicks.fetch_add(1, Ordering::SeqCst);
+                }
                 _ => {}
             };
 

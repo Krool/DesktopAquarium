@@ -523,6 +523,9 @@ body.collection-window {
   line-height: 1.25;
   margin: 0 0 6px;
   text-align: left;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
 }
 
 /* Fish card footer: pool (left) | name (center) | count (right) */
@@ -614,10 +617,17 @@ body.collection-window {
 }
 
 /* Settings window styles */
+html:has(body.settings-window) {
+  overflow-y: auto !important;
+  height: auto !important;
+}
+
 body.settings-window {
   background: #141628;
   color: #e0e0e0;
-  overflow-y: auto;
+  overflow-y: auto !important;
+  height: auto !important;
+  min-width: 360px;
 }
 
 #settings-root {
@@ -637,12 +647,52 @@ body.settings-window {
 }
 
 
+/* Settings tab bar */
+.settings-tab-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settings-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  color: #6b7280;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  padding: 6px 14px;
+  cursor: pointer;
+  position: relative;
+  bottom: -1px;
+}
+
+.settings-tab:hover { color: #c8daf0; }
+
+.settings-tab.active {
+  color: #90dfff;
+  border-color: rgba(137, 219, 255, 0.22);
+  border-bottom-color: #141628;
+  background: #141628;
+}
+
+.settings-tab-panel--hidden { display: none; }
+
+/* Actions footer always visible, separated from tabs */
+.settings-actions-section {
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .settings-section {
   padding: 12px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.settings-section:first-of-type {
+.settings-tab-panel > .settings-section:first-child {
   border-top: none;
 }
 

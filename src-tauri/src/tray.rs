@@ -433,7 +433,8 @@ fn open_settings_window(app: &AppHandle) {
         tauri::WebviewUrl::App("settings.html".into()),
     )
     .title("ASCII Reef - Settings")
-    .inner_size(520.0, 840.0)
+    .inner_size(440.0, 560.0)
+    .min_inner_size(360.0, 420.0)
     .resizable(true)
     .decorations(true)
     .build();

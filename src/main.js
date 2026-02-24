@@ -66,6 +66,7 @@ let messageBottlesPrompted = false;
 let messageBottleBusy = false;
 let helpBtnEl = null;
 let stateAppliedOnce = false;
+let everReachedTop10 = localStorage.getItem("ascii-reef-ever-top10") === "1";
 
 function syncMessageBottleSpawnState() {
   setMessageBottlesEnabled(messageBottlesEnabled || !messageBottlesPrompted);
@@ -162,7 +163,7 @@ function getUiHoverHintAtGrid(col, row) {
   if (getMessageBottleAtGrid(col, row)) return "Message Bottle";
 
   if (row === 0) {
-    const barWidth = COLS <= 45 ? 4 : COLS <= 65 ? 6 : 8;
+    const barWidth = COLS <= 45 ? 6 : COLS <= 65 ? 8 : 10;
     const barGap = COLS <= 45 ? 1 : 2;
     const bars = [
       { name: "Typing Energy" },
@@ -378,10 +379,15 @@ async function handleMessageBottleClick(gridCol, gridRow) {
 
 function updateAchievements(collection, showToasts) {
   const rank = getMyRank();
+  if (rank !== null && rank <= 10) {
+    everReachedTop10 = true;
+    localStorage.setItem("ascii-reef-ever-top10", "1");
+  }
   const newSet = computeUnlocked(collection, creaturesData, rank, {
     sizeIndex,
     soundEnabled,
     sendScoresEnabled,
+    everReachedTop10,
   });
   if (showToasts) {
     const newlyEarned = diffAchievements(currentAchievements, newSet);
@@ -1042,7 +1048,7 @@ async function init() {
     }
 
     // 6. Three energy bars (top-left, scaled down on smaller aquariums)
-    const barWidth = COLS <= 45 ? 4 : COLS <= 65 ? 6 : 8;
+    const barWidth = COLS <= 45 ? 6 : COLS <= 65 ? 8 : 10;
     const barGap = COLS <= 45 ? 1 : 2;
     const bars = [
       { label: "T", value: energyDisplay.typing, key: "typing" },
@@ -1053,15 +1059,26 @@ async function init() {
     let nextCol = 1;
     for (const bar of bars) {
       if (nextCol + barLen > COLS - 1) break;
-      const filled = Math.floor((bar.value / energyDisplay.threshold) * barWidth);
+      const filledFloat = (bar.value / energyDisplay.threshold) * barWidth;
+      const filled = Math.floor(filledFloat);
+      const hasPartial = filledFloat > filled; // any fractional progress in the next segment
       const colors = PROGRESS_COLORS[bar.key] || PROGRESS_COLORS.typing;
       drawBg(nextCol, 0, barLen, 1, uiBg);
       drawChar(nextCol, 0, bar.label, colors.outline);
       drawChar(nextCol + 1, 0, "[", colors.outline);
       drawChar(nextCol + barLen - 1, 0, "]", colors.outline);
       for (let i = 0; i < barWidth; i++) {
-        const glyph = i < filled ? "|" : ".";
-        const color = i < filled ? colors.fill : colors.empty;
+        let glyph, color;
+        if (i < filled) {
+          glyph = "|";
+          color = colors.fill;
+        } else if (i === filled && hasPartial) {
+          glyph = ":"; // partial segment — shows any progress before a full segment fills
+          color = colors.fill;
+        } else {
+          glyph = ".";
+          color = colors.empty;
+        }
         drawChar(nextCol + 2 + i, 0, glyph, color);
       }
       nextCol += barLen + barGap;

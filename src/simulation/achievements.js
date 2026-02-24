@@ -172,7 +172,7 @@ const ACHIEVEMENTS = [
     name: "Top 10",
     description: "Reach leaderboard top 10",
     unlock: "Trophy decoration",
-    check: (col) => col.sendScoresEnabled && col.leaderboardRank !== null && col.leaderboardRank <= 10,
+    check: (col) => col.sendScoresEnabled && col.everReachedTop10,
   },
 ];
 
@@ -210,6 +210,7 @@ function buildCollectionStats(collection, creaturesData, leaderboardRank, extras
     sizeIndex: extras.sizeIndex ?? 2,
     soundEnabled: extras.soundEnabled ?? false,
     sendScoresEnabled: extras.sendScoresEnabled !== false,
+    everReachedTop10: extras.everReachedTop10 ?? false,
   };
 }
 

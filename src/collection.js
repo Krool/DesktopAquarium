@@ -76,8 +76,9 @@ async function init() {
   // Achievements
   const storedRank = localStorage.getItem("ascii-reef-rank");
   const leaderboardRank = sendScoresEnabled && storedRank ? parseInt(storedRank, 10) : null;
+  const everReachedTop10 = localStorage.getItem("ascii-reef-ever-top10") === "1";
   const unlocked = computeUnlocked(collection, creaturesData, leaderboardRank, {
-    sizeIndex, soundEnabled, sendScoresEnabled,
+    sizeIndex, soundEnabled, sendScoresEnabled, everReachedTop10,
   });
   const allAchievements = getAchievements().filter(a => sendScoresEnabled || a.id !== "top_10");
 
