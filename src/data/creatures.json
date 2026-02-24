@@ -205,7 +205,7 @@
       ]
     ],
     "naturalColor": "#FFCC44",
-    "naturalColorStripe": "#221100"
+    "naturalColorStripe": "#664400"
   },
   {
     "id": "t_common_12",
@@ -268,7 +268,7 @@
     ],
     "timeOfDay": "day",
     "naturalColor": "#FFDD44",
-    "naturalColorAlt": "#221100",
+    "naturalColorAlt": "#443322",
     "naturalColorEye": "#332200"
   },
   {
@@ -355,7 +355,7 @@
     ],
     "timeOfDay": "night",
     "naturalColor": "#DD3333",
-    "naturalColorStripe": "#331100"
+    "naturalColorStripe": "#662211"
   },
   {
     "id": "t_rare_01",
@@ -1070,7 +1070,7 @@
     "naturalColorAlt": "#663388",
     "naturalColorEye": "#FF0000",
     "naturalAnim": "pulse",
-    "naturalColorStripe": "#331144"
+    "naturalColorStripe": "#664488"
   },
   {
     "id": "a_common_01",
@@ -1719,7 +1719,7 @@
       ]
     ],
     "naturalColor": "#DDCC33",
-    "naturalColorStripe": "#221100"
+    "naturalColorStripe": "#665522"
   },
   {
     "id": "t_uncommon_09",
@@ -1853,7 +1853,7 @@
     ],
     "timeOfDay": "night",
     "naturalColor": "#664477",
-    "naturalColorAlt": "#221133",
+    "naturalColorAlt": "#552266",
     "naturalColorStripe": "#CC66AA"
   },
   {
